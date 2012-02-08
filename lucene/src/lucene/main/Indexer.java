@@ -30,13 +30,10 @@ public class Indexer {
         File indexDir = new File(Config.getParameter("index"));
         long start = new Date().getTime();
         Indexer index = new Indexer();
-        int error = index.index(indexDir);
+        int count = index.index(indexDir);
         long end = new Date().getTime();
-        if(error == 1){
-            System.out.println("Time index :" + (end - start) + " milisecond");
-        }else {
-            System.out.println("Indexing error!");
-        }
+        System.out.println("Index : "+ count +" files : Time index :" + (end - start) + " milisecond");
+        
     }
     
     /**
@@ -45,6 +42,7 @@ public class Indexer {
      * @return
      */
     public int index(File indexDir){
+        int count;
         try {
             //create Lucene
             StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_34);
@@ -66,12 +64,13 @@ public class Indexer {
                 d.add(new Field("color", rs.getString("color"),Field.Store.YES, Field.Index.ANALYZED));
                 writer.addDocument(d);
              }
+            count = writer.numDocs();
             writer.optimize();
             writer.close();
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return 0;
         }
-        return 1;
+        return count;
     }
 }
