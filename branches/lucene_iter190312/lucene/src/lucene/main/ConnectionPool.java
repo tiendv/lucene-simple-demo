@@ -19,14 +19,15 @@ import org.apache.commons.pool.impl.GenericObjectPool;
  */
 public class ConnectionPool {
     public static final String DRIVER = "com.mysql.jdbc.Driver";
-    public static final String URL = "jdbc:mysql://localhost/cspublicationcrawler";
     public static final String USERNAME = "root";
     public static final String PASSWORD = "root";
     public static DataSource dataSource;    
     private GenericObjectPool connectionPool = null;
     
-    public ConnectionPool(){
+    public ConnectionPool(String username, String password, String database){
         try{
+            database = "jdbc:mysql://localhost/"+database;
+            System.out.println(database);
             //Load JDBC Driver to connect to MySQL
             Class.forName(ConnectionPool.DRIVER).newInstance();
             // Create a object to hold my pool.
@@ -38,9 +39,9 @@ public class ConnectionPool {
             // JDBC url info, username and password.
             //
             ConnectionFactory cf = new DriverManagerConnectionFactory(
-                                                    ConnectionPool.URL,
-                                                    ConnectionPool.USERNAME,
-                                                    ConnectionPool.PASSWORD);
+                                                    database,
+                                                    username,
+                                                    password);
             PoolableConnectionFactory pcf = new PoolableConnectionFactory(
                                                     cf, 
                                                     connectionPool,
@@ -51,7 +52,7 @@ public class ConnectionPool {
             dataSource = new PoolingDataSource(connectionPool);
             
         }catch (Exception e){
-            //
+             System.out.println(e.toString());
         }        
     }
     
@@ -60,7 +61,7 @@ public class ConnectionPool {
             Connection con = dataSource.getConnection();
             return con;
         }catch (Exception e){
-            // Ghi log...
+            System.out.println(e.toString());
             return null;
         }
     }
