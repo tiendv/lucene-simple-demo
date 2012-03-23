@@ -27,6 +27,7 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 import org.json.simple.JSONObject;
+import lucene.main.ConnectionPool;
 
 
 
@@ -35,11 +36,14 @@ import org.json.simple.JSONObject;
  * @author duchuynh
  */
 public class Indexer {
-    public static void main(String[] agrs){
-        File indexDir = new File(Config.getParameter("index"));
+    private ConnectionPool connectionPool ;
+    public void runIndex(String username, String password, String database, String path){
+                
+        File indexDir = new File(path);
+        connectionPool   = new ConnectionPool(username,password,database);
         long start = new Date().getTime();
         Indexer index = new Indexer();
-        int count = index.index(indexDir);
+        int count = index.index(indexDir,connectionPool);
         long end = new Date().getTime();
         System.out.println("Index : "+ count +" files : Time index :" + (end - start) + " milisecond");
     }
@@ -49,7 +53,7 @@ public class Indexer {
      * @param indexDir
      * @return
      */
-    public int index(File indexDir){
+    public int index(File indexDir, ConnectionPool connectionPool){
         int count;
         try {
             StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_34);
@@ -57,7 +61,7 @@ public class Indexer {
             Directory directory = FSDirectory.open(indexDir);
             IndexWriter writer = new IndexWriter(directory, config);
             //connection to DB
-            ConnectionPool connectionPool = new ConnectionPool();
+           
             Connection connection = connectionPool.getConnection();
             
             String sql = Config.getParameter("db.query");
