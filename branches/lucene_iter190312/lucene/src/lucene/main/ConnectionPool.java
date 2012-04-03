@@ -24,9 +24,9 @@ public class ConnectionPool {
     public static DataSource dataSource;    
     private GenericObjectPool connectionPool = null;
     
-    public ConnectionPool(String username, String password, String database){
+    public ConnectionPool(String username, String password ,int port,String database){
         try{
-            database = "jdbc:mysql://localhost/"+database;
+            database = "jdbc:mysql://localhost:"+port+"/"+database;
             System.out.println(database);
             //Load JDBC Driver to connect to MySQL
             Class.forName(ConnectionPool.DRIVER).newInstance();
