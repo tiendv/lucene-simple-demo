@@ -33,7 +33,7 @@ public class MainIndexForm extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         txtDatabase = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
-        txtPathSave = new javax.swing.JTextField();
+        txtPort = new javax.swing.JTextField();
         btRun = new javax.swing.JButton();
         prBar = new javax.swing.JProgressBar();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -48,7 +48,7 @@ public class MainIndexForm extends javax.swing.JFrame {
 
         jLabel3.setText("Database");
 
-        jLabel4.setText("Path save Index");
+        jLabel4.setText("Port");
 
         btRun.setText("Run");
         btRun.addActionListener(new java.awt.event.ActionListener() {
@@ -84,7 +84,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                                     .addComponent(txtPassWord)
                                     .addComponent(txtUserName)
                                     .addComponent(txtDatabase)
-                                    .addComponent(txtPathSave)
+                                    .addComponent(txtPort)
                                     .addComponent(btRun, javax.swing.GroupLayout.DEFAULT_SIZE, 135, Short.MAX_VALUE)))
                             .addGroup(layout.createSequentialGroup()
                                 .addGap(54, 54, 54)
@@ -110,7 +110,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
-                    .addComponent(txtPathSave, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addComponent(btRun)
                 .addGap(47, 47, 47)
@@ -130,12 +130,12 @@ public class MainIndexForm extends javax.swing.JFrame {
        String user = txtUserName.getText();
        String pass = txtPassWord.getText();
        String database = txtDatabase.getText();
-       String path = txtPathSave.getText();
+       int port = Integer.parseInt(txtPort.getText());
        
        Indexer id = new Indexer();
        prBar.setIndeterminate(false); 
        prBar.setString("I'm runing");
-       id.runIndex(user, pass, database, path);
+       id.runIndex(user, pass, database, port);
        
        prBar.setIndeterminate(true); 
        prBar.setString("Done index");
@@ -200,7 +200,7 @@ public class MainIndexForm extends javax.swing.JFrame {
     private javax.swing.JProgressBar prBar;
     private javax.swing.JTextField txtDatabase;
     private javax.swing.JTextField txtPassWord;
-    private javax.swing.JTextField txtPathSave;
+    private javax.swing.JTextField txtPort;
     private javax.swing.JTextField txtUserName;
     private javax.swing.JTextArea txtalog;
     // End of variables declaration//GEN-END:variables

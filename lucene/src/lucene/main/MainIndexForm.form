@@ -44,7 +44,7 @@
                                   <Component id="txtPassWord" max="32767" attributes="0"/>
                                   <Component id="txtUserName" max="32767" attributes="0"/>
                                   <Component id="txtDatabase" max="32767" attributes="0"/>
-                                  <Component id="txtPathSave" alignment="0" max="32767" attributes="0"/>
+                                  <Component id="txtPort" alignment="0" max="32767" attributes="0"/>
                                   <Component id="btRun" pref="135" max="32767" attributes="0"/>
                               </Group>
                           </Group>
@@ -81,7 +81,7 @@
               <EmptySpace type="separate" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="jLabel4" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="txtPathSave" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="txtPort" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="separate" max="-2" attributes="0"/>
               <Component id="btRun" min="-2" max="-2" attributes="0"/>
@@ -118,10 +118,10 @@
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel4">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Path save Index"/>
+        <Property name="text" type="java.lang.String" value="Port"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JTextField" name="txtPathSave">
+    <Component class="javax.swing.JTextField" name="txtPort">
     </Component>
     <Component class="javax.swing.JButton" name="btRun">
       <Properties>
