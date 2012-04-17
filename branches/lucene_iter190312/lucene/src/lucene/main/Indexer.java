@@ -36,11 +36,19 @@ import lucene.main.ConnectionPool;
  * @author duchuynh
  */
 public class Indexer {
+<<<<<<< .mine
+    private ConnectionPool connectionPool ;
+    public void runIndex(String username, String password, String database, String path){
+                
+        File indexDir = new File(path);
+        connectionPool   = new ConnectionPool(username,password,database);
+=======
     private ConnectionPool connectionPool ;
     public void runIndex(String username, String password, String database,int port){
                 
         File indexDir = new File("INDEX");
         connectionPool   = new ConnectionPool(username,password,port,database);
+>>>>>>> .r18
         long start = new Date().getTime();
         Indexer index = new Indexer();
         int count = index.index(indexDir,connectionPool);
@@ -66,7 +74,6 @@ public class Indexer {
             
             String sql = Config.getParameter("db.query");
             PreparedStatement stat = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_READ_ONLY);
-            
             stat.setFetchSize(Integer.MIN_VALUE);
             ResultSet rs = stat.executeQuery();
             //index data from query            
@@ -84,15 +91,20 @@ public class Indexer {
                 LinkedHashMap<String, String> listAuthors = getListAuthor(Integer.parseInt(paper.idPaper));
                 paper.setListAuthor(listAuthors.get("json"));       
                 paper.setAuthors(listAuthors.get("token"));
+                paper.idConference = Integer.toString(rs.getInt("idConference"));
+                paper.idJournal = Integer.toString(rs.getInt("idJournal"));
                 d.add(new Field(Config.getParameter("field.idPaper"), paper.idPaper, Field.Store.YES, Field.Index.NO));
                 d.add(new Field(Config.getParameter("field.title"), paper.title, Field.Store.YES, Field.Index.ANALYZED));     
                 d.add(new Field(Config.getParameter("field.abstract"), paper.abstractContent, Field.Store.YES, Field.Index.ANALYZED)); 
                 d.add(new Field(Config.getParameter("field.authorName"), paper.authors, Field.Store.YES, Field.Index.ANALYZED)); 
                 d.add(new Field(Config.getParameter("field.authorsName"), paper.listAuthor, Field.Store.YES, Field.Index.NO));
-                NumericField year = new NumericField(Config.getParameter("field.year"), Field.Store.YES, true);
+                d.add(new Field(Config.getParameter("field.idConference"), paper.idConference, Field.Store.YES, Field.Index.NO));
+                d.add(new Field(Config.getParameter("field.idJournal"), paper.idJournal, Field.Store.YES, Field.Index.NO));
+                NumericField year = new NumericField(Config.getParameter("field.year"), Field.Store.YES, true);                
                 year.setIntValue(paper.year);
                 d.add(year);
-                d.add(new Field(Config.getParameter("field.conferenceName"), paper.conferenceName, Field.Store.YES, Field.Index.ANALYZED));                                    
+                d.add(new Field(Config.getParameter("field.conferenceName"), paper.conferenceName, Field.Store.YES, Field.Index.ANALYZED));  
+                d.add(new Field(Config.getParameter("field.journalName"), paper.journalName, Field.Store.YES, Field.Index.ANALYZED));  
                 System.out.println("Indexing : " + count++ + "\t" + paper.title);
                 writer.addDocument(d);
                 year = null;

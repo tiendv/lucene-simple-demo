@@ -17,6 +17,8 @@ public class PaperInfo {
     public String conferenceName;
     public String listAuthor;
     public int year;   
+    public String idJournal;
+    public String idConference;
     
     public PaperInfo(){
         

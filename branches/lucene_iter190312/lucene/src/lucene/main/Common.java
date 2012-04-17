@@ -17,8 +17,9 @@ public class Common {
         FSDirectory directory = null;
         try{
             if(path != null){
-                File location = new File(path);
+                File location = new File("\\"+path);
                 directory = FSDirectory.open(location);
+                System.out.println("FSDirectory : " + directory.getDirectory().getPath());
             }
             return directory;
         }catch(Exception e){
