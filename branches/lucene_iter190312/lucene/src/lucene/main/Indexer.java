@@ -36,19 +36,13 @@ import lucene.main.ConnectionPool;
  * @author duchuynh
  */
 public class Indexer {
-<<<<<<< .mine
+
     private ConnectionPool connectionPool ;
     public void runIndex(String username, String password, String database, String path){
                 
         File indexDir = new File(path);
         connectionPool   = new ConnectionPool(username,password,database);
-=======
-    private ConnectionPool connectionPool ;
-    public void runIndex(String username, String password, String database,int port){
-                
-        File indexDir = new File("INDEX");
-        connectionPool   = new ConnectionPool(username,password,port,database);
->>>>>>> .r18
+
         long start = new Date().getTime();
         Indexer index = new Indexer();
         int count = index.index(indexDir,connectionPool);
