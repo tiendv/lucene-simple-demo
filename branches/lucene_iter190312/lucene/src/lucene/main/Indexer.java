@@ -38,10 +38,10 @@ import lucene.main.ConnectionPool;
 public class Indexer {
 
     private ConnectionPool connectionPool ;
-    public void runIndex(String username, String password, String database, String path){
+    public void runIndex(String username, String password, String database, int port){
                 
-        File indexDir = new File(path);
-        connectionPool   = new ConnectionPool(username,password,database);
+        File indexDir = new File("INDEX");
+        connectionPool   = new ConnectionPool(username,password,database,port);
 
         long start = new Date().getTime();
         Indexer index = new Indexer();
