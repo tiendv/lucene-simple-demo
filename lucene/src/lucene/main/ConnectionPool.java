@@ -24,7 +24,7 @@ public class ConnectionPool {
     public static DataSource dataSource;    
     private GenericObjectPool connectionPool = null;
     
-    public ConnectionPool(String username, String password ,int port,String database){
+    public ConnectionPool(String username, String password ,String database,int port){
         try{
             database = "jdbc:mysql://localhost:"+port+"/"+database;
             System.out.println(database);
