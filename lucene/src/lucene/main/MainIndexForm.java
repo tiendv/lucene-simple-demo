@@ -46,9 +46,17 @@ public class MainIndexForm extends javax.swing.JFrame {
 
         jLabel2.setText("PassWord");
 
+        txtUserName.setText("root");
+
+        txtPassWord.setText("root");
+
         jLabel3.setText("Database");
 
+        txtDatabase.setText("cspublicationcrawler");
+
         jLabel4.setText("Port");
+
+        txtPort.setText("3306");
 
         btRun.setText("Run");
         btRun.addActionListener(new java.awt.event.ActionListener() {
