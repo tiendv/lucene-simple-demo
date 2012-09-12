@@ -70,7 +70,7 @@ public class Searcher {
                     advancedSearch.add(term);                
                 }
                 advancedSearch.setSlop(4);
-                advanced1Search.add(advancedSearch, Occur.MUST);
+                advanced1Search.add(advancedSearch, Occur.SHOULD);
             }
             PhraseQuery advanced2Search = new PhraseQuery();
             String[] termConferenceList = paperSearch.authors.split(" ");

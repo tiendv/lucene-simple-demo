@@ -17,6 +17,8 @@ public class PaperInfo {
     public String conferenceName;
     public String listAuthor;
     public int year;   
+    public String idJournal;
+    public String idConference;
     
     public PaperInfo(){
         
@@ -79,11 +81,15 @@ public class PaperInfo {
     }
 
     public void setJournalName(String journalName) {
-        this.journalName = journalName;
+        if(journalName == null){
+            this.journalName = " ";
+        }else this.journalName = journalName;
     }
 
     public void setTitle(String title) {
-        this.title = title;
+        if(title == null){
+            this.title = " ";
+        }else this.title = title;
     }
 
     public void setYear(int year) {       
