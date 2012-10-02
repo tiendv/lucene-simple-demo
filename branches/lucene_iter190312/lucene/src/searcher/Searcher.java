@@ -28,7 +28,7 @@ public class Searcher {
 
     public Searcher() {
         try {
-            searcher = new IndexSearcher(Common.getFSDirectory(IndexConst.PAPER_INDEX_PATH));
+            //searcher = new IndexSearcher(Common.getFSDirectory(IndexConst.PAPER_INDEX_PATH));
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }

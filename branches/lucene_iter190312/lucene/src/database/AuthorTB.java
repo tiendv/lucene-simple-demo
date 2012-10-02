@@ -10,8 +10,8 @@ package database;
  */
 public class AuthorTB {
     //The TableName of table Person
+
     public static final String TABLE_NAME = "author";
-    
     //The Columns of table Author
     public static final String COLUMN_AUTHORID = "idAuthor";
     public static final String COLUMN_AUTHORNAME = "authorName";
@@ -22,5 +22,4 @@ public class AuthorTB {
     public static final String COLUMN_H_INDEX = "h_index";
     public static final String COLUMN_G_INDEX = "g_index";
     public static final String COLUMN_URL = "url";
-   
 }

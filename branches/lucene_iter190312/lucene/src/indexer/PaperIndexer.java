@@ -36,6 +36,7 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.NumericField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
@@ -48,15 +49,32 @@ import org.json.simple.JSONObject;
 public class PaperIndexer {
 
     private ConnectionPool connectionPool;
+    private String path = null;
+    public Boolean folder = true;
+    public Boolean connect = true;
 
-    public String _run(String username, String password, String database, int port) {
+    public PaperIndexer(String username, String password, String database, int port, String path) {
+        try {
+            FSDirectory directory = Common.getFSDirectory(path, IndexConst.PAPER_INDEX_PATH);
+            if (directory == null) {
+                folder = false;
+            }
+            this.path = path;
+            connectionPool = new ConnectionPool(username, password, database, port);
+            if (connectionPool.getConnection() == null) {
+                connect = false;
+            }
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
+
+    public String _run() {
         String out = "";
         try {
-            File indexDir = new File(IndexConst.PAPER_INDEX_PATH);
-            connectionPool = new ConnectionPool(username, password, database, port);
+            File indexDir = new File(path + IndexConst.PAPER_INDEX_PATH);
             long start = new Date().getTime();
-            PaperIndexer paperIndexer = new PaperIndexer();
-            int count = paperIndexer._index(indexDir, connectionPool);
+            int count = this._index(indexDir, connectionPool);
             long end = new Date().getTime();
             out = "Index : " + count + " files : Time index :" + (end - start) + " milisecond";
         } catch (Exception ex) {
@@ -337,8 +355,9 @@ public class PaperIndexer {
             String pass = "@huydang1920@";
             String database = "cspublicationcrawler";
             int port = 3306;
-            PaperIndexer paperIndexer = new PaperIndexer();
-            paperIndexer._run(user, pass, database, port);
+            String path = "C:\\";
+            PaperIndexer indexer = new PaperIndexer(user, pass, database, port, path);
+            indexer._run();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }

@@ -19,11 +19,21 @@ import java.util.Date;
 public class _Rank_Paper {
 
     private ConnectionPool connectionPool;
+    public Boolean connect = true;
 
-    public String _run(String username, String password, String database, int port) {
+    public _Rank_Paper() {
+    }
+
+    public _Rank_Paper(String username, String password, String database, int port) {
+        connectionPool = new ConnectionPool(username, password, database, port);
+        if (connectionPool.getConnection() == null) {
+            this.connect = false;
+        }
+    }
+
+    public String _run() {
         String out = "";
         try {
-            connectionPool = new ConnectionPool(username, password, database, port);
             long start = new Date().getTime();
             int count = this._rank();
             long end = new Date().getTime();
@@ -71,8 +81,8 @@ public class _Rank_Paper {
             String pass = "@huydang1920@";
             String database = "cspublicationcrawler";
             int port = 3306;
-            _Rank_Paper rank = new _Rank_Paper();
-            rank._run(user, pass, database, port);
+            _Rank_Paper rank = new _Rank_Paper(user, pass, database, port);
+            rank._run();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }

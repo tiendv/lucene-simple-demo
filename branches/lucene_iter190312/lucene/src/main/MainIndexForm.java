@@ -19,6 +19,8 @@ import indexer._Rank_Paper;
  */
 public class MainIndexForm extends javax.swing.JFrame {
 
+    private String path = "E:\\";
+
     /**
      * Creates new form MainIndexForm
      */
@@ -62,6 +64,8 @@ public class MainIndexForm extends javax.swing.JFrame {
         btKeywordIndexer = new javax.swing.JButton();
         btOrgIndexer = new javax.swing.JButton();
         btSubdomainIndexer = new javax.swing.JButton();
+        txtPath = new javax.swing.JTextField();
+        jLabel5 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Index data PubGuru");
@@ -115,7 +119,7 @@ public class MainIndexForm extends javax.swing.JFrame {
             }
         });
 
-        btJournalIndexer.setText("JournalIndexerr");
+        btJournalIndexer.setText("JournalIndexer");
         btJournalIndexer.setToolTipText("");
         btJournalIndexer.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -147,102 +151,119 @@ public class MainIndexForm extends javax.swing.JFrame {
             }
         });
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(prBar, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addGap(54, 54, 54)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 354, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addGap(8, 8, 8)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel1)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(txtUserName, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel3)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(txtDatabase, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 57, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.TRAILING))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtPassWord, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtPort, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(0, 10, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(btRankPaper, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(btPaperIndexer, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(btAuthorIndexer, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(btOrgIndexer, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGap(18, 18, 18)
-                                        .addComponent(btSubdomainIndexer, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(btConferenceIndexer, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGap(18, 18, 18)
-                                        .addComponent(btJournalIndexer, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                .addGap(18, 18, 18)
-                                .addComponent(btKeywordIndexer, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)))))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(22, 22, 22)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel1)
-                        .addComponent(txtUserName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(txtPassWord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(txtDatabase, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel4))
-                .addGap(47, 47, 47)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btRankPaper)
-                    .addComponent(btPaperIndexer)
-                    .addComponent(btAuthorIndexer))
-                .addGap(25, 25, 25)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btConferenceIndexer)
-                    .addComponent(btJournalIndexer)
-                    .addComponent(btKeywordIndexer))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btOrgIndexer)
-                    .addComponent(btSubdomainIndexer))
-                .addGap(18, 18, 18)
-                .addComponent(prBar, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 73, Short.MAX_VALUE)
-                .addContainerGap())
-        );
+        txtPath.setText("E:\\");
 
-        pack();
-    }// </editor-fold>//GEN-END:initComponents
+            jLabel5.setText("Path");
+
+            javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+            getContentPane().setLayout(layout);
+            layout.setHorizontalGroup(
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createSequentialGroup()
+                    .addContainerGap()
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(prBar, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                            .addGap(54, 54, 54)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 354, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                            .addGap(8, 8, 8)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(layout.createSequentialGroup()
+                                    .addComponent(jLabel1)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                    .addComponent(txtUserName, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(layout.createSequentialGroup()
+                                    .addComponent(jLabel3)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                    .addComponent(txtDatabase, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 57, Short.MAX_VALUE)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.TRAILING))
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(txtPassWord, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(txtPort, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGroup(layout.createSequentialGroup()
+                            .addGap(0, 10, Short.MAX_VALUE)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addGroup(layout.createSequentialGroup()
+                                    .addComponent(btRankPaper, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(btPaperIndexer, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(btAuthorIndexer, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(layout.createSequentialGroup()
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                        .addGroup(layout.createSequentialGroup()
+                                            .addComponent(btOrgIndexer, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addGap(18, 18, 18)
+                                            .addComponent(btSubdomainIndexer, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGroup(layout.createSequentialGroup()
+                                            .addComponent(btConferenceIndexer, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addGap(18, 18, 18)
+                                            .addComponent(btJournalIndexer, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                    .addGap(18, 18, 18)
+                                    .addComponent(btKeywordIndexer, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createSequentialGroup()
+                    .addGap(59, 59, 59)
+                    .addComponent(jLabel5)
+                    .addGap(18, 18, 18)
+                    .addComponent(txtPath, javax.swing.GroupLayout.PREFERRED_SIZE, 289, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            );
+            layout.setVerticalGroup(
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createSequentialGroup()
+                    .addGap(22, 22, 22)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel1)
+                            .addComponent(txtUserName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtPassWord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGap(18, 18, 18)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel3)
+                        .addComponent(txtDatabase, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel4))
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(txtPath, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel5))
+                    .addGap(16, 16, 16)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(btRankPaper)
+                        .addComponent(btPaperIndexer)
+                        .addComponent(btAuthorIndexer))
+                    .addGap(25, 25, 25)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(btConferenceIndexer)
+                        .addComponent(btJournalIndexer)
+                        .addComponent(btKeywordIndexer))
+                    .addGap(18, 18, 18)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(btOrgIndexer)
+                        .addComponent(btSubdomainIndexer))
+                    .addGap(18, 18, 18)
+                    .addComponent(prBar, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGap(18, 18, 18)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 73, Short.MAX_VALUE)
+                    .addContainerGap())
+            );
+
+            pack();
+        }// </editor-fold>//GEN-END:initComponents
 
     private void btPaperIndexerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btPaperIndexerActionPerformed
         // TODO add your handling code here:
         try {
+            prBar.setIndeterminate(false);
+            prBar.setString("Runing");
+            txtalog.setText("Runing");
             this.btAuthorIndexer.setEnabled(false);
             this.btConferenceIndexer.setEnabled(false);
             this.btJournalIndexer.setEnabled(false);
@@ -251,18 +272,26 @@ public class MainIndexForm extends javax.swing.JFrame {
             this.btPaperIndexer.setEnabled(false);
             this.btRankPaper.setEnabled(false);
             this.btSubdomainIndexer.setEnabled(false);
-
+            this.path = this.txtPath.getText();
             String user = txtUserName.getText();
             String pass = txtPassWord.getText();
             String database = txtDatabase.getText();
             int port = Integer.parseInt(txtPort.getText());
-
-            prBar.setIndeterminate(false);
-            prBar.setString("I'm runing");
-
-            PaperIndexer index = new PaperIndexer();
-            String text = index._run(user, pass, database, port);
-
+            // Index
+            PaperIndexer index = new PaperIndexer(user, pass, database, port, path);
+            if (index.folder && index.connect) {
+                txtalog.setText("Connect database success!\n Runing");
+                txtalog.setText(index._run());
+            } else {
+                String text = "";
+                if (!index.folder) {
+                    text += "Error: Can not connect to folder!\n";
+                }
+                if (!index.connect) {
+                    text += "Error: Can not connect to database!\n";
+                }
+                txtalog.setText(text);
+            }
             this.btAuthorIndexer.setEnabled(true);
             this.btConferenceIndexer.setEnabled(true);
             this.btJournalIndexer.setEnabled(true);
@@ -271,10 +300,8 @@ public class MainIndexForm extends javax.swing.JFrame {
             this.btPaperIndexer.setEnabled(true);
             this.btRankPaper.setEnabled(true);
             this.btSubdomainIndexer.setEnabled(true);
-
             prBar.setIndeterminate(true);
             prBar.setString("Done index");
-            txtalog.setText(text);
         } catch (Exception ex) {
             txtalog.setText(ex.getMessage());
         }
@@ -282,47 +309,42 @@ public class MainIndexForm extends javax.swing.JFrame {
 
     private void btRankPaperActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btRankPaperActionPerformed
         // TODO add your handling code here:
-        try {
-            this.btAuthorIndexer.setEnabled(false);
-            this.btConferenceIndexer.setEnabled(false);
-            this.btJournalIndexer.setEnabled(false);
-            this.btKeywordIndexer.setEnabled(false);
-            this.btOrgIndexer.setEnabled(false);
-            this.btPaperIndexer.setEnabled(false);
-            this.btRankPaper.setEnabled(false);
-            this.btSubdomainIndexer.setEnabled(false);
-
-            String user = txtUserName.getText();
-            String pass = txtPassWord.getText();
-            String database = txtDatabase.getText();
-            int port = Integer.parseInt(txtPort.getText());
-
-            prBar.setIndeterminate(false);
-            prBar.setString("I'm runing");
-
-            _Rank_Paper rank = new _Rank_Paper();
-            String text = rank._run(user, pass, database, port);
-
-            this.btAuthorIndexer.setEnabled(false);
-            this.btConferenceIndexer.setEnabled(false);
-            this.btJournalIndexer.setEnabled(false);
-            this.btKeywordIndexer.setEnabled(false);
-            this.btOrgIndexer.setEnabled(false);
+        prBar.setIndeterminate(false);
+        prBar.setString("Runing");
+        txtalog.setText("Runing");
+        this.btAuthorIndexer.setEnabled(false);
+        this.btConferenceIndexer.setEnabled(false);
+        this.btJournalIndexer.setEnabled(false);
+        this.btKeywordIndexer.setEnabled(false);
+        this.btOrgIndexer.setEnabled(false);
+        this.btPaperIndexer.setEnabled(false);
+        this.btRankPaper.setEnabled(false);
+        this.btSubdomainIndexer.setEnabled(false);
+        this.path = this.txtPath.getText();
+        String user = txtUserName.getText();
+        String pass = txtPassWord.getText();
+        String database = txtDatabase.getText();
+        int port = Integer.parseInt(txtPort.getText());
+        // Run        
+        _Rank_Paper rank = new _Rank_Paper(user, pass, database, port);
+        if (rank.connect) {
+            txtalog.setText("Connect database success!\n Runing");
+            txtalog.setText(rank._run());
             this.btPaperIndexer.setEnabled(true);
             this.btRankPaper.setEnabled(true);
-            this.btSubdomainIndexer.setEnabled(false);
-
-            prBar.setIndeterminate(true);
             prBar.setString("Done index");
-            txtalog.setText(text);
-        } catch (Exception ex) {
-            txtalog.setText(ex.getMessage());
+        } else {
+            this.btRankPaper.setEnabled(true);
+            txtalog.setText("Error: Can not connect to database!\n");
         }
     }//GEN-LAST:event_btRankPaperActionPerformed
 
     private void btAuthorIndexerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btAuthorIndexerActionPerformed
         // TODO add your handling code here:
         try {
+            prBar.setIndeterminate(false);
+            prBar.setString("Runing");
+            txtalog.setText("Runing");
             this.btAuthorIndexer.setEnabled(false);
             this.btConferenceIndexer.setEnabled(false);
             this.btJournalIndexer.setEnabled(false);
@@ -331,18 +353,26 @@ public class MainIndexForm extends javax.swing.JFrame {
             this.btPaperIndexer.setEnabled(false);
             this.btRankPaper.setEnabled(false);
             this.btSubdomainIndexer.setEnabled(false);
-
+            this.path = this.txtPath.getText();
             String user = txtUserName.getText();
             String pass = txtPassWord.getText();
             String database = txtDatabase.getText();
             int port = Integer.parseInt(txtPort.getText());
-
-            prBar.setIndeterminate(false);
-            prBar.setString("I'm runing");
-
-            AuthorIndexer index = new AuthorIndexer();
-            String text = index._run(user, pass, database, port);
-
+            // Index
+            AuthorIndexer index = new AuthorIndexer(user, pass, database, port, path);
+            if (index.folder && index.connect) {
+                txtalog.setText("Connect database success!\n Runing");
+                txtalog.setText(index._run());
+            } else {
+                String text = "";
+                if (!index.folder) {
+                    text += "Error: Can not connect to folder!\n";
+                }
+                if (!index.connect) {
+                    text += "Error: Can not connect to database!\n";
+                }
+                txtalog.setText(text);
+            }
             this.btAuthorIndexer.setEnabled(true);
             this.btConferenceIndexer.setEnabled(true);
             this.btJournalIndexer.setEnabled(true);
@@ -351,10 +381,8 @@ public class MainIndexForm extends javax.swing.JFrame {
             this.btPaperIndexer.setEnabled(true);
             this.btRankPaper.setEnabled(true);
             this.btSubdomainIndexer.setEnabled(true);
-
             prBar.setIndeterminate(true);
             prBar.setString("Done index");
-            txtalog.setText(text);
         } catch (Exception ex) {
             txtalog.setText(ex.getMessage());
         }
@@ -363,6 +391,9 @@ public class MainIndexForm extends javax.swing.JFrame {
     private void btConferenceIndexerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btConferenceIndexerActionPerformed
         // TODO add your handling code here:
         try {
+            prBar.setIndeterminate(false);
+            prBar.setString("Runing");
+            txtalog.setText("Runing");
             this.btAuthorIndexer.setEnabled(false);
             this.btConferenceIndexer.setEnabled(false);
             this.btJournalIndexer.setEnabled(false);
@@ -371,18 +402,26 @@ public class MainIndexForm extends javax.swing.JFrame {
             this.btPaperIndexer.setEnabled(false);
             this.btRankPaper.setEnabled(false);
             this.btSubdomainIndexer.setEnabled(false);
-
+            this.path = this.txtPath.getText();
             String user = txtUserName.getText();
             String pass = txtPassWord.getText();
             String database = txtDatabase.getText();
             int port = Integer.parseInt(txtPort.getText());
-
-            prBar.setIndeterminate(false);
-            prBar.setString("I'm runing");
-
-            ConferenceIndexer index = new ConferenceIndexer();
-            String text = index._run(user, pass, database, port);
-
+            // Index
+            ConferenceIndexer index = new ConferenceIndexer(user, pass, database, port, path);
+            if (index.folder && index.connect) {
+                txtalog.setText("Connect database success!\n Runing");
+                txtalog.setText(index._run());
+            } else {
+                String text = "";
+                if (!index.folder) {
+                    text += "Error: Can not connect to folder!\n";
+                }
+                if (!index.connect) {
+                    text += "Error: Can not connect to database!\n";
+                }
+                txtalog.setText(text);
+            }
             this.btAuthorIndexer.setEnabled(true);
             this.btConferenceIndexer.setEnabled(true);
             this.btJournalIndexer.setEnabled(true);
@@ -391,10 +430,8 @@ public class MainIndexForm extends javax.swing.JFrame {
             this.btPaperIndexer.setEnabled(true);
             this.btRankPaper.setEnabled(true);
             this.btSubdomainIndexer.setEnabled(true);
-
             prBar.setIndeterminate(true);
             prBar.setString("Done index");
-            txtalog.setText(text);
         } catch (Exception ex) {
             txtalog.setText(ex.getMessage());
         }
@@ -403,6 +440,9 @@ public class MainIndexForm extends javax.swing.JFrame {
     private void btJournalIndexerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btJournalIndexerActionPerformed
         // TODO add your handling code here:
         try {
+            prBar.setIndeterminate(false);
+            prBar.setString("Runing");
+            txtalog.setText("Runing");
             this.btAuthorIndexer.setEnabled(false);
             this.btConferenceIndexer.setEnabled(false);
             this.btJournalIndexer.setEnabled(false);
@@ -411,18 +451,26 @@ public class MainIndexForm extends javax.swing.JFrame {
             this.btPaperIndexer.setEnabled(false);
             this.btRankPaper.setEnabled(false);
             this.btSubdomainIndexer.setEnabled(false);
-
+            this.path = this.txtPath.getText();
             String user = txtUserName.getText();
             String pass = txtPassWord.getText();
             String database = txtDatabase.getText();
             int port = Integer.parseInt(txtPort.getText());
-
-            prBar.setIndeterminate(false);
-            prBar.setString("I'm runing");
-
-            JournalIndexer index = new JournalIndexer();
-            String text = index._run(user, pass, database, port);
-
+            // Index
+            JournalIndexer index = new JournalIndexer(user, pass, database, port, path);
+            if (index.folder && index.connect) {
+                txtalog.setText("Connect database success!\n Runing");
+                txtalog.setText(index._run());
+            } else {
+                String text = "";
+                if (!index.folder) {
+                    text += "Error: Can not connect to folder!\n";
+                }
+                if (!index.connect) {
+                    text += "Error: Can not connect to database!\n";
+                }
+                txtalog.setText(text);
+            }
             this.btAuthorIndexer.setEnabled(true);
             this.btConferenceIndexer.setEnabled(true);
             this.btJournalIndexer.setEnabled(true);
@@ -431,10 +479,8 @@ public class MainIndexForm extends javax.swing.JFrame {
             this.btPaperIndexer.setEnabled(true);
             this.btRankPaper.setEnabled(true);
             this.btSubdomainIndexer.setEnabled(true);
-
             prBar.setIndeterminate(true);
             prBar.setString("Done index");
-            txtalog.setText(text);
         } catch (Exception ex) {
             txtalog.setText(ex.getMessage());
         }
@@ -443,6 +489,9 @@ public class MainIndexForm extends javax.swing.JFrame {
     private void btKeywordIndexerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btKeywordIndexerActionPerformed
         // TODO add your handling code here:
         try {
+            prBar.setIndeterminate(false);
+            prBar.setString("Runing");
+            txtalog.setText("Runing");
             this.btAuthorIndexer.setEnabled(false);
             this.btConferenceIndexer.setEnabled(false);
             this.btJournalIndexer.setEnabled(false);
@@ -451,18 +500,26 @@ public class MainIndexForm extends javax.swing.JFrame {
             this.btPaperIndexer.setEnabled(false);
             this.btRankPaper.setEnabled(false);
             this.btSubdomainIndexer.setEnabled(false);
-
+            this.path = this.txtPath.getText();
             String user = txtUserName.getText();
             String pass = txtPassWord.getText();
             String database = txtDatabase.getText();
             int port = Integer.parseInt(txtPort.getText());
-
-            prBar.setIndeterminate(false);
-            prBar.setString("I'm runing");
-
-            KeywordIndexer index = new KeywordIndexer();
-            String text = index._run(user, pass, database, port);
-
+            // Index
+            KeywordIndexer index = new KeywordIndexer(user, pass, database, port, path);
+            if (index.folder && index.connect) {
+                txtalog.setText("Connect database success!\n Runing");
+                txtalog.setText(index._run());
+            } else {
+                String text = "";
+                if (!index.folder) {
+                    text += "Error: Can not connect to folder!\n";
+                }
+                if (!index.connect) {
+                    text += "Error: Can not connect to database!\n";
+                }
+                txtalog.setText(text);
+            }
             this.btAuthorIndexer.setEnabled(true);
             this.btConferenceIndexer.setEnabled(true);
             this.btJournalIndexer.setEnabled(true);
@@ -471,10 +528,8 @@ public class MainIndexForm extends javax.swing.JFrame {
             this.btPaperIndexer.setEnabled(true);
             this.btRankPaper.setEnabled(true);
             this.btSubdomainIndexer.setEnabled(true);
-
             prBar.setIndeterminate(true);
             prBar.setString("Done index");
-            txtalog.setText(text);
         } catch (Exception ex) {
             txtalog.setText(ex.getMessage());
         }
@@ -483,6 +538,9 @@ public class MainIndexForm extends javax.swing.JFrame {
     private void btOrgIndexerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btOrgIndexerActionPerformed
         // TODO add your handling code here:
         try {
+            prBar.setIndeterminate(false);
+            prBar.setString("Runing");
+            txtalog.setText("Runing");
             this.btAuthorIndexer.setEnabled(false);
             this.btConferenceIndexer.setEnabled(false);
             this.btJournalIndexer.setEnabled(false);
@@ -491,18 +549,26 @@ public class MainIndexForm extends javax.swing.JFrame {
             this.btPaperIndexer.setEnabled(false);
             this.btRankPaper.setEnabled(false);
             this.btSubdomainIndexer.setEnabled(false);
-
+            this.path = this.txtPath.getText();
             String user = txtUserName.getText();
             String pass = txtPassWord.getText();
             String database = txtDatabase.getText();
             int port = Integer.parseInt(txtPort.getText());
-
-            prBar.setIndeterminate(false);
-            prBar.setString("I'm runing");
-
-            OrgIndexer index = new OrgIndexer();
-            String text = index._run(user, pass, database, port);
-
+            // Index
+            OrgIndexer index = new OrgIndexer(user, pass, database, port, path);
+            if (index.folder && index.connect) {
+                txtalog.setText("Connect database success!\n Runing");
+                txtalog.setText(index._run());
+            } else {
+                String text = "";
+                if (!index.folder) {
+                    text += "Error: Can not connect to folder!\n";
+                }
+                if (!index.connect) {
+                    text += "Error: Can not connect to database!\n";
+                }
+                txtalog.setText(text);
+            }
             this.btAuthorIndexer.setEnabled(true);
             this.btConferenceIndexer.setEnabled(true);
             this.btJournalIndexer.setEnabled(true);
@@ -511,10 +577,8 @@ public class MainIndexForm extends javax.swing.JFrame {
             this.btPaperIndexer.setEnabled(true);
             this.btRankPaper.setEnabled(true);
             this.btSubdomainIndexer.setEnabled(true);
-
             prBar.setIndeterminate(true);
             prBar.setString("Done index");
-            txtalog.setText(text);
         } catch (Exception ex) {
             txtalog.setText(ex.getMessage());
         }
@@ -523,6 +587,9 @@ public class MainIndexForm extends javax.swing.JFrame {
     private void btSubdomainIndexerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btSubdomainIndexerActionPerformed
         // TODO add your handling code here:
         try {
+            prBar.setIndeterminate(false);
+            prBar.setString("Runing");
+            txtalog.setText("Runing");
             this.btAuthorIndexer.setEnabled(false);
             this.btConferenceIndexer.setEnabled(false);
             this.btJournalIndexer.setEnabled(false);
@@ -531,18 +598,26 @@ public class MainIndexForm extends javax.swing.JFrame {
             this.btPaperIndexer.setEnabled(false);
             this.btRankPaper.setEnabled(false);
             this.btSubdomainIndexer.setEnabled(false);
-
+            this.path = this.txtPath.getText();
             String user = txtUserName.getText();
             String pass = txtPassWord.getText();
             String database = txtDatabase.getText();
             int port = Integer.parseInt(txtPort.getText());
-
-            prBar.setIndeterminate(false);
-            prBar.setString("I'm runing");
-
-            SubdomainIndexer index = new SubdomainIndexer();
-            String text = index._run(user, pass, database, port);
-
+            // Index
+            SubdomainIndexer index = new SubdomainIndexer(user, pass, database, port, path);
+            if (index.folder && index.connect) {
+                txtalog.setText("Connect database success!\n Runing");
+                txtalog.setText(index._run());
+            } else {
+                String text = "";
+                if (!index.folder) {
+                    text += "Error: Can not connect to folder!\n";
+                }
+                if (!index.connect) {
+                    text += "Error: Can not connect to database!\n";
+                }
+                txtalog.setText(text);
+            }
             this.btAuthorIndexer.setEnabled(true);
             this.btConferenceIndexer.setEnabled(true);
             this.btJournalIndexer.setEnabled(true);
@@ -551,10 +626,8 @@ public class MainIndexForm extends javax.swing.JFrame {
             this.btPaperIndexer.setEnabled(true);
             this.btRankPaper.setEnabled(true);
             this.btSubdomainIndexer.setEnabled(true);
-
             prBar.setIndeterminate(true);
             prBar.setString("Done index");
-            txtalog.setText(text);
         } catch (Exception ex) {
             txtalog.setText(ex.getMessage());
         }
@@ -613,10 +686,12 @@ public class MainIndexForm extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JProgressBar prBar;
     private javax.swing.JTextField txtDatabase;
     private javax.swing.JTextField txtPassWord;
+    private javax.swing.JTextField txtPath;
     private javax.swing.JTextField txtPort;
     private javax.swing.JTextField txtUserName;
     private javax.swing.JTextArea txtalog;

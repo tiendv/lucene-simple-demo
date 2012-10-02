@@ -20,11 +20,11 @@ import sun.misc.BASE64Encoder;
  */
 public class Common {
 
-    public static FSDirectory getFSDirectory(String path) {
+    public static FSDirectory getFSDirectory(String path, String folder) {
         FSDirectory directory = null;
         try {
-            if (path != null) {
-                File location = new File("E:\\GURU\\db\\" + path);
+            if (path != null && folder != null) {
+                File location = new File(path + folder);
                 directory = FSDirectory.open(location);
                 System.out.println("FSDirectory : " + directory.getDirectory().getPath());
             }
