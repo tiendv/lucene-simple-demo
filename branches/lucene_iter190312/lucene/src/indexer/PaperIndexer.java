@@ -36,7 +36,6 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.NumericField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
@@ -52,6 +51,9 @@ public class PaperIndexer {
     private String path = null;
     public Boolean folder = true;
     public Boolean connect = true;
+
+    public PaperIndexer() {
+    }
 
     public PaperIndexer(String username, String password, String database, int port, String path) {
         try {
@@ -92,7 +94,7 @@ public class PaperIndexer {
             IndexWriter writer = new IndexWriter(directory, config);
             // Connection to DB           
             Connection connection = connectionPool.getConnection();
-            String sql = "SELECT * FROM " + PaperTB.TABLE_NAME + " p";
+            String sql = "SELECT * FROM " + PaperTB.TABLE_NAME + " p LIMIT 10";
             PreparedStatement stmt = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet rs = stmt.executeQuery();
@@ -128,6 +130,7 @@ public class PaperIndexer {
                 paper.setListIdAuthors(listAuthors.get("listIdAuthors"));
                 paper.setListIdKeywords(listKeywords.get("listIdKeywords"));
                 paper.setListIdOrgs(listAuthors.get("listIdOrgs"));
+                paper.setListIdPaperCitations(this.getListIdPaperCitations(rs.getInt(PaperTB.COLUMN_PAPERID)));
                 paper.setRank(this.getRank(rs.getInt(PaperTB.COLUMN_PAPERID)));
 
                 d.add(new Field(IndexConst.PAPER_IDPAPER_FIELD, paper.idPaper, Field.Store.YES, Field.Index.ANALYZED));
@@ -151,6 +154,7 @@ public class PaperIndexer {
                 d.add(new Field(IndexConst.PAPER_LISTIDKEYWORDS_FIELD, paper.listIdKeywords, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.PAPER_LISTIDORGS_FIELD, paper.listIdOrgs, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.PAPER_LISTIDSUBDOMAINS_FIELD, paper.listIdSubdomains, Field.Store.YES, Field.Index.ANALYZED));
+                d.add(new Field(IndexConst.PAPER_LISTIDPAPERCITATIONS_FIELD, paper.listIdPaperCitations, Field.Store.YES, Field.Index.NO));
                 d.add(new NumericField(IndexConst.PAPER_CITATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(paper.citationCount));
                 d.add(new NumericField(IndexConst.PAPER_YEAR_FIELD, Field.Store.YES, true).setIntValue(paper.year));
                 d.add(new NumericField(IndexConst.PAPER_RANK_FIELD, Field.Store.YES, true).setIntValue(paper.rank));
@@ -262,7 +266,9 @@ public class PaperIndexer {
     /*
      * getListCitations
      * @param idPaper
-     * @return citationCount, listCitations {citation, year}
+     * @return citationCount, listCitations
+     * listCitations: ArrayList<Object> listCitations = new ArrayList<Object>();
+     * + Với: Object là LinkedHashMap<String, Integer> với liệu là {citation, year}
      */
     public LinkedHashMap<String, String> getListCitations(int idPaper) throws SQLException, ClassNotFoundException {
         Connection connection = ConnectionPool.dataSource.getConnection();
@@ -348,6 +354,24 @@ public class PaperIndexer {
         return rank;
     }
 
+    public String getListIdPaperCitations(int idPaper) throws SQLException {
+        Connection connection = ConnectionPool.dataSource.getConnection();
+        String listIdPaperCitations = "";
+        String sql = "SELECT pp." + PaperPaperTB.COLUMN_PAPERID + " FROM " + PaperPaperTB.TABLE_NAME + " pp WHERE pp." + PaperPaperTB.COLUMN_PAPERREFID + " = ?";
+        PreparedStatement stmt = connection.prepareStatement(sql);
+        stmt.setInt(1, idPaper);
+        ResultSet rs = stmt.executeQuery();
+        while ((rs != null) && (rs.next())) {
+            listIdPaperCitations += " " + rs.getString(PaperPaperTB.COLUMN_PAPERID);
+        }
+        if (!"".equals(listIdPaperCitations)) {
+            listIdPaperCitations = listIdPaperCitations.substring(1);
+        }
+        stmt.close();
+        connection.close();
+        return listIdPaperCitations;
+    }
+
     public static void main(String args[]) {
         // TODO add your handling code here:
         try {
@@ -355,9 +379,9 @@ public class PaperIndexer {
             String pass = "@huydang1920@";
             String database = "cspublicationcrawler";
             int port = 3306;
-            String path = "C:\\";
+            String path = "E:\\";
             PaperIndexer indexer = new PaperIndexer(user, pass, database, port, path);
-            indexer._run();
+            System.out.println(indexer._run());
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }

@@ -12,6 +12,7 @@ import indexer.OrgIndexer;
 import indexer.PaperIndexer;
 import indexer.SubdomainIndexer;
 import indexer._Rank_Paper;
+import java.io.File;
 
 /**
  *
@@ -263,7 +264,7 @@ public class MainIndexForm extends javax.swing.JFrame {
         try {
             prBar.setIndeterminate(false);
             prBar.setString("Runing");
-            txtalog.setText("Runing");
+            txtalog.setText("Runing\n");
             this.btAuthorIndexer.setEnabled(false);
             this.btConferenceIndexer.setEnabled(false);
             this.btJournalIndexer.setEnabled(false);
@@ -277,20 +278,33 @@ public class MainIndexForm extends javax.swing.JFrame {
             String pass = txtPassWord.getText();
             String database = txtDatabase.getText();
             int port = Integer.parseInt(txtPort.getText());
+            File file = new File(this.path);
+            if (!file.exists()) {
+                // It returns false if File or directory does not exist
+                txtalog.setText(txtalog.getText() + "Directory you are searching does not exist : " + file.exists() + "\n");
+                this.btPaperIndexer.setEnabled(true);
+                this.btRankPaper.setEnabled(true);
+                return;
+            } else {
+                // It returns true if File or directory exists
+                txtalog.setText(txtalog.getText() + "Directory you are searching does exist : " + file.exists() + "\n");
+                if (!"\\".equals(this.path.substring(this.path.length() - 1, this.path.length()))) {
+                    this.path += "\\";
+                    this.txtPath.setText(this.path);
+                }
+            }
             // Index
             PaperIndexer index = new PaperIndexer(user, pass, database, port, path);
             if (index.folder && index.connect) {
-                txtalog.setText("Connect database success!\n Runing");
-                txtalog.setText(index._run());
+                txtalog.setText(txtalog.getText() + "Connect database success!\n Runing \n");
+                txtalog.setText(txtalog.getText() + index._run() + "\nFinished!\n");
             } else {
-                String text = "";
                 if (!index.folder) {
-                    text += "Error: Can not connect to folder!\n";
+                    txtalog.setText(txtalog.getText() + "Error: Can not connect to folder!\n");
                 }
                 if (!index.connect) {
-                    text += "Error: Can not connect to database!\n";
+                    txtalog.setText(txtalog.getText() + "Error: Can not connect to database!\n");
                 }
-                txtalog.setText(text);
             }
             this.btAuthorIndexer.setEnabled(true);
             this.btConferenceIndexer.setEnabled(true);
@@ -309,42 +323,10 @@ public class MainIndexForm extends javax.swing.JFrame {
 
     private void btRankPaperActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btRankPaperActionPerformed
         // TODO add your handling code here:
-        prBar.setIndeterminate(false);
-        prBar.setString("Runing");
-        txtalog.setText("Runing");
-        this.btAuthorIndexer.setEnabled(false);
-        this.btConferenceIndexer.setEnabled(false);
-        this.btJournalIndexer.setEnabled(false);
-        this.btKeywordIndexer.setEnabled(false);
-        this.btOrgIndexer.setEnabled(false);
-        this.btPaperIndexer.setEnabled(false);
-        this.btRankPaper.setEnabled(false);
-        this.btSubdomainIndexer.setEnabled(false);
-        this.path = this.txtPath.getText();
-        String user = txtUserName.getText();
-        String pass = txtPassWord.getText();
-        String database = txtDatabase.getText();
-        int port = Integer.parseInt(txtPort.getText());
-        // Run        
-        _Rank_Paper rank = new _Rank_Paper(user, pass, database, port);
-        if (rank.connect) {
-            txtalog.setText("Connect database success!\n Runing");
-            txtalog.setText(rank._run());
-            this.btPaperIndexer.setEnabled(true);
-            this.btRankPaper.setEnabled(true);
-            prBar.setString("Done index");
-        } else {
-            this.btRankPaper.setEnabled(true);
-            txtalog.setText("Error: Can not connect to database!\n");
-        }
-    }//GEN-LAST:event_btRankPaperActionPerformed
-
-    private void btAuthorIndexerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btAuthorIndexerActionPerformed
-        // TODO add your handling code here:
         try {
             prBar.setIndeterminate(false);
             prBar.setString("Runing");
-            txtalog.setText("Runing");
+            txtalog.setText("Runing\n");
             this.btAuthorIndexer.setEnabled(false);
             this.btConferenceIndexer.setEnabled(false);
             this.btJournalIndexer.setEnabled(false);
@@ -358,20 +340,89 @@ public class MainIndexForm extends javax.swing.JFrame {
             String pass = txtPassWord.getText();
             String database = txtDatabase.getText();
             int port = Integer.parseInt(txtPort.getText());
+            File file = new File(this.path);
+            if (!file.exists()) {
+                // It returns false if File or directory does not exist
+                txtalog.setText(txtalog.getText() + "Directory you are searching does not exist : " + file.exists() + "\n");
+                this.btRankPaper.setEnabled(true);
+                return;
+            } else {
+                // It returns true if File or directory exists
+                txtalog.setText(txtalog.getText() + "Directory you are searching does exist : " + file.exists() + "\n");
+                if (!"\\".equals(this.path.substring(this.path.length() - 1, this.path.length()))) {
+                    this.path += "\\";
+                    this.txtPath.setText(this.path);
+                }
+            }
+            // Run        
+            _Rank_Paper rank = new _Rank_Paper(user, pass, database, port);
+            if (rank.connect) {
+                txtalog.setText(txtalog.getText() + "Connect database success!\n Runing \n");
+                //txtalog.setText(txtalog.getText() + rank._run() + "\nFinished!");
+                this.btPaperIndexer.setEnabled(true);
+                this.btRankPaper.setEnabled(true);
+                prBar.setString("Done index");
+            } else {
+                this.btRankPaper.setEnabled(true);
+                txtalog.setText(txtalog.getText() + "Error: Can not connect to database!\nError!");
+            }
+        } catch (Exception ex) {
+            txtalog.setText(ex.getMessage());
+        }
+    }//GEN-LAST:event_btRankPaperActionPerformed
+
+    private void btAuthorIndexerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btAuthorIndexerActionPerformed
+        // TODO add your handling code here:
+        try {
+            prBar.setIndeterminate(false);
+            prBar.setString("Runing");
+            txtalog.setText("Runing\n");
+            this.btAuthorIndexer.setEnabled(false);
+            this.btConferenceIndexer.setEnabled(false);
+            this.btJournalIndexer.setEnabled(false);
+            this.btKeywordIndexer.setEnabled(false);
+            this.btOrgIndexer.setEnabled(false);
+            this.btPaperIndexer.setEnabled(false);
+            this.btRankPaper.setEnabled(false);
+            this.btSubdomainIndexer.setEnabled(false);
+            this.path = this.txtPath.getText();
+            String user = txtUserName.getText();
+            String pass = txtPassWord.getText();
+            String database = txtDatabase.getText();
+            int port = Integer.parseInt(txtPort.getText());
+            File file = new File(this.path);
+            if (!file.exists()) {
+                // It returns false if File or directory does not exist
+                txtalog.setText(txtalog.getText() + "Directory you are searching does not exist : " + file.exists() + "\n");
+                this.btAuthorIndexer.setEnabled(true);
+                this.btConferenceIndexer.setEnabled(true);
+                this.btJournalIndexer.setEnabled(true);
+                this.btKeywordIndexer.setEnabled(true);
+                this.btOrgIndexer.setEnabled(true);
+                this.btPaperIndexer.setEnabled(true);
+                this.btRankPaper.setEnabled(true);
+                this.btSubdomainIndexer.setEnabled(true);
+                return;
+            } else {
+                // It returns true if File or directory exists
+                txtalog.setText(txtalog.getText() + "Directory you are searching does exist : " + file.exists() + "\n");
+                if (!"\\".equals(this.path.substring(this.path.length() - 1, this.path.length()))) {
+                    this.path += "\\";
+                    this.txtPath.setText(this.path);
+                }
+            }
             // Index
             AuthorIndexer index = new AuthorIndexer(user, pass, database, port, path);
             if (index.folder && index.connect) {
-                txtalog.setText("Connect database success!\n Runing");
-                txtalog.setText(index._run());
+                txtalog.setText(txtalog.getText() + "Connect database success!\n Runing \n");
+                txtalog.setText(txtalog.getText() + index._run() + "\nFinished!\n");
             } else {
-                String text = "";
                 if (!index.folder) {
-                    text += "Error: Can not connect to folder!\n";
+                    txtalog.setText(txtalog.getText() + "Error: Can not connect to folder!\n");
                 }
                 if (!index.connect) {
-                    text += "Error: Can not connect to database!\n";
+                    txtalog.setText(txtalog.getText() + "Error: Can not connect to database!\n");
                 }
-                txtalog.setText(text);
             }
             this.btAuthorIndexer.setEnabled(true);
             this.btConferenceIndexer.setEnabled(true);
@@ -393,7 +444,7 @@ public class MainIndexForm extends javax.swing.JFrame {
         try {
             prBar.setIndeterminate(false);
             prBar.setString("Runing");
-            txtalog.setText("Runing");
+            txtalog.setText("Runing\n");
             this.btAuthorIndexer.setEnabled(false);
             this.btConferenceIndexer.setEnabled(false);
             this.btJournalIndexer.setEnabled(false);
@@ -407,20 +458,39 @@ public class MainIndexForm extends javax.swing.JFrame {
             String pass = txtPassWord.getText();
             String database = txtDatabase.getText();
             int port = Integer.parseInt(txtPort.getText());
+            File file = new File(this.path);
+            if (!file.exists()) {
+                // It returns false if File or directory does not exist
+                txtalog.setText(txtalog.getText() + "Directory you are searching does not exist : " + file.exists() + "\n");
+                this.btAuthorIndexer.setEnabled(true);
+                this.btConferenceIndexer.setEnabled(true);
+                this.btJournalIndexer.setEnabled(true);
+                this.btKeywordIndexer.setEnabled(true);
+                this.btOrgIndexer.setEnabled(true);
+                this.btPaperIndexer.setEnabled(true);
+                this.btRankPaper.setEnabled(true);
+                this.btSubdomainIndexer.setEnabled(true);
+                return;
+            } else {
+                // It returns true if File or directory exists
+                txtalog.setText(txtalog.getText() + "Directory you are searching does exist : " + file.exists() + "\n");
+                if (!"\\".equals(this.path.substring(this.path.length() - 1, this.path.length()))) {
+                    this.path += "\\";
+                    this.txtPath.setText(this.path);
+                }
+            }
             // Index
             ConferenceIndexer index = new ConferenceIndexer(user, pass, database, port, path);
             if (index.folder && index.connect) {
-                txtalog.setText("Connect database success!\n Runing");
-                txtalog.setText(index._run());
+                txtalog.setText(txtalog.getText() + "Connect database success!\n Runing \n");
+                txtalog.setText(txtalog.getText() + index._run() + "\nFinished!\n");
             } else {
-                String text = "";
                 if (!index.folder) {
-                    text += "Error: Can not connect to folder!\n";
+                    txtalog.setText(txtalog.getText() + "Error: Can not connect to folder!\n");
                 }
                 if (!index.connect) {
-                    text += "Error: Can not connect to database!\n";
+                    txtalog.setText(txtalog.getText() + "Error: Can not connect to database!\n");
                 }
-                txtalog.setText(text);
             }
             this.btAuthorIndexer.setEnabled(true);
             this.btConferenceIndexer.setEnabled(true);
@@ -442,7 +512,7 @@ public class MainIndexForm extends javax.swing.JFrame {
         try {
             prBar.setIndeterminate(false);
             prBar.setString("Runing");
-            txtalog.setText("Runing");
+            txtalog.setText("Runing\n");
             this.btAuthorIndexer.setEnabled(false);
             this.btConferenceIndexer.setEnabled(false);
             this.btJournalIndexer.setEnabled(false);
@@ -456,20 +526,39 @@ public class MainIndexForm extends javax.swing.JFrame {
             String pass = txtPassWord.getText();
             String database = txtDatabase.getText();
             int port = Integer.parseInt(txtPort.getText());
+            File file = new File(this.path);
+            if (!file.exists()) {
+                // It returns false if File or directory does not exist
+                txtalog.setText(txtalog.getText() + "Directory you are searching does not exist : " + file.exists() + "\n");
+                this.btAuthorIndexer.setEnabled(true);
+                this.btConferenceIndexer.setEnabled(true);
+                this.btJournalIndexer.setEnabled(true);
+                this.btKeywordIndexer.setEnabled(true);
+                this.btOrgIndexer.setEnabled(true);
+                this.btPaperIndexer.setEnabled(true);
+                this.btRankPaper.setEnabled(true);
+                this.btSubdomainIndexer.setEnabled(true);
+                return;
+            } else {
+                // It returns true if File or directory exists
+                txtalog.setText(txtalog.getText() + "Directory you are searching does exist : " + file.exists() + "\n");
+                if (!"\\".equals(this.path.substring(this.path.length() - 1, this.path.length()))) {
+                    this.path += "\\";
+                    this.txtPath.setText(this.path);
+                }
+            }
             // Index
             JournalIndexer index = new JournalIndexer(user, pass, database, port, path);
             if (index.folder && index.connect) {
-                txtalog.setText("Connect database success!\n Runing");
-                txtalog.setText(index._run());
+                txtalog.setText(txtalog.getText() + "Connect database success!\n Runing \n");
+                txtalog.setText(txtalog.getText() + index._run() + "\nFinished!\n");
             } else {
-                String text = "";
                 if (!index.folder) {
-                    text += "Error: Can not connect to folder!\n";
+                    txtalog.setText(txtalog.getText() + "Error: Can not connect to folder!\n");
                 }
                 if (!index.connect) {
-                    text += "Error: Can not connect to database!\n";
+                    txtalog.setText(txtalog.getText() + "Error: Can not connect to database!\n");
                 }
-                txtalog.setText(text);
             }
             this.btAuthorIndexer.setEnabled(true);
             this.btConferenceIndexer.setEnabled(true);
@@ -491,7 +580,7 @@ public class MainIndexForm extends javax.swing.JFrame {
         try {
             prBar.setIndeterminate(false);
             prBar.setString("Runing");
-            txtalog.setText("Runing");
+            txtalog.setText("Runing\n");
             this.btAuthorIndexer.setEnabled(false);
             this.btConferenceIndexer.setEnabled(false);
             this.btJournalIndexer.setEnabled(false);
@@ -505,20 +594,39 @@ public class MainIndexForm extends javax.swing.JFrame {
             String pass = txtPassWord.getText();
             String database = txtDatabase.getText();
             int port = Integer.parseInt(txtPort.getText());
+            File file = new File(this.path);
+            if (!file.exists()) {
+                // It returns false if File or directory does not exist
+                txtalog.setText(txtalog.getText() + "Directory you are searching does not exist : " + file.exists() + "\n");
+                this.btAuthorIndexer.setEnabled(true);
+                this.btConferenceIndexer.setEnabled(true);
+                this.btJournalIndexer.setEnabled(true);
+                this.btKeywordIndexer.setEnabled(true);
+                this.btOrgIndexer.setEnabled(true);
+                this.btPaperIndexer.setEnabled(true);
+                this.btRankPaper.setEnabled(true);
+                this.btSubdomainIndexer.setEnabled(true);
+                return;
+            } else {
+                // It returns true if File or directory exists
+                txtalog.setText(txtalog.getText() + "Directory you are searching does exist : " + file.exists() + "\n");
+                if (!"\\".equals(this.path.substring(this.path.length() - 1, this.path.length()))) {
+                    this.path += "\\";
+                    this.txtPath.setText(this.path);
+                }
+            }
             // Index
             KeywordIndexer index = new KeywordIndexer(user, pass, database, port, path);
             if (index.folder && index.connect) {
-                txtalog.setText("Connect database success!\n Runing");
-                txtalog.setText(index._run());
+                txtalog.setText(txtalog.getText() + "Connect database success!\n Runing \n");
+                txtalog.setText(txtalog.getText() + index._run() + "\nFinished!\n");
             } else {
-                String text = "";
                 if (!index.folder) {
-                    text += "Error: Can not connect to folder!\n";
+                    txtalog.setText(txtalog.getText() + "Error: Can not connect to folder!\n");
                 }
                 if (!index.connect) {
-                    text += "Error: Can not connect to database!\n";
+                    txtalog.setText(txtalog.getText() + "Error: Can not connect to database!\n");
                 }
-                txtalog.setText(text);
             }
             this.btAuthorIndexer.setEnabled(true);
             this.btConferenceIndexer.setEnabled(true);
@@ -540,7 +648,7 @@ public class MainIndexForm extends javax.swing.JFrame {
         try {
             prBar.setIndeterminate(false);
             prBar.setString("Runing");
-            txtalog.setText("Runing");
+            txtalog.setText("Runing\n");
             this.btAuthorIndexer.setEnabled(false);
             this.btConferenceIndexer.setEnabled(false);
             this.btJournalIndexer.setEnabled(false);
@@ -554,20 +662,39 @@ public class MainIndexForm extends javax.swing.JFrame {
             String pass = txtPassWord.getText();
             String database = txtDatabase.getText();
             int port = Integer.parseInt(txtPort.getText());
+            File file = new File(this.path);
+            if (!file.exists()) {
+                // It returns false if File or directory does not exist
+                txtalog.setText(txtalog.getText() + "Directory you are searching does not exist : " + file.exists() + "\n");
+                this.btAuthorIndexer.setEnabled(true);
+                this.btConferenceIndexer.setEnabled(true);
+                this.btJournalIndexer.setEnabled(true);
+                this.btKeywordIndexer.setEnabled(true);
+                this.btOrgIndexer.setEnabled(true);
+                this.btPaperIndexer.setEnabled(true);
+                this.btRankPaper.setEnabled(true);
+                this.btSubdomainIndexer.setEnabled(true);
+                return;
+            } else {
+                // It returns true if File or directory exists
+                txtalog.setText(txtalog.getText() + "Directory you are searching does exist : " + file.exists() + "\n");
+                if (!"\\".equals(this.path.substring(this.path.length() - 1, this.path.length()))) {
+                    this.path += "\\";
+                    this.txtPath.setText(this.path);
+                }
+            }
             // Index
             OrgIndexer index = new OrgIndexer(user, pass, database, port, path);
             if (index.folder && index.connect) {
-                txtalog.setText("Connect database success!\n Runing");
-                txtalog.setText(index._run());
+                txtalog.setText(txtalog.getText() + "Connect database success!\n Runing \n");
+                txtalog.setText(txtalog.getText() + index._run() + "\nFinished!\n");
             } else {
-                String text = "";
                 if (!index.folder) {
-                    text += "Error: Can not connect to folder!\n";
+                    txtalog.setText(txtalog.getText() + "Error: Can not connect to folder!\n");
                 }
                 if (!index.connect) {
-                    text += "Error: Can not connect to database!\n";
+                    txtalog.setText(txtalog.getText() + "Error: Can not connect to database!\n");
                 }
-                txtalog.setText(text);
             }
             this.btAuthorIndexer.setEnabled(true);
             this.btConferenceIndexer.setEnabled(true);
@@ -589,7 +716,7 @@ public class MainIndexForm extends javax.swing.JFrame {
         try {
             prBar.setIndeterminate(false);
             prBar.setString("Runing");
-            txtalog.setText("Runing");
+            txtalog.setText("Runing\n");
             this.btAuthorIndexer.setEnabled(false);
             this.btConferenceIndexer.setEnabled(false);
             this.btJournalIndexer.setEnabled(false);
@@ -603,20 +730,39 @@ public class MainIndexForm extends javax.swing.JFrame {
             String pass = txtPassWord.getText();
             String database = txtDatabase.getText();
             int port = Integer.parseInt(txtPort.getText());
+            File file = new File(this.path);
+            if (!file.exists()) {
+                // It returns false if File or directory does not exist
+                txtalog.setText(txtalog.getText() + "Directory you are searching does not exist : " + file.exists() + "\n");
+                this.btAuthorIndexer.setEnabled(true);
+                this.btConferenceIndexer.setEnabled(true);
+                this.btJournalIndexer.setEnabled(true);
+                this.btKeywordIndexer.setEnabled(true);
+                this.btOrgIndexer.setEnabled(true);
+                this.btPaperIndexer.setEnabled(true);
+                this.btRankPaper.setEnabled(true);
+                this.btSubdomainIndexer.setEnabled(true);
+                return;
+            } else {
+                // It returns true if File or directory exists
+                txtalog.setText(txtalog.getText() + "Directory you are searching does exist : " + file.exists() + "\n");
+                if (!"\\".equals(this.path.substring(this.path.length() - 1, this.path.length()))) {
+                    this.path += "\\";
+                    this.txtPath.setText(this.path);
+                }
+            }
             // Index
             SubdomainIndexer index = new SubdomainIndexer(user, pass, database, port, path);
             if (index.folder && index.connect) {
-                txtalog.setText("Connect database success!\n Runing");
-                txtalog.setText(index._run());
+                txtalog.setText(txtalog.getText() + "Connect database success!\n Runing \n");
+                txtalog.setText(txtalog.getText() + index._run() + "\nFinished!\n");
             } else {
-                String text = "";
                 if (!index.folder) {
-                    text += "Error: Can not connect to folder!\n";
+                    txtalog.setText(txtalog.getText() + "Error: Can not connect to folder!\n");
                 }
                 if (!index.connect) {
-                    text += "Error: Can not connect to database!\n";
+                    txtalog.setText(txtalog.getText() + "Error: Can not connect to database!\n");
                 }
-                txtalog.setText(text);
             }
             this.btAuthorIndexer.setEnabled(true);
             this.btConferenceIndexer.setEnabled(true);
