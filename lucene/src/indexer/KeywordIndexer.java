@@ -50,23 +50,33 @@ public class KeywordIndexer {
 
     private ConnectionPool connectionPool;
     private IndexSearcher searcher = null;
+    private String path = null;
+    public Boolean connect = true;
+    public Boolean folder = true;
 
-    public KeywordIndexer() {
+    public KeywordIndexer(String username, String password, String database, int port, String path) {
         try {
-            searcher = new IndexSearcher(Common.getFSDirectory(IndexConst.PAPER_INDEX_PATH));
+            FSDirectory directory = Common.getFSDirectory(path, IndexConst.PAPER_INDEX_PATH);
+            if (directory == null) {
+                folder = false;
+            }
+            this.path = path;
+            searcher = new IndexSearcher(directory);
+            connectionPool = new ConnectionPool(username, password, database, port);
+            if (connectionPool.getConnection() == null) {
+                connect = false;
+            }
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
     }
 
-    public String _run(String username, String password, String database, int port) {
+    public String _run() {
         String out = "";
         try {
-            File indexDir = new File(IndexConst.KEYWORD_INDEX_PATH);
-            connectionPool = new ConnectionPool(username, password, database, port);
+            File indexDir = new File(path + IndexConst.KEYWORD_INDEX_PATH);
             long start = new Date().getTime();
-            KeywordIndexer indexer = new KeywordIndexer();
-            int count = indexer._index(indexDir, connectionPool);
+            int count = this._index(indexDir, connectionPool);
             long end = new Date().getTime();
             out = "Index : " + count + " files : Time index :" + (end - start) + " milisecond";
         } catch (Exception ex) {
@@ -238,8 +248,9 @@ public class KeywordIndexer {
             String pass = "@huydang1920@";
             String database = "cspublicationcrawler";
             int port = 3306;
-            KeywordIndexer indexer = new KeywordIndexer();
-            indexer._run(user, pass, database, port);
+            String path = "C:\\";
+            KeywordIndexer indexer = new KeywordIndexer(user, pass, database, port, path);
+            indexer._run();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }

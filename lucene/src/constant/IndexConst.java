@@ -1,7 +1,7 @@
 package constant;
 
 public class IndexConst {
-    
+
     // Paper index directory path
     public static final String PAPER_INDEX_PATH = "INDEX-PAPER";
     // Lucene Paper field 
@@ -30,7 +30,7 @@ public class IndexConst {
     public static final String PAPER_YEAR_FIELD = "year";
     public static final String PAPER_RANK_FIELD = "rank";
     // Author index directory path
-    public static final String AUTHOR_INDEX_PATH = "C:\\INDEX-AUTHOR";
+    public static final String AUTHOR_INDEX_PATH = "INDEX-AUTHOR";
     // Lucene Author field 
     public static final String AUTHOR_IDAUTHOR_FIELD = "idAuthor";
     public static final String AUTHOR_AUTHORNAME_FIELD = "authorName";

@@ -9,10 +9,9 @@ package database;
  * @author HuyDang
  */
 public class PaperTB {
-    
+
     //The TableName of table Paper
     public static final String TABLE_NAME = "paper";
-    
     //The Columns of table Paper
     public static final String COLUMN_PAPERID = "idPaper";
     public static final String COLUMN_DOI = "doi";
@@ -24,5 +23,5 @@ public class PaperTB {
     public static final String COLUMN_YEAR = "year";
     public static final String COLUMN_VIEWPUBLICATION = "viewPublication";
     public static final String COLUMN_JOURNALID = "idJournal";
-    public static final String COLUMN_CONFERENCEID = "idConference";    
+    public static final String COLUMN_CONFERENCEID = "idConference";
 }

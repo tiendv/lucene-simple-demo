@@ -94,36 +94,36 @@ public class TestSearcher {
                     end = result.totalHits;
                 }
                 int i = 0;
-               // for (int i = start; i < end; i++) {
-                    ScoreDoc hit = hits[i];
-                    Document doc = searcher.doc(hit.doc);
-                    System.out.println((i + 1) + ".name:" + doc.get(IndexConst.AUTHOR_AUTHORNAME_FIELD));
-                    /*JSONParser parser = new JSONParser();
-                     JSONObject jauthors = (JSONObject) parser.parse(doc.get(IndexConst.PAPER_AUTHORS_FIELD));
-                     JSONArray jauthor = (JSONArray) jauthors.get("authors");
-                     for(int j=0; j<jauthor.size(); j++){
-                     System.out.println("authorName:" + jauthor.get(j));
-                     JSONObject temp = (JSONObject) jauthor.get(j);
-                     System.out.println(temp.get("idAuthor") + "+" + temp.get("authorName"));
-                     }
-                     */
+                // for (int i = start; i < end; i++) {
+                ScoreDoc hit = hits[i];
+                Document doc = searcher.doc(hit.doc);
+                System.out.println((i + 1) + ".name:" + doc.get(IndexConst.AUTHOR_AUTHORNAME_FIELD));
+                /*JSONParser parser = new JSONParser();
+                 JSONObject jauthors = (JSONObject) parser.parse(doc.get(IndexConst.PAPER_AUTHORS_FIELD));
+                 JSONArray jauthor = (JSONArray) jauthors.get("authors");
+                 for(int j=0; j<jauthor.size(); j++){
+                 System.out.println("authorName:" + jauthor.get(j));
+                 JSONObject temp = (JSONObject) jauthor.get(j);
+                 System.out.println(temp.get("idAuthor") + "+" + temp.get("authorName"));
+                 }
+                 */
 
-                    // Lấy giá trị PublicationCitation
-                    ArrayList<Object> listPublicationCitation = (ArrayList<Object>) Common.SToO(doc.get(IndexConst.AUTHOR_LISTPUBLICATIONCITATION_FIELD));
-                    Iterator it = listPublicationCitation.iterator();
-                    while (it.hasNext()) {
-                        LinkedHashMap<String, Integer> temp = (LinkedHashMap<String, Integer>) it.next();
-                        System.out.println("year:" + temp.get("year") + "-citation:" + temp.get("citation") + "-publication:" + temp.get("publication"));
-                    }
-                    
-                    System.out.println();
-                    
-                    // Lấy giá trị RankSubdomain
-                    LinkedHashMap<Integer, Object> listRankSubdomain = (LinkedHashMap<Integer, Object>) Common.SToO(doc.get(IndexConst.AUTHOR_LISTRANKSUBDOMAIN_FIELD));
-                    // Lấy giá trị RankSubdomain với idSubdomain=1
-                    LinkedHashMap<String, Integer> rankSubdomain = (LinkedHashMap<String, Integer>) listRankSubdomain.get(1);
-                    System.out.println("publicationCount:" + rankSubdomain.get("publicationCount") + " - citationCount:" + rankSubdomain.get("citationCount") + " - coAuthorCount:" + rankSubdomain.get("coAuthorCount") + " - h_index:" + rankSubdomain.get("h_index") + " - g_index:" + rankSubdomain.get("g_index"));
-               // }
+                // Lấy giá trị PublicationCitation
+                ArrayList<Object> listPublicationCitation = (ArrayList<Object>) Common.SToO(doc.get(IndexConst.AUTHOR_LISTPUBLICATIONCITATION_FIELD));
+                Iterator it = listPublicationCitation.iterator();
+                while (it.hasNext()) {
+                    LinkedHashMap<String, Integer> temp = (LinkedHashMap<String, Integer>) it.next();
+                    System.out.println("year:" + temp.get("year") + "-citation:" + temp.get("citation") + "-publication:" + temp.get("publication"));
+                }
+
+                System.out.println();
+
+                // Lấy giá trị RankSubdomain
+                LinkedHashMap<Integer, Object> listRankSubdomain = (LinkedHashMap<Integer, Object>) Common.SToO(doc.get(IndexConst.AUTHOR_LISTRANKSUBDOMAIN_FIELD));
+                // Lấy giá trị RankSubdomain với idSubdomain=1
+                LinkedHashMap<String, Integer> rankSubdomain = (LinkedHashMap<String, Integer>) listRankSubdomain.get(1);
+                System.out.println("publicationCount:" + rankSubdomain.get("publicationCount") + " - citationCount:" + rankSubdomain.get("citationCount") + " - coAuthorCount:" + rankSubdomain.get("coAuthorCount") + " - h_index:" + rankSubdomain.get("h_index") + " - g_index:" + rankSubdomain.get("g_index"));
+                // }
             }
             searcher.close();
             directory.close();
