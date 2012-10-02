@@ -27,6 +27,7 @@ public class PaperDTO {
     public String listIdKeywords = "";
     public String listIdOrgs = "";
     public String listIdSubdomains = "";
+    public String listIdPaperCitations = "";
     public String orgsName = "";
     public String pages = "";
     public int rank = 0;
@@ -175,6 +176,14 @@ public class PaperDTO {
             this.listIdSubdomains = "";
         } else {
             this.listIdSubdomains = listIdSubdomains;
+        }
+    }
+
+    public void setListIdPaperCitations(String listIdPaperCitations) {
+        if (listIdPaperCitations == null) {
+            this.listIdPaperCitations = "";
+        } else {
+            this.listIdPaperCitations = listIdPaperCitations;
         }
     }
 

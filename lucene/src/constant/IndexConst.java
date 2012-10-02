@@ -23,6 +23,7 @@ public class IndexConst {
     public static final String PAPER_LISTIDKEYWORDS_FIELD = "listIdKeywords";
     public static final String PAPER_LISTIDORGS_FIELD = "listIdOrgs";
     public static final String PAPER_LISTIDSUBDOMAINS_FIELD = "listIdSubdomains";
+    public static final String PAPER_LISTIDPAPERCITATIONS_FIELD = "listIdPaperCitations";
     public static final String PAPER_PAGES_FIELD = "pages";
     public static final String PAPER_TITLE_FIELD = "title";
     public static final String PAPER_VOLUME_FIELD = "volume";
