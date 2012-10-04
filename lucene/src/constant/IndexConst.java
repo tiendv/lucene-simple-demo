@@ -10,6 +10,7 @@ public class IndexConst {
     public static final String PAPER_AUTHORSNAME_FIELD = "authorsName";
     public static final String PAPER_CONFERENCENAME_FIELD = "conferenceName";
     public static final String PAPER_CITATIONCOUNT_FIELD = "citationCount";
+    public static final String PAPER_REFRENCECOUNT_FIELD = "referenceCount";
     public static final String PAPER_DOI_FIELD = "doi";
     public static final String PAPER_KEYWORDSNAME_FIELD = "keywordsName";
     public static final String PAPER_ORGSNAME_FIELD = "orgsName";
