@@ -46,15 +46,15 @@ import org.json.simple.JSONObject;
  * @author HuyDang
  */
 public class PaperIndexer {
-
+    
     private ConnectionPool connectionPool;
     private String path = null;
     public Boolean folder = true;
     public Boolean connect = true;
-
+    
     public PaperIndexer() {
     }
-
+    
     public PaperIndexer(String username, String password, String database, int port, String path) {
         try {
             FSDirectory directory = Common.getFSDirectory(path, IndexConst.PAPER_INDEX_PATH);
@@ -70,7 +70,7 @@ public class PaperIndexer {
             System.out.println(ex.getMessage());
         }
     }
-
+    
     public String _run() {
         String out = "";
         try {
@@ -84,7 +84,7 @@ public class PaperIndexer {
         }
         return out;
     }
-
+    
     public int _index(File indexDir, ConnectionPool connectionPool) {
         int count = 0;
         try {
@@ -94,7 +94,7 @@ public class PaperIndexer {
             IndexWriter writer = new IndexWriter(directory, config);
             // Connection to DB           
             Connection connection = connectionPool.getConnection();
-            String sql = "SELECT * FROM " + PaperTB.TABLE_NAME + " p LIMIT 10";
+            String sql = "SELECT * FROM " + PaperTB.TABLE_NAME + " p";
             PreparedStatement stmt = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet rs = stmt.executeQuery();
@@ -126,13 +126,14 @@ public class PaperIndexer {
                 paper.setAuthorsName(listAuthors.get("authorsName"));
                 paper.setAuthors(listAuthors.get("authors"));
                 paper.setCitationCount(Integer.parseInt(listCitations.get("citationCount")));
+                paper.setReferenceCount(this.getReferenceCount(rs.getInt(PaperTB.COLUMN_PAPERID)));
                 paper.setListCitations(listCitations.get("listCitations"));
                 paper.setListIdAuthors(listAuthors.get("listIdAuthors"));
                 paper.setListIdKeywords(listKeywords.get("listIdKeywords"));
                 paper.setListIdOrgs(listAuthors.get("listIdOrgs"));
                 paper.setListIdPaperCitations(this.getListIdPaperCitations(rs.getInt(PaperTB.COLUMN_PAPERID)));
                 paper.setRank(this.getRank(rs.getInt(PaperTB.COLUMN_PAPERID)));
-
+                
                 d.add(new Field(IndexConst.PAPER_IDPAPER_FIELD, paper.idPaper, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.PAPER_TITLE_FIELD, paper.title, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.PAPER_ABSTRACT_FIELD, paper.abstractContent, Field.Store.YES, Field.Index.ANALYZED));
@@ -156,9 +157,10 @@ public class PaperIndexer {
                 d.add(new Field(IndexConst.PAPER_LISTIDSUBDOMAINS_FIELD, paper.listIdSubdomains, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.PAPER_LISTIDPAPERCITATIONS_FIELD, paper.listIdPaperCitations, Field.Store.YES, Field.Index.NO));
                 d.add(new NumericField(IndexConst.PAPER_CITATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(paper.citationCount));
+                d.add(new NumericField(IndexConst.PAPER_REFRENCECOUNT_FIELD, Field.Store.YES, true).setIntValue(paper.referenceCount));
                 d.add(new NumericField(IndexConst.PAPER_YEAR_FIELD, Field.Store.YES, true).setIntValue(paper.year));
                 d.add(new NumericField(IndexConst.PAPER_RANK_FIELD, Field.Store.YES, true).setIntValue(paper.rank));
-
+                
                 writer.addDocument(d);
                 System.out.println("Indexing : " + count++ + "\t" + paper.title);
                 d = null;
@@ -176,6 +178,10 @@ public class PaperIndexer {
         return count;
     }
 
+    /*
+     * @pararam idPaper
+     * @return
+     */
     public String getConferenceName(int idPaper) throws SQLException, ClassNotFoundException {
         Connection connection = ConnectionPool.dataSource.getConnection();
         String name = "";
@@ -191,6 +197,10 @@ public class PaperIndexer {
         return name;
     }
 
+    /*
+     * @pararam idPaper
+     * @return
+     */
     public String getJournalName(int idPaper) throws SQLException, ClassNotFoundException {
         Connection connection = ConnectionPool.dataSource.getConnection();
         String name = "";
@@ -210,6 +220,7 @@ public class PaperIndexer {
      * getListAuthor
      * @param idPaper
      * @return authors {idAuthor, authorName}, authorsName, listIdAuthors, listIdOrgs, orgsName
+     * @author: JSONObject{"authors":[{"idAuthor":1,"authorName":"Michael Randolph Garey"},{"idAuthor":2,"authorName":"David S. Johnson"}]}
      */
     public LinkedHashMap<String, String> getListAuthor(int idPaper) throws SQLException, ClassNotFoundException {
         Connection connection = ConnectionPool.dataSource.getConnection();
@@ -295,6 +306,10 @@ public class PaperIndexer {
         return result;
     }
 
+    /*
+     * @pararam idPaper
+     * @return
+     */
     public String getListIdSubdomains(int idPaper) throws SQLException, ClassNotFoundException {
         Connection connection = ConnectionPool.dataSource.getConnection();
         String list = "";
@@ -313,6 +328,10 @@ public class PaperIndexer {
         return list;
     }
 
+    /*
+     * @pararam idPaper
+     * @return list idKeyword and keyword
+     */
     public LinkedHashMap<String, String> getListKeywords(int idPaper) throws SQLException, ClassNotFoundException {
         Connection connection = ConnectionPool.dataSource.getConnection();
         LinkedHashMap<String, String> result = new LinkedHashMap<String, String>();
@@ -339,6 +358,10 @@ public class PaperIndexer {
         return result;
     }
 
+    /*
+     * @pararam idPaper
+     * @return
+     */
     public int getRank(int idPaper) throws SQLException, ClassNotFoundException {
         Connection connection = ConnectionPool.dataSource.getConnection();
         int rank = 0;
@@ -354,6 +377,10 @@ public class PaperIndexer {
         return rank;
     }
 
+    /*
+     * @pararam idPaper
+     * @return list idPaper citation
+     */
     public String getListIdPaperCitations(int idPaper) throws SQLException {
         Connection connection = ConnectionPool.dataSource.getConnection();
         String listIdPaperCitations = "";
@@ -372,6 +399,25 @@ public class PaperIndexer {
         return listIdPaperCitations;
     }
 
+    /*
+     * @pararam idPaper
+     * @return
+     */
+    public int getReferenceCount(int idPaper) throws SQLException {
+        Connection connection = ConnectionPool.dataSource.getConnection();
+        int count = 0;
+        String sql = "SELECT COUNT(p." + PaperPaperTB.COLUMN_PAPERREFID + ") AS total FROM " + PaperPaperTB.TABLE_NAME + " p WHERE p." + PaperPaperTB.COLUMN_PAPERID + " = ?";
+        PreparedStatement stmt = connection.prepareStatement(sql);
+        stmt.setInt(1, idPaper);
+        ResultSet rs = stmt.executeQuery();
+        if ((rs != null) && (rs.next())) {
+            count += rs.getInt("total");
+        }
+        stmt.close();
+        connection.close();
+        return count;
+    }
+    
     public static void main(String args[]) {
         // TODO add your handling code here:
         try {

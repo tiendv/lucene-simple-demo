@@ -14,6 +14,7 @@ public class PaperDTO {
     public String authors = "";
     public String authorsName = "";
     public int citationCount = 0;
+    public int referenceCount = 0;
     public String conferenceName = "";
     public String doi = "";
     public String idConference = "";
@@ -65,6 +66,10 @@ public class PaperDTO {
 
     public void setCitationCount(int citationCount) {
         this.citationCount = citationCount;
+    }
+    
+    public void setReferenceCount(int referenceCount) {
+        this.referenceCount = referenceCount;
     }
 
     public void setConferenceName(String conferenceName) {
