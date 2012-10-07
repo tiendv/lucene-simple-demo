@@ -107,7 +107,7 @@ public class AuthorIndexer {
                 Document d = new Document();
                 LinkedHashMap<String, String> listPublicationCitation = this.getListPublicationCitation(rs.getString(AuthorTB.COLUMN_AUTHORID));
                 LinkedHashMap<String, Integer> indexAuthor = this.getCalculateIndexAuthor(rs.getString(AuthorTB.COLUMN_AUTHORID));
-                LinkedHashMap<String, String> listIdSubdomains = this.getListIdSubdomains(rs.getInt(AuthorTB.COLUMN_AUTHORID));
+                LinkedHashMap<String, String> listIdSubdomain = this.getListIdSubdomain(rs.getInt(AuthorTB.COLUMN_AUTHORID));
                 dto.setIdAuthor(rs.getString(AuthorTB.COLUMN_AUTHORID));
                 dto.setAuthorName(rs.getString(AuthorTB.COLUMN_AUTHORNAME));
                 dto.setIdOrg(rs.getString(AuthorTB.COLUMN_ORGID));
@@ -117,8 +117,8 @@ public class AuthorIndexer {
                 dto.setCitationCount(Integer.parseInt(listPublicationCitation.get("citationCount")));
                 dto.setCoAuthorCount(Integer.parseInt(listPublicationCitation.get("coAuthorCount")));
                 dto.setListPublicationCitation(listPublicationCitation.get("listPublicationCitation"));
-                dto.setListIdSubdomains(listIdSubdomains.get("listIdSubdomains"));
-                dto.setListRankSubdomain(listIdSubdomains.get("listRankSubdomain"));
+                dto.setListIdSubdomain(listIdSubdomain.get("listIdSubdomain"));
+                //dto.setListRankSubdomain(listIdSubdomain.get("listRankSubdomain"));
                 dto.setH_Index(indexAuthor.get("h_index"));
                 dto.setG_Index(indexAuthor.get("g_index"));
                 dto.setRank(0);
@@ -128,15 +128,15 @@ public class AuthorIndexer {
                 d.add(new Field(IndexConst.AUTHOR_IDORG_FIELD, dto.idOrg, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.AUTHOR_IMAGE_FIELD, dto.image, Field.Store.YES, Field.Index.NO));
                 d.add(new Field(IndexConst.AUTHOR_WEBSITE_FIELD, dto.website, Field.Store.YES, Field.Index.ANALYZED));
-                d.add(new Field(IndexConst.AUTHOR_LISTIDSUBDOMAINS_FIELD, dto.listIdSubdomains, Field.Store.YES, Field.Index.ANALYZED));
+                d.add(new Field(IndexConst.AUTHOR_LISTIDSUBDOMAIN_FIELD, dto.listIdSubdomain, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.AUTHOR_LISTPUBLICATIONCITATION_FIELD, dto.listPublicationCitation, Field.Store.YES, Field.Index.ANALYZED));
-                d.add(new Field(IndexConst.AUTHOR_LISTRANKSUBDOMAIN_FIELD, dto.listRankSubdomain, Field.Store.YES, Field.Index.NO));
-                d.add(new NumericField(IndexConst.AUTHOR_CITATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(dto.citationCount));
-                d.add(new NumericField(IndexConst.AUTHOR_PUBLICATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(dto.publicationCount));
-                d.add(new NumericField(IndexConst.AUTHOR_HINDEX_FIELD, Field.Store.YES, true).setIntValue(dto.h_index));
-                d.add(new NumericField(IndexConst.AUTHOR_GINDEX_FIELD, Field.Store.YES, true).setIntValue(dto.g_index));
-                d.add(new NumericField(IndexConst.AUTHOR_COAUTHORCOUNT_FIELD, Field.Store.YES, true).setIntValue(dto.coAuthorCount));
-                d.add(new NumericField(IndexConst.AUTHOR_RANK_FIELD, Field.Store.YES, true).setIntValue(dto.rank));
+                //d.add(new Field(IndexConst.AUTHOR_LISTRANKSUBDOMAIN_FIELD, dto.listRankSubdomain, Field.Store.YES, Field.Index.NO));
+                d.add(new NumericField(IndexConst.AUTHOR_CITATIONCOUNT_FIELD, Field.Store.YES, false).setIntValue(dto.citationCount));
+                d.add(new NumericField(IndexConst.AUTHOR_PUBLICATIONCOUNT_FIELD, Field.Store.YES, false).setIntValue(dto.publicationCount));
+                d.add(new NumericField(IndexConst.AUTHOR_HINDEX_FIELD, Field.Store.YES, false).setIntValue(dto.h_index));
+                d.add(new NumericField(IndexConst.AUTHOR_GINDEX_FIELD, Field.Store.YES, false).setIntValue(dto.g_index));
+                d.add(new NumericField(IndexConst.AUTHOR_COAUTHORCOUNT_FIELD, Field.Store.YES, false).setIntValue(dto.coAuthorCount));
+                d.add(new NumericField(IndexConst.AUTHOR_RANK_FIELD, Field.Store.YES, false).setIntValue(dto.rank));
 
                 writer.addDocument(d);
                 System.out.println("Indexing : " + count++ + "\t" + dto.authorName);
@@ -156,30 +156,30 @@ public class AuthorIndexer {
     }
 
     /*
-     * getListIdSubdomains
+     * getListIdSubdomain
      * @param idAuthor
-     * @return listIdSubdomains, listRankSubdomain {idSubdomain {publicationCount, citationCount, coAuthorCount, h_index, g_index}}
+     * @return listIdSubdomain, listRankSubdomain {idSubdomain {publicationCount, citationCount, coAuthorCount, h_index, g_index}}
      */
-    public LinkedHashMap<String, String> getListIdSubdomains(int idAuthor) throws SQLException, ClassNotFoundException, IOException, ParseException {
+    public LinkedHashMap<String, String> getListIdSubdomain(int idAuthor) throws SQLException, ClassNotFoundException, IOException, ParseException {
         Connection connection = ConnectionPool.dataSource.getConnection();
         LinkedHashMap<String, String> out = new LinkedHashMap<String, String>();
-        String listIdSubdomains = "";
-        LinkedHashMap<Integer, Object> listRankSubdomain = new LinkedHashMap<Integer, Object>();
+        String listIdSubdomain = "";
+        //LinkedHashMap<Integer, Object> listRankSubdomain = new LinkedHashMap<Integer, Object>();
         String sql = "SELECT sp." + SubdomainPaperTB.COLUMN_SUBDOMAINID + " FROM " + AuthorPaperTB.TABLE_NAME + " ap JOIN " + SubdomainPaperTB.TABLE_NAME + " sp ON ap." + AuthorPaperTB.COLUMN_PAPERID + " = sp." + SubdomainPaperTB.COLUMN_PAPERID + " WHERE ap." + AuthorPaperTB.COLUMN_AUTHORID + " = ? GROUP BY sp." + SubdomainPaperTB.COLUMN_SUBDOMAINID + "";
         PreparedStatement stmt = connection.prepareStatement(sql);
         stmt.setInt(1, idAuthor);
         ResultSet rs = stmt.executeQuery();
         while ((rs != null) && (rs.next())) {
-            listIdSubdomains += " " + rs.getString(SubdomainPaperTB.COLUMN_SUBDOMAINID);
-            listRankSubdomain.put(rs.getInt(SubdomainPaperTB.COLUMN_SUBDOMAINID), this.getPublicationByIdAuthorAndIdSubdomain(Integer.toString(idAuthor), rs.getString(SubdomainPaperTB.COLUMN_SUBDOMAINID)));
+            listIdSubdomain += " " + rs.getString(SubdomainPaperTB.COLUMN_SUBDOMAINID);
+            //listRankSubdomain.put(rs.getInt(SubdomainPaperTB.COLUMN_SUBDOMAINID), this.getPublicationByIdAuthorAndIdSubdomain(Integer.toString(idAuthor), rs.getString(SubdomainPaperTB.COLUMN_SUBDOMAINID)));
         }
-        if (!"".equals(listIdSubdomains)) {
-            listIdSubdomains = listIdSubdomains.substring(1);
+        if (!"".equals(listIdSubdomain)) {
+            listIdSubdomain = listIdSubdomain.substring(1);
         }
         stmt.close();
         connection.close();
-        out.put("listIdSubdomains", listIdSubdomains);
-        out.put("listRankSubdomain", Common.OToS(listRankSubdomain));
+        out.put("listIdSubdomain", listIdSubdomain);
+        //out.put("listRankSubdomain", Common.OToS(listRankSubdomain));
         return out;
     }
 
@@ -191,7 +191,7 @@ public class AuthorIndexer {
     public LinkedHashMap<String, String> getListPublicationCitation(String idAuthor) throws IOException, ParseException, SQLException, ClassNotFoundException {
         LinkedHashMap<String, String> out = new LinkedHashMap<String, String>();
         BooleanQuery booleanQuery = new BooleanQuery();
-        QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDAUTHORS_FIELD, new StandardAnalyzer(Version.LUCENE_36));
+        QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDAUTHOR_FIELD, new StandardAnalyzer(Version.LUCENE_36));
         Query query = parser.parse(idAuthor);
         booleanQuery.add(query, BooleanClause.Occur.MUST);
         TopDocs result = searcher.search(booleanQuery, Integer.MAX_VALUE);
@@ -206,7 +206,7 @@ public class AuthorIndexer {
                 Document doc = searcher.doc(hit.doc);
                 citationCount += Integer.parseInt(doc.get(IndexConst.PAPER_CITATIONCOUNT_FIELD));
                 listIdPaper += "," + doc.get(IndexConst.PAPER_IDPAPER_FIELD);
-                ArrayList<Object> listCitations = (ArrayList<Object>) Common.SToO(doc.get(IndexConst.PAPER_LISTCITATIONS_FIELD));
+                ArrayList<Object> listCitations = (ArrayList<Object>) Common.SToO(doc.get(IndexConst.PAPER_LISTCITATION_FIELD));
                 Iterator it = listCitations.iterator();
                 while (it.hasNext()) {
                     LinkedHashMap<String, Integer> temp = (LinkedHashMap<String, Integer>) it.next();
@@ -348,7 +348,7 @@ public class AuthorIndexer {
     public ArrayList<Integer> getPublicationList(String idAuthor) throws IOException, ParseException {
         ArrayList<Integer> publicationList = new ArrayList<Integer>();
         BooleanQuery booleanQuery = new BooleanQuery();
-        QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDAUTHORS_FIELD, new StandardAnalyzer(Version.LUCENE_36));
+        QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDAUTHOR_FIELD, new StandardAnalyzer(Version.LUCENE_36));
         Query query = parser.parse(idAuthor);
         booleanQuery.add(query, BooleanClause.Occur.MUST);
         Sort sort = new Sort(new SortField[]{
@@ -383,10 +383,11 @@ public class AuthorIndexer {
         String listIdPaper = "";
         // Query
         BooleanQuery booleanQuery = new BooleanQuery();
-        QueryParser parserAuthor = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDAUTHORS_FIELD, new StandardAnalyzer(Version.LUCENE_36));
+        QueryParser parserAuthor = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDAUTHOR_FIELD, new StandardAnalyzer(Version.LUCENE_36));
         Query queryAuthor = parserAuthor.parse(idAuthor);
         booleanQuery.add(queryAuthor, BooleanClause.Occur.MUST);
-        QueryParser parserSubdomain = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDSUBDOMAINS_FIELD, new StandardAnalyzer(Version.LUCENE_36));
+        // 
+        QueryParser parserSubdomain = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDSUBDOMAIN_FIELD, new StandardAnalyzer(Version.LUCENE_36));
         Query querySubdomain = parserSubdomain.parse(idSubdomain);
         booleanQuery.add(querySubdomain, BooleanClause.Occur.MUST);
         Sort sort = new Sort(new SortField[]{
@@ -447,7 +448,7 @@ public class AuthorIndexer {
             String pass = "@huydang1920@";
             String database = "cspublicationcrawler";
             int port = 3306;
-            String path = "C:\\";
+            String path = "E:\\";
             AuthorIndexer indexer = new AuthorIndexer(user, pass, database, port, path);
             indexer._run();
         } catch (Exception ex) {

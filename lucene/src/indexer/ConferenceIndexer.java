@@ -115,7 +115,7 @@ public class ConferenceIndexer {
                 dto.setWebsite(rs.getString(ConferenceTB.COLUMN_WEBSITE));
                 dto.setYearEnd(rs.getInt(ConferenceTB.COLUMN_YEAREND));
                 dto.setYearStart(rs.getInt(ConferenceTB.COLUMN_YEARSTART));
-                dto.setListIdSubdomains(this.getListIdSubdomains(rs.getInt(ConferenceTB.COLUMN_CONFERENCEID)));
+                dto.setListIdSubdomain(this.getListIdSubdomain(rs.getInt(ConferenceTB.COLUMN_CONFERENCEID)));
                 dto.setCitationCount(Integer.parseInt(listPublicationCitation.get("citationCount")));
                 dto.setPublicationCount(Integer.parseInt(listPublicationCitation.get("publicationCount")));
                 dto.setListPublicationCitation(listPublicationCitation.get("listPublicationCitation"));
@@ -127,13 +127,13 @@ public class ConferenceIndexer {
                 d.add(new Field(IndexConst.CONFERENCE_ORGANIZATION_FIELD, dto.organization, Field.Store.YES, Field.Index.NO));
                 d.add(new Field(IndexConst.CONFERENCE_ORGANIZEDLOCATION_FIELD, dto.organizedLocation, Field.Store.YES, Field.Index.NO));
                 d.add(new Field(IndexConst.CONFERENCE_WEBSITE_FIELD, dto.website, Field.Store.YES, Field.Index.NO));
-                d.add(new Field(IndexConst.CONFERENCE_LISTIDSUBDOMAINS_FIELD, dto.listIdSubdomains, Field.Store.YES, Field.Index.ANALYZED));
+                d.add(new Field(IndexConst.CONFERENCE_LISTIDSUBDOMAIN_FIELD, dto.listIdSubdomain, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.CONFERENCE_LISTPUBLICATIONCITATION_FIELD, dto.listPublicationCitation, Field.Store.YES, Field.Index.NO));
                 d.add(new NumericField(IndexConst.CONFERENCE_YEAREND_FIELD, Field.Store.YES, true).setIntValue(dto.yearEnd));
                 d.add(new NumericField(IndexConst.CONFERENCE_YEARSTART_FIELD, Field.Store.YES, true).setIntValue(dto.yearStart));
-                d.add(new NumericField(IndexConst.CONFERENCE_CITATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(dto.citationCount));
-                d.add(new NumericField(IndexConst.CONFERENCE_PUBLICATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(dto.publicationCount));
-                d.add(new NumericField(IndexConst.CONFERENCE_GINDEX_FIELD, Field.Store.YES, true).setIntValue(dto.g_index));
+                d.add(new NumericField(IndexConst.CONFERENCE_CITATIONCOUNT_FIELD, Field.Store.YES, false).setIntValue(dto.citationCount));
+                d.add(new NumericField(IndexConst.CONFERENCE_PUBLICATIONCOUNT_FIELD, Field.Store.YES, false).setIntValue(dto.publicationCount));
+                d.add(new NumericField(IndexConst.CONFERENCE_GINDEX_FIELD, Field.Store.YES, false).setIntValue(dto.g_index));
 
                 writer.addDocument(d);
                 System.out.println("Indexing : " + count++ + "\t" + dto.conferenceName);
@@ -152,7 +152,7 @@ public class ConferenceIndexer {
         return count;
     }
 
-    public String getListIdSubdomains(int idConference) throws SQLException, ClassNotFoundException {
+    public String getListIdSubdomain(int idConference) throws SQLException, ClassNotFoundException {
         Connection connection = ConnectionPool.dataSource.getConnection();
         String list = "";
         String sql = "SELECT s." + SubdomainPaperTB.COLUMN_SUBDOMAINID + " FROM " + PaperTB.TABLE_NAME + " p JOIN " + SubdomainPaperTB.TABLE_NAME + " s ON p." + PaperTB.COLUMN_PAPERID + " = s." + SubdomainPaperTB.COLUMN_PAPERID + " WHERE p." + PaperTB.COLUMN_CONFERENCEID + " = ? GROUP BY s." + SubdomainPaperTB.COLUMN_SUBDOMAINID + "";
@@ -185,7 +185,7 @@ public class ConferenceIndexer {
                 ScoreDoc hit = hits[i];
                 Document doc = searcher.doc(hit.doc);
                 citationCount += Integer.parseInt(doc.get(IndexConst.PAPER_CITATIONCOUNT_FIELD));
-                ArrayList<Object> listCitations = (ArrayList<Object>) Common.SToO(doc.get(IndexConst.PAPER_LISTCITATIONS_FIELD));
+                ArrayList<Object> listCitations = (ArrayList<Object>) Common.SToO(doc.get(IndexConst.PAPER_LISTCITATION_FIELD));
                 Iterator it = listCitations.iterator();
                 while (it.hasNext()) {
                     LinkedHashMap<String, Integer> temp = (LinkedHashMap<String, Integer>) it.next();
@@ -310,7 +310,7 @@ public class ConferenceIndexer {
             String pass = "@huydang1920@";
             String database = "cspublicationcrawler";
             int port = 3306;
-            String path = "C:\\";
+            String path = "E:\\";
             ConferenceIndexer indexer = new ConferenceIndexer(user, pass, database, port, path);
             indexer._run();
         } catch (Exception ex) {

@@ -46,15 +46,15 @@ import org.json.simple.JSONObject;
  * @author HuyDang
  */
 public class PaperIndexer {
-    
+
     private ConnectionPool connectionPool;
     private String path = null;
     public Boolean folder = true;
     public Boolean connect = true;
-    
+
     public PaperIndexer() {
     }
-    
+
     public PaperIndexer(String username, String password, String database, int port, String path) {
         try {
             FSDirectory directory = Common.getFSDirectory(path, IndexConst.PAPER_INDEX_PATH);
@@ -70,7 +70,7 @@ public class PaperIndexer {
             System.out.println(ex.getMessage());
         }
     }
-    
+
     public String _run() {
         String out = "";
         try {
@@ -84,7 +84,7 @@ public class PaperIndexer {
         }
         return out;
     }
-    
+
     public int _index(File indexDir, ConnectionPool connectionPool) {
         int count = 0;
         try {
@@ -94,7 +94,7 @@ public class PaperIndexer {
             IndexWriter writer = new IndexWriter(directory, config);
             // Connection to DB           
             Connection connection = connectionPool.getConnection();
-            String sql = "SELECT * FROM " + PaperTB.TABLE_NAME + " p";
+            String sql = "SELECT * FROM " + PaperTB.TABLE_NAME + " p LIMIT 10";
             PreparedStatement stmt = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet rs = stmt.executeQuery();
@@ -104,9 +104,9 @@ public class PaperIndexer {
                 paper = new PaperDTO();
                 Document d = new Document();
                 // ListAuthor
-                LinkedHashMap<String, String> listAuthors = this.getListAuthor(rs.getInt(PaperTB.COLUMN_PAPERID));
-                LinkedHashMap<String, String> listCitations = this.getListCitations(rs.getInt(PaperTB.COLUMN_PAPERID));
-                LinkedHashMap<String, String> listKeywords = this.getListKeywords(rs.getInt(PaperTB.COLUMN_PAPERID));
+                LinkedHashMap<String, String> listAuthor = this.getListAuthor(rs.getInt(PaperTB.COLUMN_PAPERID));
+                LinkedHashMap<String, String> listCitation = this.getListCitation(rs.getInt(PaperTB.COLUMN_PAPERID));
+                LinkedHashMap<String, String> listKeyword = this.getListKeyword(rs.getInt(PaperTB.COLUMN_PAPERID));
                 paper.setIdPaper(rs.getString(PaperTB.COLUMN_PAPERID));
                 paper.setTitle(rs.getString(PaperTB.COLUMN_TITLE));
                 paper.setAbstractContent(rs.getString(PaperTB.COLUMN_ABSTRACT));
@@ -120,20 +120,20 @@ public class PaperIndexer {
                 paper.setYear(rs.getInt(PaperTB.COLUMN_YEAR));
                 paper.setConferenceName(this.getConferenceName(rs.getInt(PaperTB.COLUMN_PAPERID)));
                 paper.setJournalName(this.getJournalName(rs.getInt(PaperTB.COLUMN_PAPERID)));
-                paper.setListIdSubdomains(this.getListIdSubdomains(rs.getInt(PaperTB.COLUMN_PAPERID)));
-                paper.setKeywordsName(listKeywords.get("keywords"));
-                paper.setOrgsName(listAuthors.get("orgsName"));
-                paper.setAuthorsName(listAuthors.get("authorsName"));
-                paper.setAuthors(listAuthors.get("authors"));
-                paper.setCitationCount(Integer.parseInt(listCitations.get("citationCount")));
+                paper.setListIdSubdomain(this.getListIdSubdomains(rs.getInt(PaperTB.COLUMN_PAPERID)));
+                paper.setKeywordsName(listKeyword.get("keywords"));
+                paper.setOrgsName(listAuthor.get("orgsName"));
+                paper.setAuthorsName(listAuthor.get("authorsName"));
+                paper.setAuthors(listAuthor.get("authors"));
+                paper.setCitationCount(Integer.parseInt(listCitation.get("citationCount")));
                 paper.setReferenceCount(this.getReferenceCount(rs.getInt(PaperTB.COLUMN_PAPERID)));
-                paper.setListCitations(listCitations.get("listCitations"));
-                paper.setListIdAuthors(listAuthors.get("listIdAuthors"));
-                paper.setListIdKeywords(listKeywords.get("listIdKeywords"));
-                paper.setListIdOrgs(listAuthors.get("listIdOrgs"));
-                paper.setListIdPaperCitations(this.getListIdPaperCitations(rs.getInt(PaperTB.COLUMN_PAPERID)));
+                paper.setListCitation(listCitation.get("listCitation"));
+                paper.setListIdAuthor(listAuthor.get("listIdAuthors"));
+                paper.setListIdKeyword(listKeyword.get("listIdKeywords"));
+                paper.setListIdOrg(listAuthor.get("listIdOrgs"));
+                paper.setListIdPaperCitation(this.getListIdPaperCitations(rs.getInt(PaperTB.COLUMN_PAPERID)));
                 paper.setRank(this.getRank(rs.getInt(PaperTB.COLUMN_PAPERID)));
-                
+
                 d.add(new Field(IndexConst.PAPER_IDPAPER_FIELD, paper.idPaper, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.PAPER_TITLE_FIELD, paper.title, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.PAPER_ABSTRACT_FIELD, paper.abstractContent, Field.Store.YES, Field.Index.ANALYZED));
@@ -150,17 +150,17 @@ public class PaperIndexer {
                 d.add(new Field(IndexConst.PAPER_AUTHORS_FIELD, paper.authors, Field.Store.YES, Field.Index.NO));
                 d.add(new Field(IndexConst.PAPER_AUTHORSNAME_FIELD, paper.authorsName, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.PAPER_KEYWORDSNAME_FIELD, paper.keywordsName, Field.Store.YES, Field.Index.ANALYZED));
-                d.add(new Field(IndexConst.PAPER_LISTCITATIONS_FIELD, paper.listCitations, Field.Store.YES, Field.Index.NO));
-                d.add(new Field(IndexConst.PAPER_LISTIDAUTHORS_FIELD, paper.listIdAuthors, Field.Store.YES, Field.Index.ANALYZED));
-                d.add(new Field(IndexConst.PAPER_LISTIDKEYWORDS_FIELD, paper.listIdKeywords, Field.Store.YES, Field.Index.ANALYZED));
-                d.add(new Field(IndexConst.PAPER_LISTIDORGS_FIELD, paper.listIdOrgs, Field.Store.YES, Field.Index.ANALYZED));
-                d.add(new Field(IndexConst.PAPER_LISTIDSUBDOMAINS_FIELD, paper.listIdSubdomains, Field.Store.YES, Field.Index.ANALYZED));
-                d.add(new Field(IndexConst.PAPER_LISTIDPAPERCITATIONS_FIELD, paper.listIdPaperCitations, Field.Store.YES, Field.Index.NO));
-                d.add(new NumericField(IndexConst.PAPER_CITATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(paper.citationCount));
-                d.add(new NumericField(IndexConst.PAPER_REFRENCECOUNT_FIELD, Field.Store.YES, true).setIntValue(paper.referenceCount));
+                d.add(new Field(IndexConst.PAPER_LISTCITATION_FIELD, paper.listCitation, Field.Store.YES, Field.Index.NO));
+                d.add(new Field(IndexConst.PAPER_LISTIDAUTHOR_FIELD, paper.listIdAuthor, Field.Store.YES, Field.Index.ANALYZED));
+                d.add(new Field(IndexConst.PAPER_LISTIDKEYWORD_FIELD, paper.listIdKeyword, Field.Store.YES, Field.Index.ANALYZED));
+                d.add(new Field(IndexConst.PAPER_LISTIDORG_FIELD, paper.listIdOrg, Field.Store.YES, Field.Index.ANALYZED));
+                d.add(new Field(IndexConst.PAPER_LISTIDSUBDOMAIN_FIELD, paper.listIdSubdomain, Field.Store.YES, Field.Index.ANALYZED));
+                d.add(new Field(IndexConst.PAPER_LISTIDPAPERCITATION_FIELD, paper.listIdPaperCitation, Field.Store.YES, Field.Index.NO));
+                d.add(new NumericField(IndexConst.PAPER_CITATIONCOUNT_FIELD, Field.Store.YES, false).setIntValue(paper.citationCount));
+                d.add(new NumericField(IndexConst.PAPER_REFRENCECOUNT_FIELD, Field.Store.YES, false).setIntValue(paper.referenceCount));
                 d.add(new NumericField(IndexConst.PAPER_YEAR_FIELD, Field.Store.YES, true).setIntValue(paper.year));
-                d.add(new NumericField(IndexConst.PAPER_RANK_FIELD, Field.Store.YES, true).setIntValue(paper.rank));
-                
+                d.add(new NumericField(IndexConst.PAPER_RANK_FIELD, Field.Store.YES, false).setIntValue(paper.rank));
+
                 writer.addDocument(d);
                 System.out.println("Indexing : " + count++ + "\t" + paper.title);
                 d = null;
@@ -275,16 +275,16 @@ public class PaperIndexer {
     }
 
     /*
-     * getListCitations
+     * getListCitation
      * @param idPaper
-     * @return citationCount, listCitations
-     * listCitations: ArrayList<Object> listCitations = new ArrayList<Object>();
+     * @return citationCount, listCitation
+     * listCitation: ArrayList<Object> listCitation = new ArrayList<Object>();
      * + Với: Object là LinkedHashMap<String, Integer> với liệu là {citation, year}
      */
-    public LinkedHashMap<String, String> getListCitations(int idPaper) throws SQLException, ClassNotFoundException {
+    public LinkedHashMap<String, String> getListCitation(int idPaper) throws SQLException, ClassNotFoundException {
         Connection connection = ConnectionPool.dataSource.getConnection();
         LinkedHashMap<String, String> result = new LinkedHashMap<String, String>();
-        ArrayList<Object> listCitations = new ArrayList<Object>();
+        ArrayList<Object> listCitation = new ArrayList<Object>();
         int citationCount = 0;
         String sql = "SELECT COUNT(pp." + PaperPaperTB.COLUMN_PAPERID + ") AS citation, (SELECT p." + PaperTB.COLUMN_YEAR + " FROM " + PaperTB.TABLE_NAME + " p WHERE p." + PaperTB.COLUMN_PAPERID + " = pp." + PaperPaperTB.COLUMN_PAPERID + ") AS `year` FROM " + PaperPaperTB.TABLE_NAME + " pp WHERE pp." + PaperPaperTB.COLUMN_PAPERREFID + " = ? GROUP BY `year` ORDER BY `year` ASC";
         PreparedStatement stmt = connection.prepareStatement(sql);
@@ -296,10 +296,10 @@ public class PaperIndexer {
                 LinkedHashMap<String, Integer> temp = new LinkedHashMap<String, Integer>();
                 temp.put("citation", rs.getInt("citation"));
                 temp.put("year", rs.getInt("year"));
-                listCitations.add(temp);
+                listCitation.add(temp);
             }
         }
-        result.put("listCitations", Common.OToS(listCitations));
+        result.put("listCitation", Common.OToS(listCitation));
         result.put("citationCount", Integer.toString(citationCount));
         stmt.close();
         connection.close();
@@ -332,7 +332,7 @@ public class PaperIndexer {
      * @pararam idPaper
      * @return list idKeyword and keyword
      */
-    public LinkedHashMap<String, String> getListKeywords(int idPaper) throws SQLException, ClassNotFoundException {
+    public LinkedHashMap<String, String> getListKeyword(int idPaper) throws SQLException, ClassNotFoundException {
         Connection connection = ConnectionPool.dataSource.getConnection();
         LinkedHashMap<String, String> result = new LinkedHashMap<String, String>();
         String listIdKeywords = "";
@@ -417,7 +417,7 @@ public class PaperIndexer {
         connection.close();
         return count;
     }
-    
+
     public static void main(String args[]) {
         // TODO add your handling code here:
         try {

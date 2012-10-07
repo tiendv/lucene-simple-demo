@@ -112,8 +112,8 @@ public class SubdomainIndexer {
                 d.add(new Field(IndexConst.SUBDOMAIN_SUBDOMAINNAME_FIELD, dto.subdomainName, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.SUBDOMAIN_IDDOMAIN_FIELD, dto.idDomain, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.SUBDOMAIN_LISTPUBLICATIONCITATION_FIELD, dto.listPublicationCitation, Field.Store.YES, Field.Index.NO));
-                d.add(new NumericField(IndexConst.SUBDOMAIN_PUBLICATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(dto.publicationCount));
-                d.add(new NumericField(IndexConst.SUBDOMAIN_CITATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(dto.citationCount));
+                d.add(new NumericField(IndexConst.SUBDOMAIN_PUBLICATIONCOUNT_FIELD, Field.Store.YES, false).setIntValue(dto.publicationCount));
+                d.add(new NumericField(IndexConst.SUBDOMAIN_CITATIONCOUNT_FIELD, Field.Store.YES, false).setIntValue(dto.citationCount));
 
                 writer.addDocument(d);
                 System.out.println("Indexing : " + count++ + "\t" + dto.subdomainName);
@@ -135,7 +135,7 @@ public class SubdomainIndexer {
     public LinkedHashMap<String, String> getListPublicationCitation(String idSubdomain) throws IOException, ParseException {
         LinkedHashMap<String, String> out = new LinkedHashMap<String, String>();
         BooleanQuery booleanQuery = new BooleanQuery();
-        QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDSUBDOMAINS_FIELD, new StandardAnalyzer(Version.LUCENE_36));
+        QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDSUBDOMAIN_FIELD, new StandardAnalyzer(Version.LUCENE_36));
         Query query = parser.parse(idSubdomain);
         booleanQuery.add(query, BooleanClause.Occur.MUST);
         TopDocs result = searcher.search(booleanQuery, Integer.MAX_VALUE);
@@ -147,7 +147,7 @@ public class SubdomainIndexer {
                 ScoreDoc hit = hits[i];
                 Document doc = searcher.doc(hit.doc);
                 citationCount += Integer.parseInt(doc.get(IndexConst.PAPER_CITATIONCOUNT_FIELD));
-                ArrayList<Object> listCitations = (ArrayList<Object>) Common.SToO(doc.get(IndexConst.PAPER_LISTCITATIONS_FIELD));
+                ArrayList<Object> listCitations = (ArrayList<Object>) Common.SToO(doc.get(IndexConst.PAPER_LISTCITATION_FIELD));
                 Iterator it = listCitations.iterator();
                 while (it.hasNext()) {
                     LinkedHashMap<String, Integer> temp = (LinkedHashMap<String, Integer>) it.next();
@@ -225,7 +225,7 @@ public class SubdomainIndexer {
             String pass = "@huydang1920@";
             String database = "cspublicationcrawler";
             int port = 3306;
-            String path = "C:\\";
+            String path = "E:\\";
             SubdomainIndexer indexer = new SubdomainIndexer(user, pass, database, port, path);
             indexer._run();
         } catch (Exception ex) {
