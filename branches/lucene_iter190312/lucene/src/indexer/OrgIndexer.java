@@ -113,7 +113,7 @@ public class OrgIndexer {
                 dto.setContinent(rs.getString(OrgTB.COLUMN_CONTINENT));
                 dto.setIdOrgParent(rs.getString(OrgTB.COLUMN_ORGPARENTID));
                 dto.setWebsite(rs.getString(OrgTB.COLUMN_WEBSITE));
-                dto.setListIdSubdomains(this.getListIdSubdomains(rs.getInt(OrgTB.COLUMN_ORGID)));
+                dto.setListIdSubdomain(this.getListIdSubdomain(rs.getInt(OrgTB.COLUMN_ORGID)));
                 dto.setCitationCount(Integer.parseInt(listPublicationCitation.get("citationCount")));
                 dto.setPublicationCount(Integer.parseInt(listPublicationCitation.get("publicationCount")));
                 dto.setListPublicationCitation(listPublicationCitation.get("listPublicationCitation"));
@@ -125,12 +125,12 @@ public class OrgIndexer {
                 d.add(new Field(IndexConst.ORG_CONTINENT_FIELD, dto.continent, Field.Store.YES, Field.Index.NO));
                 d.add(new Field(IndexConst.ORG_WEBSITE_FIELD, dto.website, Field.Store.YES, Field.Index.NO));
                 d.add(new Field(IndexConst.ORG_IDORGPARENT_FIELD, dto.idOrgParent, Field.Store.YES, Field.Index.NO));
-                d.add(new Field(IndexConst.ORG_LISTIDSUBDOMAINS_FIELD, dto.listIdSubdomains, Field.Store.YES, Field.Index.ANALYZED));
+                d.add(new Field(IndexConst.ORG_LISTIDSUBDOMAIN_FIELD, dto.listIdSubdomain, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.ORG_LISTPUBLICATIONCITATION_FIELD, dto.listPublicationCitation, Field.Store.YES, Field.Index.NO));
-                d.add(new NumericField(IndexConst.ORG_PUBLICATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(dto.publicationCount));
-                d.add(new NumericField(IndexConst.ORG_CITATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(dto.citationCount));
-                d.add(new NumericField(IndexConst.ORG_HINDEX_FIELD, Field.Store.YES, true).setIntValue(dto.h_index));
-                d.add(new NumericField(IndexConst.ORG_GINDEX_FIELD, Field.Store.YES, true).setIntValue(dto.g_index));
+                d.add(new NumericField(IndexConst.ORG_PUBLICATIONCOUNT_FIELD, Field.Store.YES, false).setIntValue(dto.publicationCount));
+                d.add(new NumericField(IndexConst.ORG_CITATIONCOUNT_FIELD, Field.Store.YES, false).setIntValue(dto.citationCount));
+                d.add(new NumericField(IndexConst.ORG_HINDEX_FIELD, Field.Store.YES, false).setIntValue(dto.h_index));
+                d.add(new NumericField(IndexConst.ORG_GINDEX_FIELD, Field.Store.YES, false).setIntValue(dto.g_index));
 
                 writer.addDocument(d);
                 System.out.println("Indexing : " + count++ + "\t" + dto.orgName);
@@ -149,7 +149,7 @@ public class OrgIndexer {
         return count;
     }
 
-    public String getListIdSubdomains(int idOrg) throws SQLException, ClassNotFoundException {
+    public String getListIdSubdomain(int idOrg) throws SQLException, ClassNotFoundException {
         Connection connection = ConnectionPool.dataSource.getConnection();
         String list = "";
         String sql = "SELECT s." + SubdomainPaperTB.COLUMN_SUBDOMAINID + " FROM " + AuthorPaperTB.TABLE_NAME + " ap JOIN " + SubdomainPaperTB.TABLE_NAME + " s ON s." + SubdomainPaperTB.COLUMN_PAPERID + "=ap." + AuthorPaperTB.COLUMN_PAPERID + " JOIN " + AuthorTB.TABLE_NAME + " a ON ap." + AuthorPaperTB.COLUMN_AUTHORID + " = a." + AuthorTB.COLUMN_AUTHORID + " WHERE a." + AuthorTB.COLUMN_ORGID + "=? GROUP BY s." + SubdomainPaperTB.COLUMN_SUBDOMAINID + "";
@@ -170,7 +170,7 @@ public class OrgIndexer {
     public LinkedHashMap<String, String> getListPublicationCitation(String idOrg) throws IOException, ParseException {
         LinkedHashMap<String, String> out = new LinkedHashMap<String, String>();
         BooleanQuery booleanQuery = new BooleanQuery();
-        QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDORGS_FIELD, new StandardAnalyzer(Version.LUCENE_36));
+        QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDORG_FIELD, new StandardAnalyzer(Version.LUCENE_36));
         Query query = parser.parse(idOrg);
         booleanQuery.add(query, BooleanClause.Occur.MUST);
         TopDocs result = searcher.search(booleanQuery, Integer.MAX_VALUE);
@@ -182,7 +182,7 @@ public class OrgIndexer {
                 ScoreDoc hit = hits[i];
                 Document doc = searcher.doc(hit.doc);
                 citationCount += Integer.parseInt(doc.get(IndexConst.PAPER_CITATIONCOUNT_FIELD));
-                ArrayList<Object> listCitations = (ArrayList<Object>) Common.SToO(doc.get(IndexConst.PAPER_LISTCITATIONS_FIELD));
+                ArrayList<Object> listCitations = (ArrayList<Object>) Common.SToO(doc.get(IndexConst.PAPER_LISTCITATION_FIELD));
                 Iterator it = listCitations.iterator();
                 while (it.hasNext()) {
                     LinkedHashMap<String, Integer> temp = (LinkedHashMap<String, Integer>) it.next();
@@ -296,7 +296,7 @@ public class OrgIndexer {
     public ArrayList<Integer> getPublicationList(String idOrg) throws IOException, ParseException {
         ArrayList<Integer> publicationList = new ArrayList<Integer>();
         BooleanQuery booleanQuery = new BooleanQuery();
-        QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDORGS_FIELD, new StandardAnalyzer(Version.LUCENE_36));
+        QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDORG_FIELD, new StandardAnalyzer(Version.LUCENE_36));
         Query query = parser.parse(idOrg);
         booleanQuery.add(query, BooleanClause.Occur.MUST);
         Sort sort = new Sort(new SortField[]{
@@ -320,7 +320,7 @@ public class OrgIndexer {
             String pass = "@huydang1920@";
             String database = "cspublicationcrawler";
             int port = 3306;
-            String path = "C:\\";
+            String path = "E:\\";
             OrgIndexer indexer = new OrgIndexer(user, pass, database, port, path);
             indexer._run();
         } catch (Exception ex) {

@@ -107,7 +107,7 @@ public class KeywordIndexer {
                 dto.setIdKeyword(rs.getString(KeywordTB.COLUMN_KEYWORDID));
                 dto.setKeyword(rs.getString(KeywordTB.COLUMN_KEYWORD));
                 dto.setStemmingVariations(rs.getString(KeywordTB.COLUMN_STEMMINGVARIATIONS));
-                dto.setListIdSubdomains(this.getListIdSubdomains(rs.getInt(KeywordTB.COLUMN_KEYWORDID)));
+                dto.setListIdSubdomain(this.getListIdSubdomain(rs.getInt(KeywordTB.COLUMN_KEYWORDID)));
                 dto.setCitationCount(Integer.parseInt(listPublicationCitation.get("citationCount")));
                 dto.setPublicationCount(Integer.parseInt(listPublicationCitation.get("publicationCount")));
                 dto.setListPublicationCitation(listPublicationCitation.get("listPublicationCitation"));
@@ -115,10 +115,10 @@ public class KeywordIndexer {
                 d.add(new Field(IndexConst.KEYWORD_IDKEYWORD_FIELD, dto.idKeyword, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.KEYWORD_KEYWORD_FIELD, dto.keyword, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.KEYWORD_STEMMINGVARIATIONS_FIELD, dto.stemmingVariations, Field.Store.YES, Field.Index.ANALYZED));
-                d.add(new Field(IndexConst.KEYWORD_LISTIDSUBDOMAINS_FIELD, dto.listIdSubdomains, Field.Store.YES, Field.Index.ANALYZED));
+                d.add(new Field(IndexConst.KEYWORD_LISTIDSUBDOMAIN_FIELD, dto.listIdSubdomain, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.KEYWORD_LISTPUBLICATIONCITATION_FIELD, dto.listPublicationCitation, Field.Store.YES, Field.Index.NO));
-                d.add(new NumericField(IndexConst.KEYWORD_CITATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(dto.citationCount));
-                d.add(new NumericField(IndexConst.KEYWORD_PUBLICATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(dto.publicationCount));
+                d.add(new NumericField(IndexConst.KEYWORD_CITATIONCOUNT_FIELD, Field.Store.YES, false).setIntValue(dto.citationCount));
+                d.add(new NumericField(IndexConst.KEYWORD_PUBLICATIONCOUNT_FIELD, Field.Store.YES, false).setIntValue(dto.publicationCount));
 
                 writer.addDocument(d);
                 System.out.println("Indexing : " + count++ + "\t" + dto.keyword);
@@ -137,7 +137,7 @@ public class KeywordIndexer {
         return count;
     }
 
-    public String getListIdSubdomains(int idKeyword) throws SQLException, ClassNotFoundException {
+    public String getListIdSubdomain(int idKeyword) throws SQLException, ClassNotFoundException {
         Connection connection = ConnectionPool.dataSource.getConnection();
         String list = "";
         String sql = "SELECT s." + SubdomainPaperTB.COLUMN_SUBDOMAINID + " FROM " + PaperKeywordTB.TABLE_NAME + " p JOIN " + KeywordTB.TABLE_NAME + " k ON k." + KeywordTB.COLUMN_KEYWORD + "=p." + PaperKeywordTB.COLUMN_KEYWORDID + " JOIN " + SubdomainPaperTB.TABLE_NAME + " s ON s." + SubdomainPaperTB.COLUMN_PAPERID + "=p." + PaperKeywordTB.COLUMN_PAPERID + " WHERE k." + KeywordTB.COLUMN_KEYWORD + "=? GROUP BY s." + SubdomainPaperTB.COLUMN_SUBDOMAINID + "";
@@ -158,7 +158,7 @@ public class KeywordIndexer {
     public LinkedHashMap<String, String> getListPublicationCitation(String idKeyword) throws IOException, ParseException {
         LinkedHashMap<String, String> out = new LinkedHashMap<String, String>();
         BooleanQuery booleanQuery = new BooleanQuery();
-        QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDKEYWORDS_FIELD, new StandardAnalyzer(Version.LUCENE_36));
+        QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDKEYWORD_FIELD, new StandardAnalyzer(Version.LUCENE_36));
         Query query = parser.parse(idKeyword);
         booleanQuery.add(query, BooleanClause.Occur.MUST);
         TopDocs result = searcher.search(booleanQuery, Integer.MAX_VALUE);
@@ -170,7 +170,7 @@ public class KeywordIndexer {
                 ScoreDoc hit = hits[i];
                 Document doc = searcher.doc(hit.doc);
                 citationCount += Integer.parseInt(doc.get(IndexConst.PAPER_CITATIONCOUNT_FIELD));
-                ArrayList<Object> listCitations = (ArrayList<Object>) Common.SToO(doc.get(IndexConst.PAPER_LISTCITATIONS_FIELD));
+                ArrayList<Object> listCitations = (ArrayList<Object>) Common.SToO(doc.get(IndexConst.PAPER_LISTCITATION_FIELD));
                 Iterator it = listCitations.iterator();
                 while (it.hasNext()) {
                     LinkedHashMap<String, Integer> temp = (LinkedHashMap<String, Integer>) it.next();
@@ -248,7 +248,7 @@ public class KeywordIndexer {
             String pass = "@huydang1920@";
             String database = "cspublicationcrawler";
             int port = 3306;
-            String path = "C:\\";
+            String path = "E:\\";
             KeywordIndexer indexer = new KeywordIndexer(user, pass, database, port, path);
             indexer._run();
         } catch (Exception ex) {

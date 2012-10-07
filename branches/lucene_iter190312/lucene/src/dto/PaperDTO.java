@@ -23,12 +23,12 @@ public class PaperDTO {
     public String isbn = "";
     public String journalName = "";
     public String keywordsName = "";
-    public String listCitations = "";
-    public String listIdAuthors = "";
-    public String listIdKeywords = "";
-    public String listIdOrgs = "";
-    public String listIdSubdomains = "";
-    public String listIdPaperCitations = "";
+    public String listCitation = "";
+    public String listIdAuthor = "";
+    public String listIdKeyword = "";
+    public String listIdOrg = "";
+    public String listIdSubdomain = "";
+    public String listIdPaperCitation = "";
     public String orgsName = "";
     public String pages = "";
     public int rank = 0;
@@ -144,51 +144,51 @@ public class PaperDTO {
         }
     }
 
-    public void setListCitations(String listCitations) {
-        if (listCitations == null) {
-            this.listCitations = "";
+    public void setListCitation(String listCitation) {
+        if (listCitation == null) {
+            this.listCitation = "";
         } else {
-            this.listCitations = listCitations;
+            this.listCitation = listCitation;
         }
     }
 
-    public void setListIdAuthors(String listIdAuthors) {
-        if (listIdAuthors == null) {
-            this.listIdAuthors = "";
+    public void setListIdAuthor(String listIdAuthor) {
+        if (listIdAuthor == null) {
+            this.listIdAuthor = "";
         } else {
-            this.listIdAuthors = listIdAuthors;
+            this.listIdAuthor = listIdAuthor;
         }
     }
 
-    public void setListIdKeywords(String listIdKeywords) {
-        if (listIdKeywords == null) {
-            this.listIdKeywords = "";
+    public void setListIdKeyword(String listIdKeyword) {
+        if (listIdKeyword == null) {
+            this.listIdKeyword = "";
         } else {
-            this.listIdKeywords = listIdKeywords;
+            this.listIdKeyword = listIdKeyword;
         }
     }
 
-    public void setListIdOrgs(String listIdOrgs) {
-        if (listIdOrgs == null) {
-            this.listIdOrgs = "";
+    public void setListIdOrg(String listIdOrg) {
+        if (listIdOrg == null) {
+            this.listIdOrg = "";
         } else {
-            this.listIdOrgs = listIdOrgs;
+            this.listIdOrg = listIdOrg;
         }
     }
 
-    public void setListIdSubdomains(String listIdSubdomains) {
-        if (listIdSubdomains == null) {
-            this.listIdSubdomains = "";
+    public void setListIdSubdomain(String listIdSubdomain) {
+        if (listIdSubdomain == null) {
+            this.listIdSubdomain = "";
         } else {
-            this.listIdSubdomains = listIdSubdomains;
+            this.listIdSubdomain = listIdSubdomain;
         }
     }
 
-    public void setListIdPaperCitations(String listIdPaperCitations) {
-        if (listIdPaperCitations == null) {
-            this.listIdPaperCitations = "";
+    public void setListIdPaperCitation(String listIdPaperCitation) {
+        if (listIdPaperCitation == null) {
+            this.listIdPaperCitation = "";
         } else {
-            this.listIdPaperCitations = listIdPaperCitations;
+            this.listIdPaperCitation = listIdPaperCitation;
         }
     }
 

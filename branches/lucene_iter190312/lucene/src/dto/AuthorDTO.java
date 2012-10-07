@@ -21,9 +21,10 @@ public class AuthorDTO {
     public int citationCount = 0;
     public int coAuthorCount = 0;
     public int rank = 0;
-    public String listIdSubdomains = "";
+    public String listIdSubdomain = "";
     public String listPublicationCitation = "";
-    public String listRankSubdomain = ""; // Arraylist{idSubdomain, publicationCount, citationCount, rank, coAuthorCount, h_index, g_index}
+    // Arraylist{idSubdomain, publicationCount, citationCount, rank, coAuthorCount, h_index, g_index}
+    public String listRankSubdomain = "";
 
     public AuthorDTO() {
     }
@@ -92,11 +93,11 @@ public class AuthorDTO {
         this.citationCount = citationCount;
     }
 
-    public void setListIdSubdomains(String listIdSubdomains) {
-        if (listIdSubdomains == null) {
-            this.listIdSubdomains = "";
+    public void setListIdSubdomain(String listIdSubdomain) {
+        if (listIdSubdomain == null) {
+            this.listIdSubdomain = "";
         } else {
-            this.listIdSubdomains = listIdSubdomains;
+            this.listIdSubdomain = listIdSubdomain;
         }
     }
 

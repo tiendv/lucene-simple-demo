@@ -19,7 +19,7 @@ public class JournalDTO {
     public int g_index = 0;
     public int publicationCount = 0;
     public int citationCount = 0;
-    public String listIdSubdomains = "";
+    public String listIdSubdomain = "";
     public String listPublicationCitation = "";
 
     public JournalDTO() {
@@ -77,11 +77,11 @@ public class JournalDTO {
         this.citationCount = citationCount;
     }
 
-    public void setListIdSubdomains(String listIdSubdomains) {
-        if (listIdSubdomains == null) {
-            this.listIdSubdomains = "";
+    public void setListIdSubdomain(String listIdSubdomain) {
+        if (listIdSubdomain == null) {
+            this.listIdSubdomain = "";
         } else {
-            this.listIdSubdomains = listIdSubdomains;
+            this.listIdSubdomain = listIdSubdomain;
         }
     }
 

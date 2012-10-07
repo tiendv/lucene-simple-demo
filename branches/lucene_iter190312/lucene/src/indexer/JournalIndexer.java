@@ -113,7 +113,7 @@ public class JournalIndexer {
                 dto.setWebsite(rs.getString(JournalTB.COLUMN_WEBSITE));
                 dto.setYearEnd(rs.getInt(JournalTB.COLUMN_YEAREND));
                 dto.setYearStart(rs.getInt(JournalTB.COLUMN_YEARSTART));
-                dto.setListIdSubdomains(this.getListIdSubdomains(rs.getInt(JournalTB.COLUMN_JOURNALID)));
+                dto.setListIdSubdomain(this.getListIdSubdomain(rs.getInt(JournalTB.COLUMN_JOURNALID)));
                 dto.setCitationCount(Integer.parseInt(listPublicationCitation.get("citationCount")));
                 dto.setPublicationCount(Integer.parseInt(listPublicationCitation.get("publicationCount")));
                 dto.setListPublicationCitation(listPublicationCitation.get("listPublicationCitation"));
@@ -123,13 +123,13 @@ public class JournalIndexer {
                 d.add(new Field(IndexConst.JOURNAL_JOURNALNAME_FIELD, dto.journalName, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.JOURNAL_ORGANIZATION_FIELD, dto.organization, Field.Store.YES, Field.Index.NO));
                 d.add(new Field(IndexConst.JOURNAL_WEBSITE_FIELD, dto.website, Field.Store.YES, Field.Index.NO));
-                d.add(new Field(IndexConst.JOURNAL_LISTIDSUBDOMAINS_FIELD, dto.listIdSubdomains, Field.Store.YES, Field.Index.ANALYZED));
+                d.add(new Field(IndexConst.JOURNAL_LISTIDSUBDOMAIN_FIELD, dto.listIdSubdomain, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.JOURNAL_LISTPUBLICATIONCITATION_FIELD, dto.listPublicationCitation, Field.Store.YES, Field.Index.NO));
                 d.add(new NumericField(IndexConst.JOURNAL_YEAREND_FIELD, Field.Store.YES, true).setIntValue(dto.yearEnd));
                 d.add(new NumericField(IndexConst.JOURNAL_YEARSTART_FIELD, Field.Store.YES, true).setIntValue(dto.yearStart));
-                d.add(new NumericField(IndexConst.JOURNAL_CITATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(dto.citationCount));
-                d.add(new NumericField(IndexConst.JOURNAL_PUBLICATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(dto.publicationCount));
-                d.add(new NumericField(IndexConst.JOURNAL_GINDEX_FIELD, Field.Store.YES, true).setIntValue(dto.g_index));
+                d.add(new NumericField(IndexConst.JOURNAL_CITATIONCOUNT_FIELD, Field.Store.YES, false).setIntValue(dto.citationCount));
+                d.add(new NumericField(IndexConst.JOURNAL_PUBLICATIONCOUNT_FIELD, Field.Store.YES, false).setIntValue(dto.publicationCount));
+                d.add(new NumericField(IndexConst.JOURNAL_GINDEX_FIELD, Field.Store.YES, false).setIntValue(dto.g_index));
 
                 writer.addDocument(d);
                 System.out.println("Indexing : " + count++ + "\t" + dto.journalName);
@@ -148,7 +148,7 @@ public class JournalIndexer {
         return count;
     }
 
-    public String getListIdSubdomains(int idJournal) throws SQLException, ClassNotFoundException {
+    public String getListIdSubdomain(int idJournal) throws SQLException, ClassNotFoundException {
         Connection connection = ConnectionPool.dataSource.getConnection();
         String list = "";
         String sql = "SELECT s." + SubdomainPaperTB.COLUMN_SUBDOMAINID + " FROM " + PaperTB.TABLE_NAME + " p JOIN " + SubdomainPaperTB.TABLE_NAME + " s ON p." + PaperTB.COLUMN_PAPERID + " = s." + SubdomainPaperTB.COLUMN_PAPERID + " WHERE p." + PaperTB.COLUMN_JOURNALID + " = ? GROUP BY s." + SubdomainPaperTB.COLUMN_SUBDOMAINID + "";
@@ -181,7 +181,7 @@ public class JournalIndexer {
                 ScoreDoc hit = hits[i];
                 Document doc = searcher.doc(hit.doc);
                 citationCount += Integer.parseInt(doc.get(IndexConst.PAPER_CITATIONCOUNT_FIELD));
-                ArrayList<Object> listCitations = (ArrayList<Object>) Common.SToO(doc.get(IndexConst.PAPER_LISTCITATIONS_FIELD));
+                ArrayList<Object> listCitations = (ArrayList<Object>) Common.SToO(doc.get(IndexConst.PAPER_LISTCITATION_FIELD));
                 Iterator it = listCitations.iterator();
                 while (it.hasNext()) {
                     LinkedHashMap<String, Integer> temp = (LinkedHashMap<String, Integer>) it.next();
@@ -306,7 +306,7 @@ public class JournalIndexer {
             String pass = "@huydang1920@";
             String database = "cspublicationcrawler";
             int port = 3306;
-            String path = "C:\\";
+            String path = "E:\\";
             JournalIndexer indexer = new JournalIndexer(user, pass, database, port, path);
             indexer._run();
         } catch (Exception ex) {

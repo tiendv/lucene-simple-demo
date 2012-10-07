@@ -15,7 +15,7 @@ public class KeywordDTO {
     public String stemmingVariations = "";
     public int publicationCount = 0;
     public int citationCount = 0;
-    public String listIdSubdomains = "";
+    public String listIdSubdomain = "";
     public String listPublicationCitation = "";
 
     public KeywordDTO() {
@@ -53,11 +53,11 @@ public class KeywordDTO {
         this.citationCount = citationCount;
     }
 
-    public void setListIdSubdomains(String listIdSubdomains) {
-        if (listIdSubdomains == null) {
-            this.listIdSubdomains = "";
+    public void setListIdSubdomain(String listIdSubdomain) {
+        if (listIdSubdomain == null) {
+            this.listIdSubdomain = "";
         } else {
-            this.listIdSubdomains = listIdSubdomains;
+            this.listIdSubdomain = listIdSubdomain;
         }
     }
 
