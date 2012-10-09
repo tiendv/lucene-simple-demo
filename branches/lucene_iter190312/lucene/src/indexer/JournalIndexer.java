@@ -125,8 +125,8 @@ public class JournalIndexer {
                 d.add(new Field(IndexConst.JOURNAL_WEBSITE_FIELD, dto.website, Field.Store.YES, Field.Index.NO));
                 d.add(new Field(IndexConst.JOURNAL_LISTIDSUBDOMAIN_FIELD, dto.listIdSubdomain, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.JOURNAL_LISTPUBLICATIONCITATION_FIELD, dto.listPublicationCitation, Field.Store.YES, Field.Index.NO));
-                d.add(new NumericField(IndexConst.JOURNAL_YEAREND_FIELD, Field.Store.YES, true).setIntValue(dto.yearEnd));
-                d.add(new NumericField(IndexConst.JOURNAL_YEARSTART_FIELD, Field.Store.YES, true).setIntValue(dto.yearStart));
+                d.add(new NumericField(IndexConst.JOURNAL_YEAREND_FIELD, Field.Store.YES, false).setIntValue(dto.yearEnd));
+                d.add(new NumericField(IndexConst.JOURNAL_YEARSTART_FIELD, Field.Store.YES, false).setIntValue(dto.yearStart));
                 d.add(new NumericField(IndexConst.JOURNAL_CITATIONCOUNT_FIELD, Field.Store.YES, false).setIntValue(dto.citationCount));
                 d.add(new NumericField(IndexConst.JOURNAL_PUBLICATIONCOUNT_FIELD, Field.Store.YES, false).setIntValue(dto.publicationCount));
                 d.add(new NumericField(IndexConst.JOURNAL_GINDEX_FIELD, Field.Store.YES, false).setIntValue(dto.g_index));
