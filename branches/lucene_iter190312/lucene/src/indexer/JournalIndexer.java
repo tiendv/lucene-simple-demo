@@ -117,6 +117,7 @@ public class JournalIndexer {
                 dto.setCitationCount(Integer.parseInt(listPublicationCitation.get("citationCount")));
                 dto.setPublicationCount(Integer.parseInt(listPublicationCitation.get("publicationCount")));
                 dto.setListPublicationCitation(listPublicationCitation.get("listPublicationCitation"));
+                dto.setH_Index(indexJournal.get("h_index"));
                 dto.setG_Index(indexJournal.get("g_index"));
 
                 d.add(new Field(IndexConst.JOURNAL_IDJOURNAL_FIELD, dto.idJournal, Field.Store.YES, Field.Index.ANALYZED));
@@ -129,6 +130,7 @@ public class JournalIndexer {
                 d.add(new NumericField(IndexConst.JOURNAL_YEARSTART_FIELD, Field.Store.YES, false).setIntValue(dto.yearStart));
                 d.add(new NumericField(IndexConst.JOURNAL_CITATIONCOUNT_FIELD, Field.Store.YES, false).setIntValue(dto.citationCount));
                 d.add(new NumericField(IndexConst.JOURNAL_PUBLICATIONCOUNT_FIELD, Field.Store.YES, false).setIntValue(dto.publicationCount));
+                d.add(new NumericField(IndexConst.JOURNAL_HINDEX_FIELD, Field.Store.YES, false).setIntValue(dto.h_index));
                 d.add(new NumericField(IndexConst.JOURNAL_GINDEX_FIELD, Field.Store.YES, false).setIntValue(dto.g_index));
 
                 writer.addDocument(d);
@@ -260,8 +262,20 @@ public class JournalIndexer {
     public LinkedHashMap<String, Integer> getCalculateIndexJournal(String idJournal) throws Exception {
         LinkedHashMap<String, Integer> out = new LinkedHashMap<String, Integer>();
         ArrayList<Integer> publicationList = this.getPublicationList(idJournal);
+        int h_index;
         int g_index;
+        int citationCount;
         int citationCountSum;
+        // Calculate h-index for each journal.
+        h_index = 0;
+        while (h_index < publicationList.size()) {
+            citationCount = publicationList.get(h_index);
+            if (citationCount >= (h_index + 1)) {
+                h_index++;
+            } else {
+                break;
+            }
+        }
         // Calculate g-index for each journal.
         g_index = 0;
         citationCountSum = 0;
@@ -275,6 +289,7 @@ public class JournalIndexer {
                 break;
             }
         }
+        out.put("h_index", h_index);
         out.put("g_index", g_index);
         return out;
     }

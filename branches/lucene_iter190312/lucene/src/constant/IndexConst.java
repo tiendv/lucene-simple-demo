@@ -57,6 +57,7 @@ public class IndexConst {
     public static final String JOURNAL_ORGANIZATION_FIELD = "organization";
     public static final String JOURNAL_YEARSTART_FIELD = "yearStart";
     public static final String JOURNAL_YEAREND_FIELD = "yearEnd";
+    public static final String JOURNAL_HINDEX_FIELD = "h_index";
     public static final String JOURNAL_GINDEX_FIELD = "g_index";
     public static final String JOURNAL_PUBLICATIONCOUNT_FIELD = "publicationCount";
     public static final String JOURNAL_CITATIONCOUNT_FIELD = "citationCount";
@@ -73,6 +74,7 @@ public class IndexConst {
     public static final String CONFERENCE_DURATION_FIELD = "duration";
     public static final String CONFERENCE_YEARSTART_FIELD = "yearStart";
     public static final String CONFERENCE_YEAREND_FIELD = "yearEnd";
+    public static final String CONFERENCE_HINDEX_FIELD = "h_index";
     public static final String CONFERENCE_GINDEX_FIELD = "g_index";
     public static final String CONFERENCE_PUBLICATIONCOUNT_FIELD = "publicationCount";
     public static final String CONFERENCE_CITATIONCOUNT_FIELD = "citationCount";

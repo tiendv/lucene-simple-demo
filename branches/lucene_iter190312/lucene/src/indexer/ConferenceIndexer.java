@@ -119,6 +119,7 @@ public class ConferenceIndexer {
                 dto.setCitationCount(Integer.parseInt(listPublicationCitation.get("citationCount")));
                 dto.setPublicationCount(Integer.parseInt(listPublicationCitation.get("publicationCount")));
                 dto.setListPublicationCitation(listPublicationCitation.get("listPublicationCitation"));
+                dto.setH_Index(indexConference.get("h_index"));
                 dto.setG_Index(indexConference.get("g_index"));
 
                 d.add(new Field(IndexConst.CONFERENCE_IDCONFERENCE_FIELD, dto.idConference, Field.Store.YES, Field.Index.ANALYZED));
@@ -133,6 +134,7 @@ public class ConferenceIndexer {
                 d.add(new NumericField(IndexConst.CONFERENCE_YEARSTART_FIELD, Field.Store.YES, false).setIntValue(dto.yearStart));
                 d.add(new NumericField(IndexConst.CONFERENCE_CITATIONCOUNT_FIELD, Field.Store.YES, false).setIntValue(dto.citationCount));
                 d.add(new NumericField(IndexConst.CONFERENCE_PUBLICATIONCOUNT_FIELD, Field.Store.YES, false).setIntValue(dto.publicationCount));
+                d.add(new NumericField(IndexConst.CONFERENCE_HINDEX_FIELD, Field.Store.YES, false).setIntValue(dto.h_index));
                 d.add(new NumericField(IndexConst.CONFERENCE_GINDEX_FIELD, Field.Store.YES, false).setIntValue(dto.g_index));
 
                 writer.addDocument(d);
@@ -264,8 +266,20 @@ public class ConferenceIndexer {
     public LinkedHashMap<String, Integer> getCalculateIndexConference(String idConference) throws Exception {
         LinkedHashMap<String, Integer> out = new LinkedHashMap<String, Integer>();
         ArrayList<Integer> publicationList = this.getPublicationList(idConference);
+        int h_index;
         int g_index;
+        int citationCount;
         int citationCountSum;
+        // Calculate h-index for each conference.
+        h_index = 0;
+        while (h_index < publicationList.size()) {
+            citationCount = publicationList.get(h_index);
+            if (citationCount >= (h_index + 1)) {
+                h_index++;
+            } else {
+                break;
+            }
+        }
         // Calculate g-index for each conference.
         g_index = 0;
         citationCountSum = 0;
@@ -279,6 +293,7 @@ public class ConferenceIndexer {
                 break;
             }
         }
+        out.put("h_index", h_index);
         out.put("g_index", g_index);
         return out;
     }
