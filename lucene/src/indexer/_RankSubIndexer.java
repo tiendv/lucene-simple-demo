@@ -58,7 +58,7 @@ public class _RankSubIndexer {
     public String _run() {
         String out = "";
         try {
-            File indexDir = new File(path + IndexConst.SUBDOMAIN_INDEX_PATH);
+            File indexDir = new File(path + IndexConst.RANK_SUBDOMAIN_INDEX_PATH);
             long start = new Date().getTime();
             int count = this._index(indexDir, connectionPool);
             long end = new Date().getTime();
@@ -96,12 +96,12 @@ public class _RankSubIndexer {
                 pubLast5Year = object5Year.get("pubCount");
                 citLast5Year = object5Year.get("citCount");
                 Document d = new Document();
-                d.add(new NumericField(IndexConst.RANK_KEYWORD_IDKEYWORD_FIELD, Field.Store.YES, false).setIntValue(rs.getInt(SubdomainTB.COLUMN_SUBDOMAINID)));
-                d.add(new Field(IndexConst.RANK_KEYWORD_IDSUBDOMAIN_FIELD, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Field.Store.YES, Field.Index.ANALYZED));
-                d.add(new NumericField(IndexConst.RANK_KEYWORD_PUBLAST5YEAR_FIELD, Field.Store.YES, false).setIntValue(pubLast5Year));
-                d.add(new NumericField(IndexConst.RANK_KEYWORD_PUBLAST10YEAR_FIELD, Field.Store.YES, false).setIntValue(pubLast10Year));
-                d.add(new NumericField(IndexConst.RANK_KEYWORD_CITLAST5YEAR_FIELD, Field.Store.YES, false).setIntValue(citLast5Year));
-                d.add(new NumericField(IndexConst.RANK_KEYWORD_CITLAST10YEAR_FIELD, Field.Store.YES, false).setIntValue(citLast10Year));
+                d.add(new Field(IndexConst.RANK_SUBDOMAIN_IDSUBDOMAIN_FIELD, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Field.Store.YES, Field.Index.ANALYZED));
+                d.add(new NumericField(IndexConst.RANK_SUBDOMAIN_PUBLAST5YEAR_FIELD, Field.Store.YES, false).setIntValue(pubLast5Year));
+                d.add(new NumericField(IndexConst.RANK_SUBDOMAIN_PUBLAST10YEAR_FIELD, Field.Store.YES, false).setIntValue(pubLast10Year));
+                d.add(new NumericField(IndexConst.RANK_SUBDOMAIN_CITLAST5YEAR_FIELD, Field.Store.YES, false).setIntValue(citLast5Year));
+                d.add(new NumericField(IndexConst.RANK_SUBDOMAIN_CITLAST10YEAR_FIELD, Field.Store.YES, false).setIntValue(citLast10Year));
+                
                 writer.addDocument(d);
                 System.out.println("Indexing : " + count++ + "\t idSubdomain:" + rs.getString(SubdomainTB.COLUMN_SUBDOMAINID) + "\t pubLast5Year:" + pubLast5Year + "\t citLast5Year:" + citLast5Year + "\t pubLast10Year:" + pubLast10Year + "\t citLast10Year:" + citLast10Year);
                 d = null;
@@ -125,7 +125,7 @@ public class _RankSubIndexer {
             String pass = "@huydang1920@";
             String database = "cspublicationcrawler";
             int port = 3306;
-            String path = "C:\\";
+            String path = "E:\\";
             _RankSubIndexer indexer = new _RankSubIndexer(user, pass, database, port, path);
             indexer._run();
         } catch (Exception ex) {

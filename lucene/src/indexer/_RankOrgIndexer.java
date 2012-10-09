@@ -59,7 +59,7 @@ public class _RankOrgIndexer {
     public String _run() {
         String out = "";
         try {
-            File indexDir = new File(path + IndexConst.SUBDOMAIN_INDEX_PATH);
+            File indexDir = new File(path + IndexConst.RANK_ORG_INDEX_PATH);
             long start = new Date().getTime();
             int count = this._index(indexDir, connectionPool);
             long end = new Date().getTime();
