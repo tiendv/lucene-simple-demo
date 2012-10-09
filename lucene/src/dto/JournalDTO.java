@@ -16,6 +16,7 @@ public class JournalDTO {
     public String organization = "";
     public int yearStart = 0;
     public int yearEnd = 0;
+    public int h_index = 0;
     public int g_index = 0;
     public int publicationCount = 0;
     public int citationCount = 0;
@@ -65,6 +66,10 @@ public class JournalDTO {
         this.yearEnd = yearEnd;
     }
 
+    public void setH_Index(int h_index) {
+        this.h_index = h_index;
+    }
+    
     public void setG_Index(int g_index) {
         this.g_index = g_index;
     }

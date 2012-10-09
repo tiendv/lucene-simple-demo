@@ -18,6 +18,7 @@ public class ConferenceDTO {
     public String duration = "";
     public int yearStart = 0;
     public int yearEnd = 0;
+    public int h_index = 0;
     public int g_index = 0;
     public int publicationCount = 0;
     public int citationCount = 0;
@@ -81,6 +82,10 @@ public class ConferenceDTO {
 
     public void setYearEnd(int yearEnd) {
         this.yearEnd = yearEnd;
+    }
+    
+    public void setH_Index(int h_index) {
+        this.h_index = h_index;
     }
 
     public void setG_Index(int g_index) {
