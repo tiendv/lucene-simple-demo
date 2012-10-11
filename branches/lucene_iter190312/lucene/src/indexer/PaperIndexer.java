@@ -76,7 +76,7 @@ public class PaperIndexer {
         try {
             File indexDir = new File(path + IndexConst.PAPER_INDEX_PATH);
             long start = new Date().getTime();
-            int count = this._index(indexDir, connectionPool);
+            int count = this._index(indexDir);
             long end = new Date().getTime();
             out = "Index : " + count + " files : Time index :" + (end - start) + " milisecond";
         } catch (Exception ex) {
@@ -85,7 +85,7 @@ public class PaperIndexer {
         return out;
     }
 
-    public int _index(File indexDir, ConnectionPool connectionPool) {
+    public int _index(File indexDir) {
         int count = 0;
         try {
             StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
@@ -128,9 +128,9 @@ public class PaperIndexer {
                 paper.setCitationCount(Integer.parseInt(listCitation.get("citationCount")));
                 paper.setReferenceCount(this.getReferenceCount(rs.getInt(PaperTB.COLUMN_PAPERID)));
                 paper.setListCitation(listCitation.get("listCitation"));
-                paper.setListIdAuthor(listAuthor.get("listIdAuthors"));
-                paper.setListIdKeyword(listKeyword.get("listIdKeywords"));
-                paper.setListIdOrg(listAuthor.get("listIdOrgs"));
+                paper.setListIdAuthor(listAuthor.get("listIdAuthor"));
+                paper.setListIdKeyword(listKeyword.get("listIdKeyword"));
+                paper.setListIdOrg(listAuthor.get("listIdOrg"));
                 paper.setListIdPaperCitation(this.getListIdPaperCitations(rs.getInt(PaperTB.COLUMN_PAPERID)));
                 paper.setRank(this.getRank(rs.getInt(PaperTB.COLUMN_PAPERID)));
 
@@ -155,7 +155,7 @@ public class PaperIndexer {
                 d.add(new Field(IndexConst.PAPER_LISTIDKEYWORD_FIELD, paper.listIdKeyword, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.PAPER_LISTIDORG_FIELD, paper.listIdOrg, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.PAPER_LISTIDSUBDOMAIN_FIELD, paper.listIdSubdomain, Field.Store.YES, Field.Index.ANALYZED));
-                d.add(new Field(IndexConst.PAPER_LISTIDPAPERCITATION_FIELD, paper.listIdPaperCitation, Field.Store.YES, Field.Index.NO));
+                d.add(new Field(IndexConst.PAPER_LISTIDPAPERCITATION_FIELD, paper.listIdPaperCitation, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new NumericField(IndexConst.PAPER_CITATIONCOUNT_FIELD, Field.Store.YES, false).setIntValue(paper.citationCount));
                 d.add(new NumericField(IndexConst.PAPER_REFRENCECOUNT_FIELD, Field.Store.YES, false).setIntValue(paper.referenceCount));
                 d.add(new NumericField(IndexConst.PAPER_YEAR_FIELD, Field.Store.YES, true).setIntValue(paper.year));
@@ -171,6 +171,8 @@ public class PaperIndexer {
             writer.close();
             stmt.close();
             connection.close();
+            connectionPool.getConnection().close();
+            connectionPool = null;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
             return 0;
@@ -183,17 +185,21 @@ public class PaperIndexer {
      * @return
      */
     public String getConferenceName(int idPaper) throws SQLException, ClassNotFoundException {
-        Connection connection = ConnectionPool.dataSource.getConnection();
         String name = "";
-        String sql = "SELECT c." + ConferenceTB.COLUMN_CONFERENCENAME + " FROM " + PaperTB.TABLE_NAME + " p JOIN " + ConferenceTB.TABLE_NAME + " c ON c." + ConferenceTB.COLUMN_CONFERENCEID + " = p." + PaperTB.COLUMN_CONFERENCEID + " WHERE p." + PaperTB.COLUMN_PAPERID + " = ?";
-        PreparedStatement stmt = connection.prepareStatement(sql);
-        stmt.setInt(1, idPaper);
-        ResultSet rs = stmt.executeQuery();
-        if ((rs != null) && (rs.next())) {
-            name = rs.getString(ConferenceTB.COLUMN_CONFERENCENAME);
+        try {
+            Connection connection = connectionPool.getConnection();
+            String sql = "SELECT c." + ConferenceTB.COLUMN_CONFERENCENAME + " FROM " + PaperTB.TABLE_NAME + " p JOIN " + ConferenceTB.TABLE_NAME + " c ON c." + ConferenceTB.COLUMN_CONFERENCEID + " = p." + PaperTB.COLUMN_CONFERENCEID + " WHERE p." + PaperTB.COLUMN_PAPERID + " = ?";
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setInt(1, idPaper);
+            ResultSet rs = stmt.executeQuery();
+            if ((rs != null) && (rs.next())) {
+                name = rs.getString(ConferenceTB.COLUMN_CONFERENCENAME);
+            }
+            stmt.close();
+            connection.close();
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
         }
-        stmt.close();
-        connection.close();
         return name;
     }
 
@@ -202,75 +208,84 @@ public class PaperIndexer {
      * @return
      */
     public String getJournalName(int idPaper) throws SQLException, ClassNotFoundException {
-        Connection connection = ConnectionPool.dataSource.getConnection();
         String name = "";
-        String sql = "SELECT j." + JournalTB.COLUMN_JOURNALNAME + " FROM " + PaperTB.TABLE_NAME + " p JOIN " + JournalTB.TABLE_NAME + " j ON j." + JournalTB.COLUMN_JOURNALID + " = p." + PaperTB.COLUMN_JOURNALID + " WHERE p." + PaperTB.COLUMN_PAPERID + " = ?";
-        PreparedStatement stmt = connection.prepareStatement(sql);
-        stmt.setInt(1, idPaper);
-        ResultSet rs = stmt.executeQuery();
-        if ((rs != null) && (rs.next())) {
-            name = rs.getString(JournalTB.COLUMN_JOURNALNAME);
+        try {
+            Connection connection = connectionPool.getConnection();
+            String sql = "SELECT j." + JournalTB.COLUMN_JOURNALNAME + " FROM " + PaperTB.TABLE_NAME + " p JOIN " + JournalTB.TABLE_NAME + " j ON j." + JournalTB.COLUMN_JOURNALID + " = p." + PaperTB.COLUMN_JOURNALID + " WHERE p." + PaperTB.COLUMN_PAPERID + " = ?";
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setInt(1, idPaper);
+            ResultSet rs = stmt.executeQuery();
+            if ((rs != null) && (rs.next())) {
+                name = rs.getString(JournalTB.COLUMN_JOURNALNAME);
+            }
+            stmt.close();
+            connection.close();
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
         }
-        stmt.close();
-        connection.close();
         return name;
+
     }
 
     /* 
      * getListAuthor
      * @param idPaper
-     * @return authors {idAuthor, authorName}, authorsName, listIdAuthors, listIdOrgs, orgsName
+     * @return authors {idAuthor, authorName}, authorsName, listIdAuthor, listIdOrg, orgsName
      * @author: JSONObject{"authors":[{"idAuthor":1,"authorName":"Michael Randolph Garey"},{"idAuthor":2,"authorName":"David S. Johnson"}]}
      */
     public LinkedHashMap<String, String> getListAuthor(int idPaper) throws SQLException, ClassNotFoundException {
-        Connection connection = ConnectionPool.dataSource.getConnection();
         LinkedHashMap<String, String> result = new LinkedHashMap<String, String>();
         Map json = new HashMap();
         ArrayList<Object> authors = new ArrayList<Object>();
         String authorsName = "";
-        String listIdAuthors = "";
-        String listIdOrgs = "";
+        String listIdAuthor = "";
+        String listIdOrg = "";
         String orgsName = "";
-        String sql = "SELECT a." + AuthorTB.COLUMN_AUTHORID + ", a." + AuthorTB.COLUMN_ORGID + ", a." + AuthorTB.COLUMN_AUTHORNAME + ",(SELECT o." + OrgTB.COLUMN_ORGNAME + " FROM " + OrgTB.TABLE_NAME + " o WHERE o." + OrgTB.COLUMN_ORGID + " = a." + AuthorTB.COLUMN_ORGID + ") AS " + OrgTB.COLUMN_ORGNAME + " FROM " + PaperTB.TABLE_NAME + " p JOIN " + AuthorPaperTB.TABLE_NAME + " ap ON ap." + AuthorPaperTB.COLUMN_PAPERID + " = p." + PaperTB.COLUMN_PAPERID + " JOIN " + AuthorTB.TABLE_NAME + " a ON a." + AuthorTB.COLUMN_AUTHORID + " = ap." + AuthorPaperTB.COLUMN_AUTHORID + " WHERE p." + PaperTB.COLUMN_PAPERID + " = ?";
-        PreparedStatement stmt = connection.prepareStatement(sql);
-        stmt.setInt(1, idPaper);
-        stmt.setFetchSize(Integer.MIN_VALUE);
-        ResultSet rs = stmt.executeQuery();
-        while ((rs != null) && (rs.next())) {
-            //db.authorTB.idAuthor
-            LinkedHashMap<String, Object> author = new LinkedHashMap<String, Object>();
-            author.put("idAuthor", rs.getInt(AuthorTB.COLUMN_AUTHORID));
-            String authorName = rs.getString(AuthorTB.COLUMN_AUTHORNAME);
-            author.put("authorName", authorName);
-            authorsName += " " + authorName;
-            orgsName += " " + rs.getString(OrgTB.COLUMN_ORGNAME);;
-            listIdAuthors += " " + rs.getString(AuthorTB.COLUMN_AUTHORID);
-            if ((rs.getInt(AuthorTB.COLUMN_ORGID) > 0) && (!listIdOrgs.contains(rs.getString(AuthorTB.COLUMN_ORGID)))) {
-                listIdOrgs += " " + rs.getString(AuthorTB.COLUMN_ORGID);
+        try {
+            Connection connection = connectionPool.getConnection();
+            String sql = "SELECT a." + AuthorTB.COLUMN_AUTHORID + ", a." + AuthorTB.COLUMN_ORGID + ", a." + AuthorTB.COLUMN_AUTHORNAME + ",(SELECT o." + OrgTB.COLUMN_ORGNAME + " FROM " + OrgTB.TABLE_NAME + " o WHERE o." + OrgTB.COLUMN_ORGID + " = a." + AuthorTB.COLUMN_ORGID + ") AS " + OrgTB.COLUMN_ORGNAME + " FROM " + PaperTB.TABLE_NAME + " p JOIN " + AuthorPaperTB.TABLE_NAME + " ap ON ap." + AuthorPaperTB.COLUMN_PAPERID + " = p." + PaperTB.COLUMN_PAPERID + " JOIN " + AuthorTB.TABLE_NAME + " a ON a." + AuthorTB.COLUMN_AUTHORID + " = ap." + AuthorPaperTB.COLUMN_AUTHORID + " WHERE p." + PaperTB.COLUMN_PAPERID + " = ?";
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setInt(1, idPaper);
+            stmt.setFetchSize(Integer.MIN_VALUE);
+            ResultSet rs = stmt.executeQuery();
+            while ((rs != null) && (rs.next())) {
+                //db.authorTB.idAuthor
+                LinkedHashMap<String, Object> author = new LinkedHashMap<String, Object>();
+                author.put("idAuthor", rs.getInt(AuthorTB.COLUMN_AUTHORID));
+                String authorName = rs.getString(AuthorTB.COLUMN_AUTHORNAME);
+                author.put("authorName", authorName);
+                authorsName += " " + authorName;
+                orgsName += " " + rs.getString(OrgTB.COLUMN_ORGNAME);;
+                listIdAuthor += " " + rs.getString(AuthorTB.COLUMN_AUTHORID);
+                if ((rs.getInt(AuthorTB.COLUMN_ORGID) > 0) && (!listIdOrg.contains(rs.getString(AuthorTB.COLUMN_ORGID)))) {
+                    listIdOrg += " " + rs.getString(AuthorTB.COLUMN_ORGID);
+                }
+                authors.add(author);
             }
-            authors.add(author);
-        }
-        if (!"".equals(authorsName)) {
-            authorsName = authorsName.substring(1);
-        }
-        if (!"".equals(listIdAuthors)) {
-            listIdAuthors = listIdAuthors.substring(1);
-        }
-        if (!"".equals(listIdOrgs)) {
-            listIdOrgs = listIdOrgs.substring(1);
-        }
-        if (!"".equals(orgsName)) {
-            orgsName = orgsName.substring(1);
+            if (!"".equals(authorsName)) {
+                authorsName = authorsName.substring(1);
+            }
+            if (!"".equals(listIdAuthor)) {
+                listIdAuthor = listIdAuthor.substring(1);
+            }
+            if (!"".equals(listIdOrg)) {
+                listIdOrg = listIdOrg.substring(1);
+            }
+            if (!"".equals(orgsName)) {
+                orgsName = orgsName.substring(1);
+            }
+            stmt.close();
+            connection.close();
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
         }
         json.put("authors", authors);
         JSONObject outJSON = new JSONObject(json);
         result.put("authors", outJSON.toJSONString());
         result.put("authorsName", authorsName);
-        result.put("listIdAuthors", listIdAuthors);
-        result.put("listIdOrgs", listIdOrgs);
+        result.put("listIdAuthor", listIdAuthor);
+        result.put("listIdOrg", listIdOrg);
         result.put("orgsName", orgsName);
-        stmt.close();
-        connection.close();
         return result;
     }
 
@@ -282,27 +297,31 @@ public class PaperIndexer {
      * + Với: Object là LinkedHashMap<String, Integer> với liệu là {citation, year}
      */
     public LinkedHashMap<String, String> getListCitation(int idPaper) throws SQLException, ClassNotFoundException {
-        Connection connection = ConnectionPool.dataSource.getConnection();
         LinkedHashMap<String, String> result = new LinkedHashMap<String, String>();
         ArrayList<Object> listCitation = new ArrayList<Object>();
         int citationCount = 0;
-        String sql = "SELECT COUNT(pp." + PaperPaperTB.COLUMN_PAPERID + ") AS citation, (SELECT p." + PaperTB.COLUMN_YEAR + " FROM " + PaperTB.TABLE_NAME + " p WHERE p." + PaperTB.COLUMN_PAPERID + " = pp." + PaperPaperTB.COLUMN_PAPERID + ") AS `year` FROM " + PaperPaperTB.TABLE_NAME + " pp WHERE pp." + PaperPaperTB.COLUMN_PAPERREFID + " = ? GROUP BY `year` ORDER BY `year` ASC";
-        PreparedStatement stmt = connection.prepareStatement(sql);
-        stmt.setInt(1, idPaper);
-        ResultSet rs = stmt.executeQuery();
-        while ((rs != null) && (rs.next())) {
-            citationCount += rs.getInt("citation");
-            if (rs.getInt("year") > 0) {
-                LinkedHashMap<String, Integer> temp = new LinkedHashMap<String, Integer>();
-                temp.put("citation", rs.getInt("citation"));
-                temp.put("year", rs.getInt("year"));
-                listCitation.add(temp);
+        try {
+            Connection connection = connectionPool.getConnection();
+            String sql = "SELECT COUNT(pp." + PaperPaperTB.COLUMN_PAPERID + ") AS citation, (SELECT p." + PaperTB.COLUMN_YEAR + " FROM " + PaperTB.TABLE_NAME + " p WHERE p." + PaperTB.COLUMN_PAPERID + " = pp." + PaperPaperTB.COLUMN_PAPERID + ") AS `year` FROM " + PaperPaperTB.TABLE_NAME + " pp WHERE pp." + PaperPaperTB.COLUMN_PAPERREFID + " = ? GROUP BY `year` ORDER BY `year` ASC";
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setInt(1, idPaper);
+            ResultSet rs = stmt.executeQuery();
+            while ((rs != null) && (rs.next())) {
+                citationCount += rs.getInt("citation");
+                if (rs.getInt("year") > 0) {
+                    LinkedHashMap<String, Integer> temp = new LinkedHashMap<String, Integer>();
+                    temp.put("citation", rs.getInt("citation"));
+                    temp.put("year", rs.getInt("year"));
+                    listCitation.add(temp);
+                }
             }
+            stmt.close();
+            connection.close();
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
         }
         result.put("listCitation", Common.OToS(listCitation));
         result.put("citationCount", Integer.toString(citationCount));
-        stmt.close();
-        connection.close();
         return result;
     }
 
@@ -311,20 +330,24 @@ public class PaperIndexer {
      * @return
      */
     public String getListIdSubdomains(int idPaper) throws SQLException, ClassNotFoundException {
-        Connection connection = ConnectionPool.dataSource.getConnection();
         String list = "";
-        String sql = "SELECT s." + SubdomainTB.COLUMN_SUBDOMAINID + " FROM " + PaperTB.TABLE_NAME + " p JOIN " + SubdomainPaperTB.TABLE_NAME + " sp ON sp." + SubdomainPaperTB.COLUMN_PAPERID + " = p." + PaperTB.COLUMN_PAPERID + " JOIN " + SubdomainTB.TABLE_NAME + " s ON s." + SubdomainTB.COLUMN_SUBDOMAINID + " = sp." + SubdomainPaperTB.COLUMN_SUBDOMAINID + " WHERE p." + PaperTB.COLUMN_PAPERID + " = ?";
-        PreparedStatement stmt = connection.prepareStatement(sql);
-        stmt.setInt(1, idPaper);
-        ResultSet rs = stmt.executeQuery();
-        while ((rs != null) && (rs.next())) {
-            list += " " + rs.getString(SubdomainTB.COLUMN_SUBDOMAINID);
+        try {
+            Connection connection = connectionPool.getConnection();
+            String sql = "SELECT s." + SubdomainTB.COLUMN_SUBDOMAINID + " FROM " + PaperTB.TABLE_NAME + " p JOIN " + SubdomainPaperTB.TABLE_NAME + " sp ON sp." + SubdomainPaperTB.COLUMN_PAPERID + " = p." + PaperTB.COLUMN_PAPERID + " JOIN " + SubdomainTB.TABLE_NAME + " s ON s." + SubdomainTB.COLUMN_SUBDOMAINID + " = sp." + SubdomainPaperTB.COLUMN_SUBDOMAINID + " WHERE p." + PaperTB.COLUMN_PAPERID + " = ?";
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setInt(1, idPaper);
+            ResultSet rs = stmt.executeQuery();
+            while ((rs != null) && (rs.next())) {
+                list += " " + rs.getString(SubdomainTB.COLUMN_SUBDOMAINID);
+            }
+            if (!"".equals(list)) {
+                list = list.substring(1);
+            }
+            stmt.close();
+            connection.close();
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
         }
-        if (!"".equals(list)) {
-            list = list.substring(1);
-        }
-        stmt.close();
-        connection.close();
         return list;
     }
 
@@ -333,28 +356,32 @@ public class PaperIndexer {
      * @return list idKeyword and keyword
      */
     public LinkedHashMap<String, String> getListKeyword(int idPaper) throws SQLException, ClassNotFoundException {
-        Connection connection = ConnectionPool.dataSource.getConnection();
         LinkedHashMap<String, String> result = new LinkedHashMap<String, String>();
-        String listIdKeywords = "";
+        String listIdKeyword = "";
         String keywords = "";
-        String sql = "SELECT pk." + PaperKeywordTB.COLUMN_KEYWORDID + ", (SELECT k." + KeywordTB.COLUMN_KEYWORD + " FROM " + KeywordTB.TABLE_NAME + " k WHERE pk." + PaperKeywordTB.COLUMN_KEYWORDID + " = k." + KeywordTB.COLUMN_KEYWORDID + ") AS " + KeywordTB.COLUMN_KEYWORD + " FROM " + PaperKeywordTB.TABLE_NAME + " pk WHERE pk." + PaperKeywordTB.COLUMN_PAPERID + " = ?";
-        PreparedStatement stmt = connection.prepareStatement(sql);
-        stmt.setInt(1, idPaper);
-        ResultSet rs = stmt.executeQuery();
-        while ((rs != null) && (rs.next())) {
-            listIdKeywords += " " + rs.getString(PaperKeywordTB.COLUMN_KEYWORDID);
-            keywords += " " + rs.getString(KeywordTB.COLUMN_KEYWORD);
+        try {
+            Connection connection = connectionPool.getConnection();
+            String sql = "SELECT pk." + PaperKeywordTB.COLUMN_KEYWORDID + ", (SELECT k." + KeywordTB.COLUMN_KEYWORD + " FROM " + KeywordTB.TABLE_NAME + " k WHERE pk." + PaperKeywordTB.COLUMN_KEYWORDID + " = k." + KeywordTB.COLUMN_KEYWORDID + ") AS " + KeywordTB.COLUMN_KEYWORD + " FROM " + PaperKeywordTB.TABLE_NAME + " pk WHERE pk." + PaperKeywordTB.COLUMN_PAPERID + " = ?";
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setInt(1, idPaper);
+            ResultSet rs = stmt.executeQuery();
+            while ((rs != null) && (rs.next())) {
+                listIdKeyword += " " + rs.getString(PaperKeywordTB.COLUMN_KEYWORDID);
+                keywords += " " + rs.getString(KeywordTB.COLUMN_KEYWORD);
+            }
+            if (!"".equals(listIdKeyword)) {
+                listIdKeyword = listIdKeyword.substring(1);
+            }
+            if (!"".equals(keywords)) {
+                keywords = keywords.substring(1);
+            }
+            stmt.close();
+            connection.close();
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
         }
-        if (!"".equals(listIdKeywords)) {
-            listIdKeywords = listIdKeywords.substring(1);
-        }
-        if (!"".equals(keywords)) {
-            keywords = keywords.substring(1);
-        }
-        result.put("listIdKeywords", listIdKeywords);
+        result.put("listIdKeyword", listIdKeyword);
         result.put("keywords", keywords);
-        stmt.close();
-        connection.close();
         return result;
     }
 
@@ -363,17 +390,21 @@ public class PaperIndexer {
      * @return
      */
     public int getRank(int idPaper) throws SQLException, ClassNotFoundException {
-        Connection connection = ConnectionPool.dataSource.getConnection();
         int rank = 0;
-        String sql = "SELECT r." + RankPaperTB.COLUMN_RANK + " FROM " + RankPaperTB.TABLE_NAME + " r WHERE r." + RankPaperTB.COLUMN_PAPERID + " = ?";
-        PreparedStatement stmt = connection.prepareStatement(sql);
-        stmt.setInt(1, idPaper);
-        ResultSet rs = stmt.executeQuery();
-        if ((rs != null) && (rs.next())) {
-            rank = rs.getInt(RankPaperTB.COLUMN_RANK);
+        try {
+            Connection connection = connectionPool.getConnection();
+            String sql = "SELECT r." + RankPaperTB.COLUMN_RANK + " FROM " + RankPaperTB.TABLE_NAME + " r WHERE r." + RankPaperTB.COLUMN_PAPERID + " = ?";
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setInt(1, idPaper);
+            ResultSet rs = stmt.executeQuery();
+            if ((rs != null) && (rs.next())) {
+                rank = rs.getInt(RankPaperTB.COLUMN_RANK);
+            }
+            stmt.close();
+            connection.close();
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
         }
-        stmt.close();
-        connection.close();
         return rank;
     }
 
@@ -382,20 +413,24 @@ public class PaperIndexer {
      * @return list idPaper citation
      */
     public String getListIdPaperCitations(int idPaper) throws SQLException {
-        Connection connection = ConnectionPool.dataSource.getConnection();
         String listIdPaperCitations = "";
-        String sql = "SELECT pp." + PaperPaperTB.COLUMN_PAPERID + " FROM " + PaperPaperTB.TABLE_NAME + " pp WHERE pp." + PaperPaperTB.COLUMN_PAPERREFID + " = ?";
-        PreparedStatement stmt = connection.prepareStatement(sql);
-        stmt.setInt(1, idPaper);
-        ResultSet rs = stmt.executeQuery();
-        while ((rs != null) && (rs.next())) {
-            listIdPaperCitations += " " + rs.getString(PaperPaperTB.COLUMN_PAPERID);
+        try {
+            Connection connection = connectionPool.getConnection();
+            String sql = "SELECT pp." + PaperPaperTB.COLUMN_PAPERID + " FROM " + PaperPaperTB.TABLE_NAME + " pp WHERE pp." + PaperPaperTB.COLUMN_PAPERREFID + " = ?";
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setInt(1, idPaper);
+            ResultSet rs = stmt.executeQuery();
+            while ((rs != null) && (rs.next())) {
+                listIdPaperCitations += " " + rs.getString(PaperPaperTB.COLUMN_PAPERID);
+            }
+            if (!"".equals(listIdPaperCitations)) {
+                listIdPaperCitations = listIdPaperCitations.substring(1);
+            }
+            stmt.close();
+            connection.close();
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
         }
-        if (!"".equals(listIdPaperCitations)) {
-            listIdPaperCitations = listIdPaperCitations.substring(1);
-        }
-        stmt.close();
-        connection.close();
         return listIdPaperCitations;
     }
 
@@ -404,17 +439,21 @@ public class PaperIndexer {
      * @return
      */
     public int getReferenceCount(int idPaper) throws SQLException {
-        Connection connection = ConnectionPool.dataSource.getConnection();
         int count = 0;
-        String sql = "SELECT COUNT(p." + PaperPaperTB.COLUMN_PAPERREFID + ") AS total FROM " + PaperPaperTB.TABLE_NAME + " p WHERE p." + PaperPaperTB.COLUMN_PAPERID + " = ?";
-        PreparedStatement stmt = connection.prepareStatement(sql);
-        stmt.setInt(1, idPaper);
-        ResultSet rs = stmt.executeQuery();
-        if ((rs != null) && (rs.next())) {
-            count += rs.getInt("total");
+        try {
+            Connection connection = connectionPool.getConnection();
+            String sql = "SELECT COUNT(p." + PaperPaperTB.COLUMN_PAPERREFID + ") AS total FROM " + PaperPaperTB.TABLE_NAME + " p WHERE p." + PaperPaperTB.COLUMN_PAPERID + " = ?";
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setInt(1, idPaper);
+            ResultSet rs = stmt.executeQuery();
+            if ((rs != null) && (rs.next())) {
+                count += rs.getInt("total");
+            }
+            stmt.close();
+            connection.close();
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
         }
-        stmt.close();
-        connection.close();
         return count;
     }
 

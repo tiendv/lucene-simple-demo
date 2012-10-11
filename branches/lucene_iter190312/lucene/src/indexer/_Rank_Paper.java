@@ -45,10 +45,10 @@ public class _Rank_Paper {
     }
 
     public int _rank() throws SQLException {
-        Connection connection = connectionPool.getConnection();
-        Statement statement = connection.createStatement();
         int count = 0;
         try {
+            Connection connection = connectionPool.getConnection();
+            Statement statement = connection.createStatement();
             // Drop
             String drop = "DROP TABLE IF EXISTS `" + RankPaperTB.TABLE_NAME + "`;";
             statement.execute(drop);
@@ -65,11 +65,12 @@ public class _Rank_Paper {
             // 1. TABLE _rank_paper, citationCount: all paper cite to this paper
             String insert = "INSERT IGNORE INTO " + RankPaperTB.TABLE_NAME + "(" + RankPaperTB.COLUMN_PAPERID + ", " + RankPaperTB.COLUMN_CITATIONCOUNT + ") SELECT pp." + PaperPaperTB.COLUMN_PAPERREFID + ", COUNT(DISTINCT pp." + PaperPaperTB.COLUMN_PAPERID + ") FROM " + PaperPaperTB.TABLE_NAME + " pp GROUP BY pp." + PaperPaperTB.COLUMN_PAPERREFID + ";";
             count = statement.executeUpdate(insert);
+
+            statement.close();
+            connection.close();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         } finally {
-            statement.close();
-            connection.close();
         }
         return count;
     }

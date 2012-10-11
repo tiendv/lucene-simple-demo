@@ -122,10 +122,8 @@
               </Group>
               <EmptySpace type="separate" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="txtPort" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="jLabel4" alignment="0" min="-2" max="-2" attributes="0"/>
-                  </Group>
+                  <Component id="jLabel4" alignment="0" min="-2" max="-2" attributes="0"/>
+                  <Component id="txtPort" min="-2" max="-2" attributes="0"/>
                   <Group type="103" alignment="1" groupAlignment="3" attributes="0">
                       <Component id="jLabel5" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="txtPath" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -185,7 +183,7 @@
     </Component>
     <Component class="javax.swing.JTextField" name="txtPassWord">
       <Properties>
-        <Property name="text" type="java.lang.String" value="root"/>
+        <Property name="text" type="java.lang.String" value="@huydang1920@"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel3">
@@ -317,7 +315,6 @@
       <Properties>
         <Property name="text" type="java.lang.String" value="RankAuthorIndexer"/>
         <Property name="toolTipText" type="java.lang.String" value=""/>
-        <Property name="actionCommand" type="java.lang.String" value="RankAuthorIndexer"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btRankAuthorIndexerActionPerformed"/>

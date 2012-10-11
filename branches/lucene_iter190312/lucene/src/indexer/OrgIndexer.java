@@ -79,7 +79,7 @@ public class OrgIndexer {
         try {
             File indexDir = new File(path + IndexConst.ORG_INDEX_PATH);
             long start = new Date().getTime();
-            int count = this._index(indexDir, connectionPool);
+            int count = this._index(indexDir);
             long end = new Date().getTime();
             out = "Index : " + count + " files : Time index :" + (end - start) + " milisecond";
         } catch (Exception ex) {
@@ -88,7 +88,7 @@ public class OrgIndexer {
         return out;
     }
 
-    public int _index(File indexDir, ConnectionPool connectionPool) {
+    public int _index(File indexDir) {
         int count = 0;
         try {
             StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
@@ -142,6 +142,8 @@ public class OrgIndexer {
             writer.close();
             stmt.close();
             connection.close();
+            connectionPool.getConnection().close();
+            connectionPool = null;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
             return 0;
@@ -150,20 +152,24 @@ public class OrgIndexer {
     }
 
     public String getListIdSubdomain(int idOrg) throws SQLException, ClassNotFoundException {
-        Connection connection = ConnectionPool.dataSource.getConnection();
         String list = "";
-        String sql = "SELECT s." + SubdomainPaperTB.COLUMN_SUBDOMAINID + " FROM " + AuthorPaperTB.TABLE_NAME + " ap JOIN " + SubdomainPaperTB.TABLE_NAME + " s ON s." + SubdomainPaperTB.COLUMN_PAPERID + "=ap." + AuthorPaperTB.COLUMN_PAPERID + " JOIN " + AuthorTB.TABLE_NAME + " a ON ap." + AuthorPaperTB.COLUMN_AUTHORID + " = a." + AuthorTB.COLUMN_AUTHORID + " WHERE a." + AuthorTB.COLUMN_ORGID + "=? GROUP BY s." + SubdomainPaperTB.COLUMN_SUBDOMAINID + "";
-        PreparedStatement stmt = connection.prepareStatement(sql);
-        stmt.setInt(1, idOrg);
-        ResultSet rs = stmt.executeQuery();
-        while ((rs != null) && (rs.next())) {
-            list += " " + rs.getString(SubdomainPaperTB.COLUMN_SUBDOMAINID);
+        try {
+            Connection connection = connectionPool.getConnection();
+            String sql = "SELECT s." + SubdomainPaperTB.COLUMN_SUBDOMAINID + " FROM " + AuthorPaperTB.TABLE_NAME + " ap JOIN " + SubdomainPaperTB.TABLE_NAME + " s ON s." + SubdomainPaperTB.COLUMN_PAPERID + "=ap." + AuthorPaperTB.COLUMN_PAPERID + " JOIN " + AuthorTB.TABLE_NAME + " a ON ap." + AuthorPaperTB.COLUMN_AUTHORID + " = a." + AuthorTB.COLUMN_AUTHORID + " WHERE a." + AuthorTB.COLUMN_ORGID + "=? GROUP BY s." + SubdomainPaperTB.COLUMN_SUBDOMAINID + "";
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setInt(1, idOrg);
+            ResultSet rs = stmt.executeQuery();
+            while ((rs != null) && (rs.next())) {
+                list += " " + rs.getString(SubdomainPaperTB.COLUMN_SUBDOMAINID);
+            }
+            if (!"".equals(list)) {
+                list = list.substring(1);
+            }
+            stmt.close();
+            connection.close();
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
         }
-        if (!"".equals(list)) {
-            list = list.substring(1);
-        }
-        stmt.close();
-        connection.close();
         return list;
     }
 
@@ -322,7 +328,7 @@ public class OrgIndexer {
             int port = 3306;
             String path = "E:\\";
             OrgIndexer indexer = new OrgIndexer(user, pass, database, port, path);
-            indexer._run();
+            System.out.println(indexer._run());
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }

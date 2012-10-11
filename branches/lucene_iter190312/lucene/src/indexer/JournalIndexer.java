@@ -78,7 +78,7 @@ public class JournalIndexer {
         try {
             File indexDir = new File(path + IndexConst.JOURNAL_INDEX_PATH);
             long start = new Date().getTime();
-            int count = this._index(indexDir, connectionPool);
+            int count = this._index(indexDir);
             long end = new Date().getTime();
             out = "Index : " + count + " files : Time index :" + (end - start) + " milisecond";
         } catch (Exception ex) {
@@ -87,7 +87,7 @@ public class JournalIndexer {
         return out;
     }
 
-    public int _index(File indexDir, ConnectionPool connectionPool) {
+    public int _index(File indexDir) {
         int count = 0;
         try {
             StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
@@ -143,6 +143,8 @@ public class JournalIndexer {
             writer.close();
             stmt.close();
             connection.close();
+            connectionPool.getConnection().close();
+            connectionPool = null;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
             return 0;
@@ -151,20 +153,24 @@ public class JournalIndexer {
     }
 
     public String getListIdSubdomain(int idJournal) throws SQLException, ClassNotFoundException {
-        Connection connection = ConnectionPool.dataSource.getConnection();
         String list = "";
-        String sql = "SELECT s." + SubdomainPaperTB.COLUMN_SUBDOMAINID + " FROM " + PaperTB.TABLE_NAME + " p JOIN " + SubdomainPaperTB.TABLE_NAME + " s ON p." + PaperTB.COLUMN_PAPERID + " = s." + SubdomainPaperTB.COLUMN_PAPERID + " WHERE p." + PaperTB.COLUMN_JOURNALID + " = ? GROUP BY s." + SubdomainPaperTB.COLUMN_SUBDOMAINID + "";
-        PreparedStatement stmt = connection.prepareStatement(sql);
-        stmt.setInt(1, idJournal);
-        ResultSet rs = stmt.executeQuery();
-        while ((rs != null) && (rs.next())) {
-            list += " " + rs.getString(SubdomainPaperTB.COLUMN_SUBDOMAINID);
+        try {
+            Connection connection = connectionPool.getConnection();
+            String sql = "SELECT s." + SubdomainPaperTB.COLUMN_SUBDOMAINID + " FROM " + PaperTB.TABLE_NAME + " p JOIN " + SubdomainPaperTB.TABLE_NAME + " s ON p." + PaperTB.COLUMN_PAPERID + " = s." + SubdomainPaperTB.COLUMN_PAPERID + " WHERE p." + PaperTB.COLUMN_JOURNALID + " = ? GROUP BY s." + SubdomainPaperTB.COLUMN_SUBDOMAINID + "";
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setInt(1, idJournal);
+            ResultSet rs = stmt.executeQuery();
+            while ((rs != null) && (rs.next())) {
+                list += " " + rs.getString(SubdomainPaperTB.COLUMN_SUBDOMAINID);
+            }
+            if (!"".equals(list)) {
+                list = list.substring(1);
+            }
+            stmt.close();
+            connection.close();
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
         }
-        if (!"".equals(list)) {
-            list = list.substring(1);
-        }
-        stmt.close();
-        connection.close();
         return list;
     }
 
@@ -323,7 +329,7 @@ public class JournalIndexer {
             int port = 3306;
             String path = "E:\\";
             JournalIndexer indexer = new JournalIndexer(user, pass, database, port, path);
-            indexer._run();
+            System.out.println(indexer._run());
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }

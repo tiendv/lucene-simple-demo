@@ -56,7 +56,7 @@ public class CcidfIndexer {
         try {
             File indexDir = new File(path + IndexConst.CCIDF_INDEX_PATH);
             long start = new Date().getTime();
-            int count = this._index(indexDir, connectionPool);
+            int count = this._index(indexDir);
             long end = new Date().getTime();
             out = "Index : " + count + " files : Time index :" + (end - start) + " milisecond";
         } catch (Exception ex) {
@@ -65,7 +65,7 @@ public class CcidfIndexer {
         return out;
     }
 
-    public int _index(File indexDir, ConnectionPool connectionPool) {
+    public int _index(File indexDir) {
         int count = 0;
         try {
             StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
@@ -101,6 +101,8 @@ public class CcidfIndexer {
             writer.close();
             stmt.close();
             connection.close();
+            connectionPool.getConnection().close();
+            connectionPool = null;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
             return 0;

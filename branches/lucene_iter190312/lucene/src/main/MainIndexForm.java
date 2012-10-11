@@ -28,6 +28,12 @@ import java.io.File;
 public class MainIndexForm extends javax.swing.JFrame {
 
     private String path = "E:\\";
+    private Boolean aut = false;
+    private Boolean con = false;
+    private Boolean jou = false;
+    private Boolean org = false;
+    private Boolean key = false;
+    private Boolean sub = false;
 
     /**
      * Creates new form MainIndexForm
@@ -36,6 +42,7 @@ public class MainIndexForm extends javax.swing.JFrame {
         initComponents();
         this.setDisabledAll();
         this.btRankPaper.setEnabled(true);
+        this.btCcidfIndexer.setEnabled(true);
     }
 
     /**
@@ -85,7 +92,7 @@ public class MainIndexForm extends javax.swing.JFrame {
 
         txtUserName.setText("root");
 
-        txtPassWord.setText("root");
+        txtPassWord.setText("@huydang1920@");
 
         jLabel3.setText("Database");
 
@@ -174,7 +181,6 @@ public class MainIndexForm extends javax.swing.JFrame {
 
             btRankAuthorIndexer.setText("RankAuthorIndexer");
             btRankAuthorIndexer.setToolTipText("");
-            btRankAuthorIndexer.setActionCommand("RankAuthorIndexer");
             btRankAuthorIndexer.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent evt) {
                     btRankAuthorIndexerActionPerformed(evt);
@@ -305,9 +311,8 @@ public class MainIndexForm extends javax.swing.JFrame {
                         .addComponent(txtPassWord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGap(18, 18, 18)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(txtPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel4))
+                        .addComponent(jLabel4)
+                        .addComponent(txtPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel5)
                             .addComponent(txtPath, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -385,6 +390,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                 }
             }
             this.setEnabledAll();
+            this.setEnabledAllRank();
             prBar.setIndeterminate(true);
             prBar.setString("Done index");
         } catch (Exception ex) {
@@ -422,7 +428,7 @@ public class MainIndexForm extends javax.swing.JFrame {
             _Rank_Paper rank = new _Rank_Paper(user, pass, database, port);
             if (rank.connect) {
                 txtalog.setText(txtalog.getText() + "Connect database success!\n Runing \n");
-                //txtalog.setText(txtalog.getText() + rank._run() + "\nFinished!");
+                txtalog.setText(txtalog.getText() + rank._run() + "\nFinished!");
                 this.btPaperIndexer.setEnabled(true);
                 this.btRankPaper.setEnabled(true);
                 prBar.setString("Done index");
@@ -430,6 +436,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                 this.btRankPaper.setEnabled(true);
                 txtalog.setText(txtalog.getText() + "Error: Can not connect to database!\nError!");
             }
+            this.setEnabledAllRank();
         } catch (Exception ex) {
             txtalog.setText(ex.getMessage());
         }
@@ -475,6 +482,8 @@ public class MainIndexForm extends javax.swing.JFrame {
                 }
             }
             this.setEnabledAll();
+            this.aut = true;
+            this.setEnabledAllRank();
             prBar.setString("Done index");
         } catch (Exception ex) {
             txtalog.setText(ex.getMessage());
@@ -521,6 +530,8 @@ public class MainIndexForm extends javax.swing.JFrame {
                 }
             }
             this.setEnabledAll();
+            this.con = true;
+            this.setEnabledAllRank();
             prBar.setIndeterminate(true);
             prBar.setString("Done index");
         } catch (Exception ex) {
@@ -568,6 +579,8 @@ public class MainIndexForm extends javax.swing.JFrame {
                 }
             }
             this.setEnabledAll();
+            this.jou = true;
+            this.setEnabledAllRank();
             prBar.setIndeterminate(true);
             prBar.setString("Done index");
         } catch (Exception ex) {
@@ -615,6 +628,8 @@ public class MainIndexForm extends javax.swing.JFrame {
                 }
             }
             this.setEnabledAll();
+            this.key = true;
+            this.setEnabledAllRank();
             prBar.setIndeterminate(true);
             prBar.setString("Done index");
         } catch (Exception ex) {
@@ -662,6 +677,8 @@ public class MainIndexForm extends javax.swing.JFrame {
                 }
             }
             this.setEnabledAll();
+            this.org = true;
+            this.setEnabledAllRank();
             prBar.setIndeterminate(true);
             prBar.setString("Done index");
         } catch (Exception ex) {
@@ -709,6 +726,8 @@ public class MainIndexForm extends javax.swing.JFrame {
                 }
             }
             this.setEnabledAll();
+            this.sub = true;
+            this.setEnabledAllRank();
             prBar.setIndeterminate(true);
             prBar.setString("Done index");
         } catch (Exception ex) {
@@ -756,6 +775,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                 }
             }
             this.setEnabledAll();
+            this.setEnabledAllRank();
             prBar.setIndeterminate(true);
             prBar.setString("Done index");
         } catch (Exception ex) {
@@ -803,6 +823,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                 }
             }
             this.setEnabledAll();
+            this.setEnabledAllRank();
             prBar.setIndeterminate(true);
             prBar.setString("Done index");
         } catch (Exception ex) {
@@ -897,6 +918,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                 }
             }
             this.setEnabledAll();
+            this.setEnabledAllRank();
             prBar.setIndeterminate(true);
             prBar.setString("Done index");
         } catch (Exception ex) {
@@ -944,6 +966,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                 }
             }
             this.setEnabledAll();
+            this.setEnabledAllRank();
             prBar.setIndeterminate(true);
             prBar.setString("Done index");
         } catch (Exception ex) {
@@ -991,6 +1014,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                 }
             }
             this.setEnabledAll();
+            this.setEnabledAllRank();
             prBar.setIndeterminate(true);
             prBar.setString("Done index");
         } catch (Exception ex) {
@@ -1038,6 +1062,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                 }
             }
             this.setEnabledAll();
+            this.setEnabledAllRank();
             prBar.setIndeterminate(true);
             prBar.setString("Done index");
         } catch (Exception ex) {
@@ -1045,7 +1070,7 @@ public class MainIndexForm extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btRankSubIndexerActionPerformed
 
-    public void setDisabledAll() {
+    private void setDisabledAll() {
         this.btAuthorIndexer.setEnabled(false);
         this.btConferenceIndexer.setEnabled(false);
         this.btJournalIndexer.setEnabled(false);
@@ -1064,7 +1089,7 @@ public class MainIndexForm extends javax.swing.JFrame {
 
     }
 
-    public void setEnabledAll() {
+    private void setEnabledAll() {
         this.btAuthorIndexer.setEnabled(true);
         this.btConferenceIndexer.setEnabled(true);
         this.btJournalIndexer.setEnabled(true);
@@ -1074,13 +1099,27 @@ public class MainIndexForm extends javax.swing.JFrame {
         this.btRankPaper.setEnabled(true);
         this.btSubdomainIndexer.setEnabled(true);
         this.btCcidfIndexer.setEnabled(true);
-        this.btRankAuthorIndexer.setEnabled(true);
-        this.btRankConfIndexer.setEnabled(true);
-        this.btRankJournalIndexer.setEnabled(true);
-        this.btRankKeyIndexer.setEnabled(true);
-        this.btRankOrgIndexer.setEnabled(true);
-        this.btRankSubIndexer.setEnabled(true);
+    }
 
+    private void setEnabledAllRank() {
+        if (this.aut) {
+            this.btAuthorIndexer.setEnabled(true);
+        }
+        if (this.con) {
+            this.btRankConfIndexer.setEnabled(true);
+        }
+        if (this.jou) {
+            this.btRankJournalIndexer.setEnabled(true);
+        }
+        if (this.key) {
+            this.btRankKeyIndexer.setEnabled(true);
+        }
+        if (this.org) {
+            this.btRankOrgIndexer.setEnabled(true);
+        }
+        if (this.sub) {
+            this.btRankSubIndexer.setEnabled(true);
+        }
     }
 
     /**

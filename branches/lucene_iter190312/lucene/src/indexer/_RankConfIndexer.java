@@ -61,7 +61,7 @@ public class _RankConfIndexer {
         try {
             File indexDir = new File(path + IndexConst.RANK_CONFERENCE_INDEX_PATH);
             long start = new Date().getTime();
-            int count = this._index(indexDir, connectionPool);
+            int count = this._index(indexDir);
             long end = new Date().getTime();
             out = "Index : " + count + " files : Time index :" + (end - start) + " milisecond";
         } catch (Exception ex) {
@@ -70,7 +70,7 @@ public class _RankConfIndexer {
         return out;
     }
 
-    public int _index(File indexDir, ConnectionPool connectionPool) {
+    public int _index(File indexDir) {
         int count = 0;
         IndexBO indexBO = new IndexBO();
         try {
@@ -137,6 +137,8 @@ public class _RankConfIndexer {
             writer.close();
             stmt.close();
             connection.close();
+            connectionPool.getConnection().close();
+            connectionPool = null;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
             return 0;
@@ -153,7 +155,7 @@ public class _RankConfIndexer {
             int port = 3306;
             String path = "E:\\";
             _RankConfIndexer indexer = new _RankConfIndexer(user, pass, database, port, path);
-            indexer._run();
+            System.out.println(indexer._run());
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
