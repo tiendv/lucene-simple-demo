@@ -61,7 +61,7 @@ public class _RankJournalIndexer {
         try {
             File indexDir = new File(path + IndexConst.RANK_JOURNAL_INDEX_PATH);
             long start = new Date().getTime();
-            int count = this._index(indexDir, connectionPool);
+            int count = this._index(indexDir);
             long end = new Date().getTime();
             out = "Index : " + count + " files : Time index :" + (end - start) + " milisecond";
         } catch (Exception ex) {
@@ -70,7 +70,7 @@ public class _RankJournalIndexer {
         return out;
     }
 
-    public int _index(File indexDir, ConnectionPool connectionPool) {
+    public int _index(File indexDir) {
         int count = 0;
         IndexBO indexBO = new IndexBO();
         try {
@@ -86,7 +86,7 @@ public class _RankJournalIndexer {
             ResultSet rs = stmt.executeQuery();
             // Index data from query
             while ((rs != null) && (rs.next())) {
-                ArrayList<Integer> listIdJournal = indexBO.getListIdJournalFromIdSubDomain(path + IndexConst.AUTHOR_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID));
+                ArrayList<Integer> listIdJournal = indexBO.getListIdJournalFromIdSubDomain(path + IndexConst.JOURNAL_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID));
                 for (int i = 0; i < listIdJournal.size(); i++) {
                     int pubLast5Year = 0;
                     int citLast5Year = 0;
@@ -96,7 +96,7 @@ public class _RankJournalIndexer {
                     int citLast10Year = 0;
                     int g_indexLast10Year = 0;
                     int h_indexLast10Year = 0;
-                    LinkedHashMap<String, Object> object10Year = indexBO.getPapersFromRankSubDomain(path + IndexConst.JOURNAL_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdJournal.get(i)), 10, 3);
+                    LinkedHashMap<String, Object> object10Year = indexBO.getPapersFromRankSubDomain(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdJournal.get(i)), 10, 3);
                     if (object10Year != null) {
                         ArrayList<Integer> publicationList10Year = (ArrayList<Integer>) object10Year.get("list");
                         LinkedHashMap<String, Integer> index10Year = indexBO.getCalculateIndex(publicationList10Year);
@@ -137,6 +137,8 @@ public class _RankJournalIndexer {
             writer.close();
             stmt.close();
             connection.close();
+            connectionPool.getConnection().close();
+            connectionPool = null;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
             return 0;
@@ -153,7 +155,7 @@ public class _RankJournalIndexer {
             int port = 3306;
             String path = "E:\\";
             _RankJournalIndexer indexer = new _RankJournalIndexer(user, pass, database, port, path);
-            indexer._run();
+            System.out.println(indexer._run());
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }

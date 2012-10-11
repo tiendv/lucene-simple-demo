@@ -60,7 +60,7 @@ public class _RankSubIndexer {
         try {
             File indexDir = new File(path + IndexConst.RANK_SUBDOMAIN_INDEX_PATH);
             long start = new Date().getTime();
-            int count = this._index(indexDir, connectionPool);
+            int count = this._index(indexDir);
             long end = new Date().getTime();
             out = "Index : " + count + " files : Time index :" + (end - start) + " milisecond";
         } catch (Exception ex) {
@@ -69,7 +69,7 @@ public class _RankSubIndexer {
         return out;
     }
 
-    public int _index(File indexDir, ConnectionPool connectionPool) {
+    public int _index(File indexDir) {
         int count = 0;
         IndexBO indexBO = new IndexBO();
         try {
@@ -101,7 +101,7 @@ public class _RankSubIndexer {
                 d.add(new NumericField(IndexConst.RANK_SUBDOMAIN_PUBLAST10YEAR_FIELD, Field.Store.YES, false).setIntValue(pubLast10Year));
                 d.add(new NumericField(IndexConst.RANK_SUBDOMAIN_CITLAST5YEAR_FIELD, Field.Store.YES, false).setIntValue(citLast5Year));
                 d.add(new NumericField(IndexConst.RANK_SUBDOMAIN_CITLAST10YEAR_FIELD, Field.Store.YES, false).setIntValue(citLast10Year));
-                
+
                 writer.addDocument(d);
                 System.out.println("Indexing : " + count++ + "\t idSubdomain:" + rs.getString(SubdomainTB.COLUMN_SUBDOMAINID) + "\t pubLast5Year:" + pubLast5Year + "\t citLast5Year:" + citLast5Year + "\t pubLast10Year:" + pubLast10Year + "\t citLast10Year:" + citLast10Year);
                 d = null;
@@ -111,6 +111,8 @@ public class _RankSubIndexer {
             writer.close();
             stmt.close();
             connection.close();
+            connectionPool.getConnection().close();
+            connectionPool = null;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
             return 0;
@@ -127,7 +129,7 @@ public class _RankSubIndexer {
             int port = 3306;
             String path = "E:\\";
             _RankSubIndexer indexer = new _RankSubIndexer(user, pass, database, port, path);
-            indexer._run();
+            System.out.println(indexer._run());
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }

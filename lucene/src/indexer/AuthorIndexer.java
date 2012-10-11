@@ -78,7 +78,7 @@ public class AuthorIndexer {
         try {
             File indexDir = new File(path + IndexConst.AUTHOR_INDEX_PATH);
             long start = new Date().getTime();
-            int count = this._index(indexDir, connectionPool);
+            int count = this._index(indexDir);
             long end = new Date().getTime();
             out = "Index : " + count + " files : Time index :" + (end - start) + " milisecond";
         } catch (Exception ex) {
@@ -87,7 +87,7 @@ public class AuthorIndexer {
         return out;
     }
 
-    public int _index(File indexDir, ConnectionPool connectionPool) {
+    public int _index(File indexDir) {
         int count = 0;
         try {
             StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
@@ -148,6 +148,8 @@ public class AuthorIndexer {
             writer.close();
             stmt.close();
             connection.close();
+            connectionPool.getConnection().close();
+            connectionPool = null;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
             return 0;
@@ -161,23 +163,27 @@ public class AuthorIndexer {
      * @return listIdSubdomain, listRankSubdomain {idSubdomain {publicationCount, citationCount, coAuthorCount, h_index, g_index}}
      */
     public LinkedHashMap<String, String> getListIdSubdomain(int idAuthor) throws SQLException, ClassNotFoundException, IOException, ParseException {
-        Connection connection = ConnectionPool.dataSource.getConnection();
         LinkedHashMap<String, String> out = new LinkedHashMap<String, String>();
         String listIdSubdomain = "";
         //LinkedHashMap<Integer, Object> listRankSubdomain = new LinkedHashMap<Integer, Object>();
-        String sql = "SELECT sp." + SubdomainPaperTB.COLUMN_SUBDOMAINID + " FROM " + AuthorPaperTB.TABLE_NAME + " ap JOIN " + SubdomainPaperTB.TABLE_NAME + " sp ON ap." + AuthorPaperTB.COLUMN_PAPERID + " = sp." + SubdomainPaperTB.COLUMN_PAPERID + " WHERE ap." + AuthorPaperTB.COLUMN_AUTHORID + " = ? GROUP BY sp." + SubdomainPaperTB.COLUMN_SUBDOMAINID + "";
-        PreparedStatement stmt = connection.prepareStatement(sql);
-        stmt.setInt(1, idAuthor);
-        ResultSet rs = stmt.executeQuery();
-        while ((rs != null) && (rs.next())) {
-            listIdSubdomain += " " + rs.getString(SubdomainPaperTB.COLUMN_SUBDOMAINID);
-            //listRankSubdomain.put(rs.getInt(SubdomainPaperTB.COLUMN_SUBDOMAINID), this.getPublicationByIdAuthorAndIdSubdomain(Integer.toString(idAuthor), rs.getString(SubdomainPaperTB.COLUMN_SUBDOMAINID)));
+        try {
+            Connection connection = connectionPool.getConnection();
+            String sql = "SELECT sp." + SubdomainPaperTB.COLUMN_SUBDOMAINID + " FROM " + AuthorPaperTB.TABLE_NAME + " ap JOIN " + SubdomainPaperTB.TABLE_NAME + " sp ON ap." + AuthorPaperTB.COLUMN_PAPERID + " = sp." + SubdomainPaperTB.COLUMN_PAPERID + " WHERE ap." + AuthorPaperTB.COLUMN_AUTHORID + " = ? GROUP BY sp." + SubdomainPaperTB.COLUMN_SUBDOMAINID + "";
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setInt(1, idAuthor);
+            ResultSet rs = stmt.executeQuery();
+            while ((rs != null) && (rs.next())) {
+                listIdSubdomain += " " + rs.getString(SubdomainPaperTB.COLUMN_SUBDOMAINID);
+                //listRankSubdomain.put(rs.getInt(SubdomainPaperTB.COLUMN_SUBDOMAINID), this.getPublicationByIdAuthorAndIdSubdomain(Integer.toString(idAuthor), rs.getString(SubdomainPaperTB.COLUMN_SUBDOMAINID)));
+            }
+            if (!"".equals(listIdSubdomain)) {
+                listIdSubdomain = listIdSubdomain.substring(1);
+            }
+            stmt.close();
+            connection.close();
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
         }
-        if (!"".equals(listIdSubdomain)) {
-            listIdSubdomain = listIdSubdomain.substring(1);
-        }
-        stmt.close();
-        connection.close();
         out.put("listIdSubdomain", listIdSubdomain);
         //out.put("listRankSubdomain", Common.OToS(listRankSubdomain));
         return out;
@@ -288,19 +294,23 @@ public class AuthorIndexer {
      * @return
      */
     public int getCoAuthorCount(String listIdPaper) throws SQLException, ClassNotFoundException, IOException {
-        Connection connection = ConnectionPool.dataSource.getConnection();
         int count = 0;
-        String sql = "SELECT COUNT(DISTINCT ap." + AuthorPaperTB.COLUMN_AUTHORID + ") AS CoAuthorCount FROM " + AuthorPaperTB.TABLE_NAME + " ap WHERE ap." + AuthorPaperTB.COLUMN_PAPERID + " IN (" + listIdPaper + ")";
-        PreparedStatement stmt = connection.prepareStatement(sql);
-        ResultSet rs = stmt.executeQuery();
-        if ((rs != null) && (rs.next())) {
-            count = rs.getInt("CoAuthorCount");
+        try {
+            Connection connection = connectionPool.getConnection();
+            String sql = "SELECT COUNT(DISTINCT ap." + AuthorPaperTB.COLUMN_AUTHORID + ") AS CoAuthorCount FROM " + AuthorPaperTB.TABLE_NAME + " ap WHERE ap." + AuthorPaperTB.COLUMN_PAPERID + " IN (" + listIdPaper + ")";
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery();
+            if ((rs != null) && (rs.next())) {
+                count = rs.getInt("CoAuthorCount");
+            }
+            if (count > 0) {
+                count = count - 1;
+            }
+            stmt.close();
+            connection.close();
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
         }
-        if (count > 0) {
-            count = count - 1;
-        }
-        stmt.close();
-        connection.close();
         return count;
     }
 
@@ -450,7 +460,7 @@ public class AuthorIndexer {
             int port = 3306;
             String path = "E:\\";
             AuthorIndexer indexer = new AuthorIndexer(user, pass, database, port, path);
-            indexer._run();
+            System.out.println(indexer._run());
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
