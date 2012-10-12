@@ -143,7 +143,7 @@ public class KeywordIndexer {
         String list = "";
         try {
             Connection connection = connectionPool.getConnection();
-            String sql = "SELECT s." + SubdomainPaperTB.COLUMN_SUBDOMAINID + " FROM " + PaperKeywordTB.TABLE_NAME + " p JOIN " + KeywordTB.TABLE_NAME + " k ON k." + KeywordTB.COLUMN_KEYWORD + "=p." + PaperKeywordTB.COLUMN_KEYWORDID + " JOIN " + SubdomainPaperTB.TABLE_NAME + " s ON s." + SubdomainPaperTB.COLUMN_PAPERID + "=p." + PaperKeywordTB.COLUMN_PAPERID + " WHERE k." + KeywordTB.COLUMN_KEYWORD + "=? GROUP BY s." + SubdomainPaperTB.COLUMN_SUBDOMAINID + "";
+            String sql = "SELECT sp." + SubdomainPaperTB.COLUMN_SUBDOMAINID + " FROM " + PaperKeywordTB.TABLE_NAME + " pk JOIN " + SubdomainPaperTB.TABLE_NAME + " sp ON sp." + SubdomainPaperTB.COLUMN_PAPERID + " = pk." + PaperKeywordTB.COLUMN_PAPERID + " WHERE pk." + PaperKeywordTB.COLUMN_KEYWORDID + " = ? GROUP BY sp." + SubdomainPaperTB.COLUMN_SUBDOMAINID + "";
             PreparedStatement stmt = connection.prepareStatement(sql);
             stmt.setInt(1, idKeyword);
             ResultSet rs = stmt.executeQuery();
