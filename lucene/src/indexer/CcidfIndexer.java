@@ -4,7 +4,6 @@
  */
 package indexer;
 
-import constant.Common;
 import constant.ConnectionPool;
 import constant.IndexConst;
 import database.CcidfTB;
@@ -30,33 +29,22 @@ import org.apache.lucene.util.Version;
  */
 public class CcidfIndexer {
 
-    private ConnectionPool connectionPool;
-    private String path = null;
-    public Boolean connect = true;
-    public Boolean folder = true;
+    private String path = "E:\\";
 
-    public CcidfIndexer(String username, String password, String database, int port, String path) {
+    public CcidfIndexer(String path) {
         try {
-            FSDirectory directory = Common.getFSDirectory(path, IndexConst.PAPER_INDEX_PATH);
-            if (directory == null) {
-                folder = false;
-            }
             this.path = path;
-            connectionPool = new ConnectionPool(username, password, database, port);
-            if (connectionPool.getConnection() == null) {
-                connect = false;
-            }
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
     }
 
-    public String _run() {
+    public String _run(ConnectionPool connectionPool) {
         String out = "";
         try {
             File indexDir = new File(path + IndexConst.CCIDF_INDEX_PATH);
             long start = new Date().getTime();
-            int count = this._index(indexDir);
+            int count = this._index(connectionPool, indexDir);
             long end = new Date().getTime();
             out = "Index : " + count + " files : Time index :" + (end - start) + " milisecond";
         } catch (Exception ex) {
@@ -65,7 +53,7 @@ public class CcidfIndexer {
         return out;
     }
 
-    public int _index(File indexDir) {
+    private int _index(ConnectionPool connectionPool, File indexDir) {
         int count = 0;
         try {
             StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
@@ -82,14 +70,14 @@ public class CcidfIndexer {
             CcidfDTO dto = null;
             while ((rs != null) && (rs.next())) {
                 dto = new CcidfDTO();
-                Document d = new Document();
                 dto.setIdPaper(rs.getString(CcidfTB.COLUMN_PAPERID));
                 dto.setIdRelatedPaper(rs.getInt(CcidfTB.COLUMN_RELATEDPAPERID));
                 dto.setWeight(rs.getDouble(CcidfTB.COLUMN_WEIGHT));
 
+                Document d = new Document();
                 d.add(new Field(IndexConst.CCIDF_IDPAPER_FIELD, dto.idPaper, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new NumericField(IndexConst.CCIDF_IDRELATEPAPER_FIELD, Field.Store.YES, false).setIntValue(dto.idRelatedPaper));
-                d.add(new NumericField(IndexConst.CCIDF_WEIGHT_FIELD, Field.Store.YES, false).setDoubleValue(dto.weight));
+                d.add(new NumericField(IndexConst.CCIDF_WEIGHT_FIELD, Field.Store.YES, true).setDoubleValue(dto.weight));
 
                 writer.addDocument(d);
                 System.out.println("Indexing : " + count++ + "\t");
@@ -101,8 +89,6 @@ public class CcidfIndexer {
             writer.close();
             stmt.close();
             connection.close();
-            connectionPool.getConnection().close();
-            connectionPool = null;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
             return 0;
@@ -118,8 +104,9 @@ public class CcidfIndexer {
             String database = "cspublicationcrawler";
             int port = 3306;
             String path = "E:\\";
-            CcidfIndexer indexer = new CcidfIndexer(user, pass, database, port, path);
-            indexer._run();
+            ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
+            CcidfIndexer indexer = new CcidfIndexer(path);
+            System.out.println(indexer._run(connectionPool));
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }

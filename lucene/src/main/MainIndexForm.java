@@ -4,6 +4,8 @@
  */
 package main;
 
+import constant.ConnectionPool;
+import constant.IndexConst;
 import indexer.AuthorIndexer;
 import indexer.CcidfIndexer;
 import indexer.ConferenceIndexer;
@@ -20,6 +22,7 @@ import indexer._RankOrgIndexer;
 import indexer._RankSubIndexer;
 import indexer._Rank_Paper;
 import java.io.File;
+import java.io.IOException;
 
 /**
  *
@@ -376,19 +379,25 @@ public class MainIndexForm extends javax.swing.JFrame {
                     this.txtPath.setText(this.path);
                 }
             }
-            // Index
-            PaperIndexer index = new PaperIndexer(user, pass, database, port, path);
-            if (index.folder && index.connect) {
-                txtalog.setText(txtalog.getText() + "Connect database success!\n Runing \n");
-                txtalog.setText(txtalog.getText() + index._run() + "\nFinished!\n");
-            } else {
-                if (!index.folder) {
-                    txtalog.setText(txtalog.getText() + "Error: Can not connect to folder!\n");
-                }
-                if (!index.connect) {
-                    txtalog.setText(txtalog.getText() + "Error: Can not connect to database!\n");
-                }
+            // Delete folder
+            File indexDir = new File(this.path + IndexConst.PAPER_INDEX_PATH);
+            if (indexDir.exists()) {
+                delete(indexDir);
             }
+            // Connect Database
+            ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
+            if (connectionPool.getConnection() == null) {
+                txtalog.setText(txtalog.getText() + "Error: Can not connect to database!\n");
+                this.btPaperIndexer.setEnabled(true);
+                this.btRankPaper.setEnabled(true);
+                return;
+            } else {
+                txtalog.setText(txtalog.getText() + "Connect database success!\n Runing \n");
+            }
+            PaperIndexer index = new PaperIndexer(path);
+            txtalog.setText(txtalog.getText() + index._run(connectionPool) + "\nFinished!\n");
+            connectionPool.getConnection().close();
+            connectionPool = null;
             this.setEnabledAll();
             this.setEnabledAllRank();
             prBar.setIndeterminate(true);
@@ -424,18 +433,20 @@ public class MainIndexForm extends javax.swing.JFrame {
                     this.txtPath.setText(this.path);
                 }
             }
-            // Run        
-            _Rank_Paper rank = new _Rank_Paper(user, pass, database, port);
-            if (rank.connect) {
-                txtalog.setText(txtalog.getText() + "Connect database success!\n Runing \n");
-                txtalog.setText(txtalog.getText() + rank._run() + "\nFinished!");
+            // Connect Database
+            ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
+            if (connectionPool.getConnection() == null) {
+                txtalog.setText(txtalog.getText() + "Error: Can not connect to database!\n");
                 this.btPaperIndexer.setEnabled(true);
                 this.btRankPaper.setEnabled(true);
-                prBar.setString("Done index");
+                return;
             } else {
-                this.btRankPaper.setEnabled(true);
-                txtalog.setText(txtalog.getText() + "Error: Can not connect to database!\nError!");
+                txtalog.setText(txtalog.getText() + "Connect database success!\n Runing \n");
             }
+            _Rank_Paper rank = new _Rank_Paper();
+            txtalog.setText(txtalog.getText() + rank._run(connectionPool) + "\nFinished!\n");
+            connectionPool.getConnection().close();
+            connectionPool = null;
             this.setEnabledAllRank();
         } catch (Exception ex) {
             txtalog.setText(ex.getMessage());
@@ -468,19 +479,24 @@ public class MainIndexForm extends javax.swing.JFrame {
                     this.txtPath.setText(this.path);
                 }
             }
-            // Index
-            AuthorIndexer index = new AuthorIndexer(user, pass, database, port, path);
-            if (index.folder && index.connect) {
-                txtalog.setText(txtalog.getText() + "Connect database success!\n Runing \n");
-                txtalog.setText(txtalog.getText() + index._run() + "\nFinished!\n");
-            } else {
-                if (!index.folder) {
-                    txtalog.setText(txtalog.getText() + "Error: Can not connect to folder!\n");
-                }
-                if (!index.connect) {
-                    txtalog.setText(txtalog.getText() + "Error: Can not connect to database!\n");
-                }
+            // Delete folder
+            File indexDir = new File(this.path + IndexConst.AUTHOR_INDEX_PATH);
+            if (indexDir.exists()) {
+                delete(indexDir);
             }
+            // Connect Database
+            ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
+            if (connectionPool.getConnection() == null) {
+                txtalog.setText(txtalog.getText() + "Error: Can not connect to database!\n");
+                this.setEnabledAll();
+                return;
+            } else {
+                txtalog.setText(txtalog.getText() + "Connect database success!\n Runing \n");
+            }
+            AuthorIndexer index = new AuthorIndexer(path);
+            txtalog.setText(txtalog.getText() + index._run(connectionPool) + "\nFinished!\n");
+            connectionPool.getConnection().close();
+            connectionPool = null;
             this.setEnabledAll();
             this.aut = true;
             this.setEnabledAllRank();
@@ -516,19 +532,24 @@ public class MainIndexForm extends javax.swing.JFrame {
                     this.txtPath.setText(this.path);
                 }
             }
-            // Index
-            ConferenceIndexer index = new ConferenceIndexer(user, pass, database, port, path);
-            if (index.folder && index.connect) {
-                txtalog.setText(txtalog.getText() + "Connect database success!\n Runing \n");
-                txtalog.setText(txtalog.getText() + index._run() + "\nFinished!\n");
-            } else {
-                if (!index.folder) {
-                    txtalog.setText(txtalog.getText() + "Error: Can not connect to folder!\n");
-                }
-                if (!index.connect) {
-                    txtalog.setText(txtalog.getText() + "Error: Can not connect to database!\n");
-                }
+            // Delete folder
+            File indexDir = new File(this.path + IndexConst.CONFERENCE_INDEX_PATH);
+            if (indexDir.exists()) {
+                delete(indexDir);
             }
+            // Connect Database
+            ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
+            if (connectionPool.getConnection() == null) {
+                txtalog.setText(txtalog.getText() + "Error: Can not connect to database!\n");
+                this.setEnabledAll();
+                return;
+            } else {
+                txtalog.setText(txtalog.getText() + "Connect database success!\n Runing \n");
+            }
+            ConferenceIndexer index = new ConferenceIndexer(path);
+            txtalog.setText(txtalog.getText() + index._run(connectionPool) + "\nFinished!\n");
+            connectionPool.getConnection().close();
+            connectionPool = null;
             this.setEnabledAll();
             this.con = true;
             this.setEnabledAllRank();
@@ -565,19 +586,24 @@ public class MainIndexForm extends javax.swing.JFrame {
                     this.txtPath.setText(this.path);
                 }
             }
-            // Index
-            JournalIndexer index = new JournalIndexer(user, pass, database, port, path);
-            if (index.folder && index.connect) {
-                txtalog.setText(txtalog.getText() + "Connect database success!\n Runing \n");
-                txtalog.setText(txtalog.getText() + index._run() + "\nFinished!\n");
-            } else {
-                if (!index.folder) {
-                    txtalog.setText(txtalog.getText() + "Error: Can not connect to folder!\n");
-                }
-                if (!index.connect) {
-                    txtalog.setText(txtalog.getText() + "Error: Can not connect to database!\n");
-                }
+            // Delete folder
+            File indexDir = new File(this.path + IndexConst.JOURNAL_INDEX_PATH);
+            if (indexDir.exists()) {
+                delete(indexDir);
             }
+            // Connect Database
+            ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
+            if (connectionPool.getConnection() == null) {
+                txtalog.setText(txtalog.getText() + "Error: Can not connect to database!\n");
+                this.setEnabledAll();
+                return;
+            } else {
+                txtalog.setText(txtalog.getText() + "Connect database success!\n Runing \n");
+            }
+            JournalIndexer index = new JournalIndexer(path);
+            txtalog.setText(txtalog.getText() + index._run(connectionPool) + "\nFinished!\n");
+            connectionPool.getConnection().close();
+            connectionPool = null;
             this.setEnabledAll();
             this.jou = true;
             this.setEnabledAllRank();
@@ -614,19 +640,24 @@ public class MainIndexForm extends javax.swing.JFrame {
                     this.txtPath.setText(this.path);
                 }
             }
-            // Index
-            KeywordIndexer index = new KeywordIndexer(user, pass, database, port, path);
-            if (index.folder && index.connect) {
-                txtalog.setText(txtalog.getText() + "Connect database success!\n Runing \n");
-                txtalog.setText(txtalog.getText() + index._run() + "\nFinished!\n");
-            } else {
-                if (!index.folder) {
-                    txtalog.setText(txtalog.getText() + "Error: Can not connect to folder!\n");
-                }
-                if (!index.connect) {
-                    txtalog.setText(txtalog.getText() + "Error: Can not connect to database!\n");
-                }
+            // Delete folder
+            File indexDir = new File(this.path + IndexConst.KEYWORD_INDEX_PATH);
+            if (indexDir.exists()) {
+                delete(indexDir);
             }
+            // Connect Database
+            ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
+            if (connectionPool.getConnection() == null) {
+                txtalog.setText(txtalog.getText() + "Error: Can not connect to database!\n");
+                this.setEnabledAll();
+                return;
+            } else {
+                txtalog.setText(txtalog.getText() + "Connect database success!\n Runing \n");
+            }
+            KeywordIndexer index = new KeywordIndexer(path);
+            txtalog.setText(txtalog.getText() + index._run(connectionPool) + "\nFinished!\n");
+            connectionPool.getConnection().close();
+            connectionPool = null;
             this.setEnabledAll();
             this.key = true;
             this.setEnabledAllRank();
@@ -663,19 +694,24 @@ public class MainIndexForm extends javax.swing.JFrame {
                     this.txtPath.setText(this.path);
                 }
             }
-            // Index
-            OrgIndexer index = new OrgIndexer(user, pass, database, port, path);
-            if (index.folder && index.connect) {
-                txtalog.setText(txtalog.getText() + "Connect database success!\n Runing \n");
-                txtalog.setText(txtalog.getText() + index._run() + "\nFinished!\n");
-            } else {
-                if (!index.folder) {
-                    txtalog.setText(txtalog.getText() + "Error: Can not connect to folder!\n");
-                }
-                if (!index.connect) {
-                    txtalog.setText(txtalog.getText() + "Error: Can not connect to database!\n");
-                }
+            // Delete folder
+            File indexDir = new File(this.path + IndexConst.ORG_INDEX_PATH);
+            if (indexDir.exists()) {
+                delete(indexDir);
             }
+            // Connect Database
+            ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
+            if (connectionPool.getConnection() == null) {
+                txtalog.setText(txtalog.getText() + "Error: Can not connect to database!\n");
+                this.setEnabledAll();
+                return;
+            } else {
+                txtalog.setText(txtalog.getText() + "Connect database success!\n Runing \n");
+            }
+            OrgIndexer index = new OrgIndexer(path);
+            txtalog.setText(txtalog.getText() + index._run(connectionPool) + "\nFinished!\n");
+            connectionPool.getConnection().close();
+            connectionPool = null;
             this.setEnabledAll();
             this.org = true;
             this.setEnabledAllRank();
@@ -761,19 +797,25 @@ public class MainIndexForm extends javax.swing.JFrame {
                     this.txtPath.setText(this.path);
                 }
             }
-            // Index
-            CcidfIndexer index = new CcidfIndexer(user, pass, database, port, path);
-            if (index.folder && index.connect) {
-                txtalog.setText(txtalog.getText() + "Connect database success!\n Runing \n");
-                txtalog.setText(txtalog.getText() + index._run() + "\nFinished!\n");
-            } else {
-                if (!index.folder) {
-                    txtalog.setText(txtalog.getText() + "Error: Can not connect to folder!\n");
-                }
-                if (!index.connect) {
-                    txtalog.setText(txtalog.getText() + "Error: Can not connect to database!\n");
-                }
+            // Delete folder
+            File indexDir = new File(this.path + IndexConst.CCIDF_INDEX_PATH);
+            if (indexDir.exists()) {
+                delete(indexDir);
             }
+            // Connect Database
+            ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
+            if (connectionPool.getConnection() == null) {
+                txtalog.setText(txtalog.getText() + "Error: Can not connect to database!\n");
+                this.btPaperIndexer.setEnabled(true);
+                this.btRankPaper.setEnabled(true);
+                return;
+            } else {
+                txtalog.setText(txtalog.getText() + "Connect database success!\n Runing \n");
+            }
+            CcidfIndexer index = new CcidfIndexer(path);
+            txtalog.setText(txtalog.getText() + index._run(connectionPool) + "\nFinished!\n");
+            connectionPool.getConnection().close();
+            connectionPool = null;
             this.setEnabledAll();
             this.setEnabledAllRank();
             prBar.setIndeterminate(true);
@@ -1119,6 +1161,34 @@ public class MainIndexForm extends javax.swing.JFrame {
         }
         if (this.sub) {
             this.btRankSubIndexer.setEnabled(true);
+        }
+    }
+
+    public static void delete(File file) throws IOException {
+        if (file.isDirectory()) {
+            //directory is empty, then delete it
+            if (file.list().length == 0) {
+                file.delete();
+                //System.out.println("Directory is deleted : " + file.getAbsolutePath());
+            } else {
+                //list all the directory contents
+                String files[] = file.list();
+                for (String temp : files) {
+                    //construct the file structure
+                    File fileDelete = new File(file, temp);
+                    //recursive delete
+                    delete(fileDelete);
+                }
+                //check the directory again, if empty then delete it
+                if (file.list().length == 0) {
+                    file.delete();
+                    System.out.println("Directory is deleted : " + file.getAbsolutePath());
+                }
+            }
+        } else {
+            //if file, then delete it
+            file.delete();
+            System.out.println("File is deleted : " + file.getAbsolutePath());
         }
     }
 

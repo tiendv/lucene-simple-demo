@@ -112,8 +112,8 @@ public class SubdomainIndexer {
                 d.add(new Field(IndexConst.SUBDOMAIN_SUBDOMAINNAME_FIELD, dto.subdomainName, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.SUBDOMAIN_IDDOMAIN_FIELD, dto.idDomain, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.SUBDOMAIN_LISTPUBLICATIONCITATION_FIELD, dto.listPublicationCitation, Field.Store.YES, Field.Index.NO));
-                d.add(new NumericField(IndexConst.SUBDOMAIN_PUBLICATIONCOUNT_FIELD, Field.Store.YES, false).setIntValue(dto.publicationCount));
-                d.add(new NumericField(IndexConst.SUBDOMAIN_CITATIONCOUNT_FIELD, Field.Store.YES, false).setIntValue(dto.citationCount));
+                d.add(new NumericField(IndexConst.SUBDOMAIN_PUBLICATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(dto.publicationCount));
+                d.add(new NumericField(IndexConst.SUBDOMAIN_CITATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(dto.citationCount));
 
                 writer.addDocument(d);
                 System.out.println("Indexing : " + count++ + "\t" + dto.subdomainName);
