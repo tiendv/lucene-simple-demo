@@ -4,6 +4,7 @@
  */
 package indexer;
 
+import bo.IndexBO;
 import constant.Common;
 import constant.ConnectionPool;
 import constant.IndexConst;
@@ -45,35 +46,25 @@ import org.apache.lucene.util.Version;
  */
 public class SubdomainIndexer {
 
-    private ConnectionPool connectionPool;
     private IndexSearcher searcher = null;
-    private String path = null;
-    public Boolean connect = true;
-    public Boolean folder = true;
+    private String path = "E:\\";
 
-    public SubdomainIndexer(String username, String password, String database, int port, String path) {
+    public SubdomainIndexer(String path) {
         try {
             FSDirectory directory = Common.getFSDirectory(path, IndexConst.PAPER_INDEX_PATH);
-            if (directory == null) {
-                folder = false;
-            }
-            this.path = path;
             searcher = new IndexSearcher(directory);
-            connectionPool = new ConnectionPool(username, password, database, port);
-            if (connectionPool.getConnection() == null) {
-                connect = false;
-            }
+            this.path = path;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
     }
 
-    public String _run() {
+    public String _run(ConnectionPool connectionPool) {
         String out = "";
         try {
             File indexDir = new File(path + IndexConst.SUBDOMAIN_INDEX_PATH);
             long start = new Date().getTime();
-            int count = this._index(indexDir);
+            int count = this._index(connectionPool, indexDir);
             long end = new Date().getTime();
             out = "Index : " + count + " files : Time index :" + (end - start) + " milisecond";
         } catch (Exception ex) {
@@ -82,7 +73,7 @@ public class SubdomainIndexer {
         return out;
     }
 
-    public int _index(File indexDir) {
+    private int _index(ConnectionPool connectionPool, File indexDir) {
         int count = 0;
         try {
             StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
@@ -96,24 +87,55 @@ public class SubdomainIndexer {
             stmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet rs = stmt.executeQuery();
             // Index data from query
+            IndexBO indexBO = new IndexBO();
             SubdomainDTO dto = null;
             while ((rs != null) && (rs.next())) {
                 dto = new SubdomainDTO();
-                Document d = new Document();
                 LinkedHashMap<String, String> listPublicationCitation = this.getListPublicationCitation(rs.getString(SubdomainTB.COLUMN_SUBDOMAINID));
                 dto.setIdSubdomain(rs.getString(SubdomainTB.COLUMN_SUBDOMAINID));
                 dto.setSubdomainName(rs.getString(SubdomainTB.COLUMN_SUBDOMAINNAME));
                 dto.setIdDomain(rs.getString(SubdomainTB.COLUMN_DOMAINID));
-                dto.setCitationCount(Integer.parseInt(listPublicationCitation.get("citationCount")));
-                dto.setPublicationCount(Integer.parseInt(listPublicationCitation.get("publicationCount")));
+                //dto.setCitationCount(Integer.parseInt(listPublicationCitation.get("citationCount")));
+                //dto.setPublicationCount(Integer.parseInt(listPublicationCitation.get("publicationCount")));
                 dto.setListPublicationCitation(listPublicationCitation.get("listPublicationCitation"));
 
+                int pubLast5Year = 0;
+                int citLast5Year = 0;
+                int pubLast10Year = 0;
+                int citLast10Year = 0;
+                int publicationCount = 0;
+                int citationCount = 0;
+
+                LinkedHashMap<String, Integer> objectAllYear = indexBO.getPublicationsFromIdSubdomain(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), 0);
+                if (objectAllYear != null) {
+                    publicationCount = objectAllYear.get("pubCount");
+                    citationCount = objectAllYear.get("citCount");
+                    LinkedHashMap<String, Integer> object10Year = indexBO.getPublicationsFromIdSubdomain(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), 10);
+                    if (object10Year != null) {
+                        pubLast10Year = object10Year.get("pubCount");
+                        citLast10Year = object10Year.get("citCount");
+                        LinkedHashMap<String, Integer> object5Year = indexBO.getPublicationsFromIdSubdomain(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), 5);
+                        if (object5Year != null) {
+                            pubLast5Year = object5Year.get("pubCount");
+                            citLast5Year = object5Year.get("citCount");
+                        }
+                    }
+                }
+
+                Document d = new Document();
                 d.add(new Field(IndexConst.SUBDOMAIN_IDSUBDOMAIN_FIELD, dto.idSubdomain, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.SUBDOMAIN_SUBDOMAINNAME_FIELD, dto.subdomainName, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.SUBDOMAIN_IDDOMAIN_FIELD, dto.idDomain, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.SUBDOMAIN_LISTPUBLICATIONCITATION_FIELD, dto.listPublicationCitation, Field.Store.YES, Field.Index.NO));
-                d.add(new NumericField(IndexConst.SUBDOMAIN_PUBLICATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(dto.publicationCount));
-                d.add(new NumericField(IndexConst.SUBDOMAIN_CITATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(dto.citationCount));
+
+                //d.add(new NumericField(IndexConst.SUBDOMAIN_PUBLICATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(dto.publicationCount));
+                //d.add(new NumericField(IndexConst.SUBDOMAIN_CITATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(dto.citationCount));
+                d.add(new NumericField(IndexConst.SUBDOMAIN_PUBLAST5YEAR_FIELD, Field.Store.YES, true).setIntValue(pubLast5Year));
+                d.add(new NumericField(IndexConst.SUBDOMAIN_PUBLAST10YEAR_FIELD, Field.Store.YES, true).setIntValue(pubLast10Year));
+                d.add(new NumericField(IndexConst.SUBDOMAIN_CITLAST5YEAR_FIELD, Field.Store.YES, true).setIntValue(citLast5Year));
+                d.add(new NumericField(IndexConst.SUBDOMAIN_CITLAST10YEAR_FIELD, Field.Store.YES, true).setIntValue(citLast10Year));
+                d.add(new NumericField(IndexConst.SUBDOMAIN_PUBLICATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(publicationCount));
+                d.add(new NumericField(IndexConst.SUBDOMAIN_CITATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(citationCount));
 
                 writer.addDocument(d);
                 System.out.println("Indexing : " + count++ + "\t" + dto.subdomainName);
@@ -125,8 +147,6 @@ public class SubdomainIndexer {
             writer.close();
             stmt.close();
             connection.close();
-            connectionPool.getConnection().close();
-            connectionPool = null;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
             return 0;
@@ -228,8 +248,9 @@ public class SubdomainIndexer {
             String database = "cspublicationcrawler";
             int port = 3306;
             String path = "E:\\";
-            SubdomainIndexer indexer = new SubdomainIndexer(user, pass, database, port, path);
-            System.out.println(indexer._run());
+            ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
+            SubdomainIndexer indexer = new SubdomainIndexer(path);
+            System.out.println(indexer._run(connectionPool));
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }

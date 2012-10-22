@@ -19,7 +19,6 @@ import indexer._RankConfIndexer;
 import indexer._RankJournalIndexer;
 import indexer._RankKeyIndexer;
 import indexer._RankOrgIndexer;
-import indexer._RankSubIndexer;
 import indexer._Rank_Paper;
 import java.io.File;
 import java.io.IOException;
@@ -36,7 +35,6 @@ public class MainIndexForm extends javax.swing.JFrame {
     private Boolean jou = false;
     private Boolean org = false;
     private Boolean key = false;
-    private Boolean sub = false;
 
     /**
      * Creates new form MainIndexForm
@@ -84,7 +82,6 @@ public class MainIndexForm extends javax.swing.JFrame {
         btRankJournalIndexer = new javax.swing.JButton();
         btRankKeyIndexer = new javax.swing.JButton();
         btRankOrgIndexer = new javax.swing.JButton();
-        btRankSubIndexer = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Index data PubGuru");
@@ -222,14 +219,6 @@ public class MainIndexForm extends javax.swing.JFrame {
                 }
             });
 
-            btRankSubIndexer.setText("RankSubIndexer");
-            btRankSubIndexer.setToolTipText("");
-            btRankSubIndexer.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent evt) {
-                    btRankSubIndexerActionPerformed(evt);
-                }
-            });
-
             javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
             getContentPane().setLayout(layout);
             layout.setHorizontalGroup(
@@ -289,9 +278,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                                 .addGroup(layout.createSequentialGroup()
                                     .addComponent(btRankKeyIndexer, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addGap(18, 18, 18)
-                                    .addComponent(btRankOrgIndexer, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addGap(18, 18, 18)
-                                    .addComponent(btRankSubIndexer, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                    .addComponent(btRankOrgIndexer, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)))
                             .addGap(0, 8, Short.MAX_VALUE))
                         .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                             .addContainerGap()
@@ -340,8 +327,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                     .addGap(18, 18, 18)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(btRankKeyIndexer)
-                        .addComponent(btRankOrgIndexer)
-                        .addComponent(btRankSubIndexer))
+                        .addComponent(btRankOrgIndexer))
                     .addGap(18, 18, 18)
                     .addComponent(prBar, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGap(18, 18, 18)
@@ -748,21 +734,25 @@ public class MainIndexForm extends javax.swing.JFrame {
                     this.txtPath.setText(this.path);
                 }
             }
-            // Index
-            SubdomainIndexer index = new SubdomainIndexer(user, pass, database, port, path);
-            if (index.folder && index.connect) {
-                txtalog.setText(txtalog.getText() + "Connect database success!\n Runing \n");
-                txtalog.setText(txtalog.getText() + index._run() + "\nFinished!\n");
-            } else {
-                if (!index.folder) {
-                    txtalog.setText(txtalog.getText() + "Error: Can not connect to folder!\n");
-                }
-                if (!index.connect) {
-                    txtalog.setText(txtalog.getText() + "Error: Can not connect to database!\n");
-                }
+            // Delete folder
+            File indexDir = new File(this.path + IndexConst.SUBDOMAIN_INDEX_PATH);
+            if (indexDir.exists()) {
+                delete(indexDir);
             }
+            // Connect Database
+            ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
+            if (connectionPool.getConnection() == null) {
+                txtalog.setText(txtalog.getText() + "Error: Can not connect to database!\n");
+                this.setEnabledAll();
+                return;
+            } else {
+                txtalog.setText(txtalog.getText() + "Connect database success!\n Runing \n");
+            }
+            SubdomainIndexer index = new SubdomainIndexer(path);
+            txtalog.setText(txtalog.getText() + index._run(connectionPool) + "\nFinished!\n");
+            connectionPool.getConnection().close();
+            connectionPool = null;
             this.setEnabledAll();
-            this.sub = true;
             this.setEnabledAllRank();
             prBar.setIndeterminate(true);
             prBar.setString("Done index");
@@ -1064,54 +1054,6 @@ public class MainIndexForm extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btRankOrgIndexerActionPerformed
 
-    private void btRankSubIndexerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btRankSubIndexerActionPerformed
-        // TODO add your handling code here:
-        try {
-            prBar.setIndeterminate(false);
-            prBar.setString("Runing");
-            txtalog.setText("Runing\n");
-            this.setDisabledAll();
-            this.path = this.txtPath.getText();
-            String user = txtUserName.getText();
-            String pass = txtPassWord.getText();
-            String database = txtDatabase.getText();
-            int port = Integer.parseInt(txtPort.getText());
-            File file = new File(this.path);
-            if (!file.exists()) {
-                // It returns false if File or directory does not exist
-                txtalog.setText(txtalog.getText() + "Directory you are searching does not exist : " + file.exists() + "\n");
-                this.setEnabledAll();
-                return;
-            } else {
-                // It returns true if File or directory exists
-                txtalog.setText(txtalog.getText() + "Directory you are searching does exist : " + file.exists() + "\n");
-                if (!"\\".equals(this.path.substring(this.path.length() - 1, this.path.length()))) {
-                    this.path += "\\";
-                    this.txtPath.setText(this.path);
-                }
-            }
-            // Index
-            _RankSubIndexer index = new _RankSubIndexer(user, pass, database, port, path);
-            if (index.folder && index.connect) {
-                txtalog.setText(txtalog.getText() + "Connect database success!\n Runing \n");
-                txtalog.setText(txtalog.getText() + index._run() + "\nFinished!\n");
-            } else {
-                if (!index.folder) {
-                    txtalog.setText(txtalog.getText() + "Error: Can not connect to folder!\n");
-                }
-                if (!index.connect) {
-                    txtalog.setText(txtalog.getText() + "Error: Can not connect to database!\n");
-                }
-            }
-            this.setEnabledAll();
-            this.setEnabledAllRank();
-            prBar.setIndeterminate(true);
-            prBar.setString("Done index");
-        } catch (Exception ex) {
-            txtalog.setText(ex.getMessage());
-        }
-    }//GEN-LAST:event_btRankSubIndexerActionPerformed
-
     private void setDisabledAll() {
         this.btAuthorIndexer.setEnabled(false);
         this.btConferenceIndexer.setEnabled(false);
@@ -1127,7 +1069,6 @@ public class MainIndexForm extends javax.swing.JFrame {
         this.btRankJournalIndexer.setEnabled(false);
         this.btRankKeyIndexer.setEnabled(false);
         this.btRankOrgIndexer.setEnabled(false);
-        this.btRankSubIndexer.setEnabled(false);
 
     }
 
@@ -1158,9 +1099,6 @@ public class MainIndexForm extends javax.swing.JFrame {
         }
         if (this.org) {
             this.btRankOrgIndexer.setEnabled(true);
-        }
-        if (this.sub) {
-            this.btRankSubIndexer.setEnabled(true);
         }
     }
 
@@ -1246,7 +1184,6 @@ public class MainIndexForm extends javax.swing.JFrame {
     private javax.swing.JButton btRankKeyIndexer;
     private javax.swing.JButton btRankOrgIndexer;
     private javax.swing.JButton btRankPaper;
-    private javax.swing.JButton btRankSubIndexer;
     private javax.swing.JButton btSubdomainIndexer;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
