@@ -4,6 +4,7 @@
  */
 package indexer;
 
+import bo.IndexBO;
 import constant.Common;
 import constant.ConnectionPool;
 import constant.IndexConst;
@@ -51,35 +52,25 @@ import org.apache.lucene.util.Version;
  */
 public class OrgIndexer {
 
-    private ConnectionPool connectionPool;
     private IndexSearcher searcher = null;
-    private String path = null;
-    public Boolean connect = true;
-    public Boolean folder = true;
+    private String path = "E:\\";
 
-    public OrgIndexer(String username, String password, String database, int port, String path) {
+    public OrgIndexer(String path) {
         try {
             FSDirectory directory = Common.getFSDirectory(path, IndexConst.PAPER_INDEX_PATH);
-            if (directory == null) {
-                folder = false;
-            }
-            this.path = path;
             searcher = new IndexSearcher(directory);
-            connectionPool = new ConnectionPool(username, password, database, port);
-            if (connectionPool.getConnection() == null) {
-                connect = false;
-            }
+            this.path = path;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
     }
 
-    public String _run() {
+    public String _run(ConnectionPool connectionPool) {
         String out = "";
         try {
             File indexDir = new File(path + IndexConst.ORG_INDEX_PATH);
             long start = new Date().getTime();
-            int count = this._index(indexDir);
+            int count = this._index(connectionPool, indexDir);
             long end = new Date().getTime();
             out = "Index : " + count + " files : Time index :" + (end - start) + " milisecond";
         } catch (Exception ex) {
@@ -88,7 +79,7 @@ public class OrgIndexer {
         return out;
     }
 
-    public int _index(File indexDir) {
+    private int _index(ConnectionPool connectionPool, File indexDir) {
         int count = 0;
         try {
             StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
@@ -102,10 +93,10 @@ public class OrgIndexer {
             stmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet rs = stmt.executeQuery();
             // Index data from query
+            IndexBO indexBO = new IndexBO();
             OrgDTO dto = null;
             while ((rs != null) && (rs.next())) {
                 dto = new OrgDTO();
-                Document d = new Document();
                 LinkedHashMap<String, String> listPublicationCitation = this.getListPublicationCitation(rs.getString(OrgTB.COLUMN_ORGID));
                 LinkedHashMap<String, Integer> indexOrg = this.getCalculateIndexOrg(rs.getString(OrgTB.COLUMN_ORGID));
                 dto.setIdOrg(rs.getString(OrgTB.COLUMN_ORGID));
@@ -113,13 +104,43 @@ public class OrgIndexer {
                 dto.setContinent(rs.getString(OrgTB.COLUMN_CONTINENT));
                 dto.setIdOrgParent(rs.getString(OrgTB.COLUMN_ORGPARENTID));
                 dto.setWebsite(rs.getString(OrgTB.COLUMN_WEBSITE));
-                dto.setListIdSubdomain(this.getListIdSubdomain(rs.getInt(OrgTB.COLUMN_ORGID)));
+                dto.setListIdSubdomain(this.getListIdSubdomain(connectionPool, rs.getInt(OrgTB.COLUMN_ORGID)));
                 dto.setCitationCount(Integer.parseInt(listPublicationCitation.get("citationCount")));
                 dto.setPublicationCount(Integer.parseInt(listPublicationCitation.get("publicationCount")));
                 dto.setListPublicationCitation(listPublicationCitation.get("listPublicationCitation"));
                 dto.setH_Index(indexOrg.get("h_index"));
                 dto.setG_Index(indexOrg.get("g_index"));
 
+                int pubLast5Year = 0;
+                int citLast5Year = 0;
+                int g_indexLast5Year = 0;
+                int h_indexLast5Year = 0;
+                int pubLast10Year = 0;
+                int citLast10Year = 0;
+                int g_indexLast10Year = 0;
+                int h_indexLast10Year = 0;
+
+                LinkedHashMap<String, Object> object10Year = indexBO.getPapersForAll(path + IndexConst.PAPER_INDEX_PATH, rs.getString(OrgTB.COLUMN_ORGID), 10, 4);
+                if (object10Year != null) {
+                    ArrayList<Integer> publicationList10Year = (ArrayList<Integer>) object10Year.get("list");
+                    LinkedHashMap<String, Integer> index10Year = indexBO.getCalculateIndex(publicationList10Year);
+                    pubLast10Year = Integer.parseInt(object10Year.get("pubCount").toString());
+                    citLast10Year = Integer.parseInt(object10Year.get("citCount").toString());
+                    g_indexLast10Year = index10Year.get("g_index");
+                    h_indexLast10Year = index10Year.get("h_index");
+
+                    LinkedHashMap<String, Object> object5Year = indexBO.getPapersForAll(path + IndexConst.PAPER_INDEX_PATH, rs.getString(OrgTB.COLUMN_ORGID), 5, 4);
+                    if (object5Year != null) {
+                        ArrayList<Integer> publicationList5Year = (ArrayList<Integer>) object5Year.get("list");
+                        LinkedHashMap<String, Integer> index5Year = indexBO.getCalculateIndex(publicationList5Year);
+                        pubLast5Year = Integer.parseInt(object5Year.get("pubCount").toString());
+                        citLast5Year = Integer.parseInt(object5Year.get("citCount").toString());
+                        g_indexLast5Year = index5Year.get("g_index");
+                        h_indexLast5Year = index5Year.get("h_index");
+                    }
+                }
+
+                Document d = new Document();
                 d.add(new Field(IndexConst.ORG_IDORG_FIELD, dto.idOrg, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.ORG_ORGNAME_FIELD, dto.orgName, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.ORG_CONTINENT_FIELD, dto.continent, Field.Store.YES, Field.Index.NO));
@@ -127,10 +148,20 @@ public class OrgIndexer {
                 d.add(new Field(IndexConst.ORG_IDORGPARENT_FIELD, dto.idOrgParent, Field.Store.YES, Field.Index.NO));
                 d.add(new Field(IndexConst.ORG_LISTIDSUBDOMAIN_FIELD, dto.listIdSubdomain, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.ORG_LISTPUBLICATIONCITATION_FIELD, dto.listPublicationCitation, Field.Store.YES, Field.Index.NO));
-                d.add(new NumericField(IndexConst.ORG_PUBLICATIONCOUNT_FIELD, Field.Store.YES, false).setIntValue(dto.publicationCount));
-                d.add(new NumericField(IndexConst.ORG_CITATIONCOUNT_FIELD, Field.Store.YES, false).setIntValue(dto.citationCount));
-                d.add(new NumericField(IndexConst.ORG_HINDEX_FIELD, Field.Store.YES, false).setIntValue(dto.h_index));
-                d.add(new NumericField(IndexConst.ORG_GINDEX_FIELD, Field.Store.YES, false).setIntValue(dto.g_index));
+
+                d.add(new NumericField(IndexConst.ORG_PUBLICATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(dto.publicationCount));
+                d.add(new NumericField(IndexConst.ORG_CITATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(dto.citationCount));
+                d.add(new NumericField(IndexConst.ORG_HINDEX_FIELD, Field.Store.YES, true).setIntValue(dto.h_index));
+                d.add(new NumericField(IndexConst.ORG_GINDEX_FIELD, Field.Store.YES, true).setIntValue(dto.g_index));
+
+                d.add(new NumericField(IndexConst.ORG_PUBLAST5YEAR_FIELD, Field.Store.YES, true).setIntValue(pubLast5Year));
+                d.add(new NumericField(IndexConst.ORG_PUBLAST10YEAR_FIELD, Field.Store.YES, true).setIntValue(pubLast10Year));
+                d.add(new NumericField(IndexConst.ORG_CITLAST5YEAR_FIELD, Field.Store.YES, true).setIntValue(citLast5Year));
+                d.add(new NumericField(IndexConst.ORG_CITLAST10YEAR_FIELD, Field.Store.YES, true).setIntValue(citLast10Year));
+                d.add(new NumericField(IndexConst.ORG_HINDEXLAST5YEAR_FIELD, Field.Store.YES, true).setIntValue(h_indexLast5Year));
+                d.add(new NumericField(IndexConst.ORG_HINDEXLAST10YEAR_FIELD, Field.Store.YES, true).setIntValue(h_indexLast10Year));
+                d.add(new NumericField(IndexConst.ORG_GINDEXLAST5YEAR_FIELD, Field.Store.YES, true).setIntValue(g_indexLast5Year));
+                d.add(new NumericField(IndexConst.ORG_GINDEXLAST10YEAR_FIELD, Field.Store.YES, true).setIntValue(g_indexLast10Year));
 
                 writer.addDocument(d);
                 System.out.println("Indexing : " + count++ + "\t" + dto.orgName);
@@ -142,8 +173,6 @@ public class OrgIndexer {
             writer.close();
             stmt.close();
             connection.close();
-            connectionPool.getConnection().close();
-            connectionPool = null;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
             return 0;
@@ -151,7 +180,7 @@ public class OrgIndexer {
         return count;
     }
 
-    public String getListIdSubdomain(int idOrg) throws SQLException, ClassNotFoundException {
+    private String getListIdSubdomain(ConnectionPool connectionPool, int idOrg) throws SQLException, ClassNotFoundException {
         String list = "";
         try {
             Connection connection = connectionPool.getConnection();
@@ -173,7 +202,7 @@ public class OrgIndexer {
         return list;
     }
 
-    public LinkedHashMap<String, String> getListPublicationCitation(String idOrg) throws IOException, ParseException {
+    private LinkedHashMap<String, String> getListPublicationCitation(String idOrg) throws IOException, ParseException {
         LinkedHashMap<String, String> out = new LinkedHashMap<String, String>();
         BooleanQuery booleanQuery = new BooleanQuery();
         QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDORG_FIELD, new StandardAnalyzer(Version.LUCENE_36));
@@ -264,7 +293,7 @@ public class OrgIndexer {
      *
      * @throws Exception
      */
-    public LinkedHashMap<String, Integer> getCalculateIndexOrg(String idOrg) throws Exception {
+    private LinkedHashMap<String, Integer> getCalculateIndexOrg(String idOrg) throws Exception {
         LinkedHashMap<String, Integer> out = new LinkedHashMap<String, Integer>();
         ArrayList<Integer> publicationList = this.getPublicationList(idOrg);
         int h_index;
@@ -299,7 +328,7 @@ public class OrgIndexer {
         return out;
     }
 
-    public ArrayList<Integer> getPublicationList(String idOrg) throws IOException, ParseException {
+    private ArrayList<Integer> getPublicationList(String idOrg) throws IOException, ParseException {
         ArrayList<Integer> publicationList = new ArrayList<Integer>();
         BooleanQuery booleanQuery = new BooleanQuery();
         QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDORG_FIELD, new StandardAnalyzer(Version.LUCENE_36));
@@ -327,8 +356,9 @@ public class OrgIndexer {
             String database = "cspublicationcrawler";
             int port = 3306;
             String path = "E:\\";
-            OrgIndexer indexer = new OrgIndexer(user, pass, database, port, path);
-            System.out.println(indexer._run());
+            ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
+            OrgIndexer indexer = new OrgIndexer(path);
+            System.out.println(indexer._run(connectionPool));
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }

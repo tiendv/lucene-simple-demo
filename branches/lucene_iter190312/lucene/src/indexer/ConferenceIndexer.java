@@ -4,6 +4,7 @@
  */
 package indexer;
 
+import bo.IndexBO;
 import constant.Common;
 import constant.ConnectionPool;
 import constant.IndexConst;
@@ -50,35 +51,25 @@ import org.apache.lucene.util.Version;
  */
 public class ConferenceIndexer {
 
-    private ConnectionPool connectionPool;
     private IndexSearcher searcher = null;
-    private String path = null;
-    public Boolean connect = true;
-    public Boolean folder = true;
+    private String path = "E:\\";
 
-    public ConferenceIndexer(String username, String password, String database, int port, String path) {
+    public ConferenceIndexer(String path) {
         try {
             FSDirectory directory = Common.getFSDirectory(path, IndexConst.PAPER_INDEX_PATH);
-            if (directory == null) {
-                folder = false;
-            }
-            this.path = path;
             searcher = new IndexSearcher(directory);
-            connectionPool = new ConnectionPool(username, password, database, port);
-            if (connectionPool.getConnection() == null) {
-                connect = false;
-            }
+            this.path = path;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
     }
 
-    public String _run() {
+    public String _run(ConnectionPool connectionPool) {
         String out = "";
         try {
             File indexDir = new File(path + IndexConst.CONFERENCE_INDEX_PATH);
             long start = new Date().getTime();
-            int count = this._index(indexDir);
+            int count = this._index(connectionPool, indexDir);
             long end = new Date().getTime();
             out = "Index : " + count + " files : Time index :" + (end - start) + " milisecond";
         } catch (Exception ex) {
@@ -87,7 +78,7 @@ public class ConferenceIndexer {
         return out;
     }
 
-    public int _index(File indexDir) {
+    private int _index(ConnectionPool connectionPool, File indexDir) {
         int count = 0;
         try {
             StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
@@ -101,10 +92,10 @@ public class ConferenceIndexer {
             stmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet rs = stmt.executeQuery();
             // Index data from query
+            IndexBO indexBO = new IndexBO();
             ConferenceDTO dto = null;
             while ((rs != null) && (rs.next())) {
                 dto = new ConferenceDTO();
-                Document d = new Document();
                 LinkedHashMap<String, String> listPublicationCitation = this.getListPublicationCitation(rs.getString(ConferenceTB.COLUMN_CONFERENCEID));
                 LinkedHashMap<String, Integer> indexConference = this.getCalculateIndexConference(rs.getString(ConferenceTB.COLUMN_CONFERENCEID));
                 dto.setIdConference(rs.getString(ConferenceTB.COLUMN_CONFERENCEID));
@@ -115,13 +106,43 @@ public class ConferenceIndexer {
                 dto.setWebsite(rs.getString(ConferenceTB.COLUMN_WEBSITE));
                 dto.setYearEnd(rs.getInt(ConferenceTB.COLUMN_YEAREND));
                 dto.setYearStart(rs.getInt(ConferenceTB.COLUMN_YEARSTART));
-                dto.setListIdSubdomain(this.getListIdSubdomain(rs.getInt(ConferenceTB.COLUMN_CONFERENCEID)));
+                dto.setListIdSubdomain(this.getListIdSubdomain(connectionPool, rs.getInt(ConferenceTB.COLUMN_CONFERENCEID)));
                 dto.setCitationCount(Integer.parseInt(listPublicationCitation.get("citationCount")));
                 dto.setPublicationCount(Integer.parseInt(listPublicationCitation.get("publicationCount")));
                 dto.setListPublicationCitation(listPublicationCitation.get("listPublicationCitation"));
                 dto.setH_Index(indexConference.get("h_index"));
                 dto.setG_Index(indexConference.get("g_index"));
 
+                int pubLast5Year = 0;
+                int citLast5Year = 0;
+                int g_indexLast5Year = 0;
+                int h_indexLast5Year = 0;
+                int pubLast10Year = 0;
+                int citLast10Year = 0;
+                int g_indexLast10Year = 0;
+                int h_indexLast10Year = 0;
+
+                LinkedHashMap<String, Object> object10Year = indexBO.getPapersForAll(path + IndexConst.PAPER_INDEX_PATH, rs.getString(ConferenceTB.COLUMN_CONFERENCEID), 10, 2);
+                if (object10Year != null) {
+                    ArrayList<Integer> publicationList10Year = (ArrayList<Integer>) object10Year.get("list");
+                    LinkedHashMap<String, Integer> index10Year = indexBO.getCalculateIndex(publicationList10Year);
+                    pubLast10Year = Integer.parseInt(object10Year.get("pubCount").toString());
+                    citLast10Year = Integer.parseInt(object10Year.get("citCount").toString());
+                    g_indexLast10Year = index10Year.get("g_index");
+                    h_indexLast10Year = index10Year.get("h_index");
+
+                    LinkedHashMap<String, Object> object5Year = indexBO.getPapersForAll(path + IndexConst.PAPER_INDEX_PATH, rs.getString(ConferenceTB.COLUMN_CONFERENCEID), 5, 2);
+                    if (object5Year != null) {
+                        ArrayList<Integer> publicationList5Year = (ArrayList<Integer>) object5Year.get("list");
+                        LinkedHashMap<String, Integer> index5Year = indexBO.getCalculateIndex(publicationList5Year);
+                        pubLast5Year = Integer.parseInt(object5Year.get("pubCount").toString());
+                        citLast5Year = Integer.parseInt(object5Year.get("citCount").toString());
+                        g_indexLast5Year = index5Year.get("g_index");
+                        h_indexLast5Year = index5Year.get("h_index");
+                    }
+                }
+
+                Document d = new Document();
                 d.add(new Field(IndexConst.CONFERENCE_IDCONFERENCE_FIELD, dto.idConference, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.CONFERENCE_CONFERENCENAME_FIELD, dto.conferenceName, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.CONFERENCE_DURATION_FIELD, dto.duration, Field.Store.YES, Field.Index.NO));
@@ -130,12 +151,22 @@ public class ConferenceIndexer {
                 d.add(new Field(IndexConst.CONFERENCE_WEBSITE_FIELD, dto.website, Field.Store.YES, Field.Index.NO));
                 d.add(new Field(IndexConst.CONFERENCE_LISTIDSUBDOMAIN_FIELD, dto.listIdSubdomain, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.CONFERENCE_LISTPUBLICATIONCITATION_FIELD, dto.listPublicationCitation, Field.Store.YES, Field.Index.NO));
+                
                 d.add(new NumericField(IndexConst.CONFERENCE_YEAREND_FIELD, Field.Store.YES, false).setIntValue(dto.yearEnd));
                 d.add(new NumericField(IndexConst.CONFERENCE_YEARSTART_FIELD, Field.Store.YES, false).setIntValue(dto.yearStart));
-                d.add(new NumericField(IndexConst.CONFERENCE_CITATIONCOUNT_FIELD, Field.Store.YES, false).setIntValue(dto.citationCount));
-                d.add(new NumericField(IndexConst.CONFERENCE_PUBLICATIONCOUNT_FIELD, Field.Store.YES, false).setIntValue(dto.publicationCount));
-                d.add(new NumericField(IndexConst.CONFERENCE_HINDEX_FIELD, Field.Store.YES, false).setIntValue(dto.h_index));
-                d.add(new NumericField(IndexConst.CONFERENCE_GINDEX_FIELD, Field.Store.YES, false).setIntValue(dto.g_index));
+                d.add(new NumericField(IndexConst.CONFERENCE_PUBLICATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(dto.publicationCount));
+                d.add(new NumericField(IndexConst.CONFERENCE_CITATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(dto.citationCount));
+                d.add(new NumericField(IndexConst.CONFERENCE_HINDEX_FIELD, Field.Store.YES, true).setIntValue(dto.h_index));
+                d.add(new NumericField(IndexConst.CONFERENCE_GINDEX_FIELD, Field.Store.YES, true).setIntValue(dto.g_index));
+
+                d.add(new NumericField(IndexConst.CONFERENCE_PUBLAST5YEAR_FIELD, Field.Store.YES, true).setIntValue(pubLast5Year));
+                d.add(new NumericField(IndexConst.CONFERENCE_PUBLAST10YEAR_FIELD, Field.Store.YES, true).setIntValue(pubLast10Year));
+                d.add(new NumericField(IndexConst.CONFERENCE_CITLAST5YEAR_FIELD, Field.Store.YES, true).setIntValue(citLast5Year));
+                d.add(new NumericField(IndexConst.CONFERENCE_CITLAST10YEAR_FIELD, Field.Store.YES, true).setIntValue(citLast10Year));
+                d.add(new NumericField(IndexConst.CONFERENCE_HINDEXLAST5YEAR_FIELD, Field.Store.YES, true).setIntValue(h_indexLast5Year));
+                d.add(new NumericField(IndexConst.CONFERENCE_HINDEXLAST10YEAR_FIELD, Field.Store.YES, true).setIntValue(h_indexLast10Year));
+                d.add(new NumericField(IndexConst.CONFERENCE_GINDEXLAST5YEAR_FIELD, Field.Store.YES, true).setIntValue(g_indexLast5Year));
+                d.add(new NumericField(IndexConst.CONFERENCE_GINDEXLAST10YEAR_FIELD, Field.Store.YES, true).setIntValue(g_indexLast10Year));
 
                 writer.addDocument(d);
                 System.out.println("Indexing : " + count++ + "\t" + dto.conferenceName);
@@ -147,8 +178,6 @@ public class ConferenceIndexer {
             writer.close();
             stmt.close();
             connection.close();
-            connectionPool.getConnection().close();
-            connectionPool = null;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
             return 0;
@@ -156,7 +185,7 @@ public class ConferenceIndexer {
         return count;
     }
 
-    public String getListIdSubdomain(int idConference) throws SQLException, ClassNotFoundException {
+    private String getListIdSubdomain(ConnectionPool connectionPool, int idConference) throws SQLException, ClassNotFoundException {
         String list = "";
         try {
             Connection connection = connectionPool.getConnection();
@@ -178,7 +207,7 @@ public class ConferenceIndexer {
         return list;
     }
 
-    public LinkedHashMap<String, String> getListPublicationCitation(String idConference) throws IOException, ParseException {
+    private LinkedHashMap<String, String> getListPublicationCitation(String idConference) throws IOException, ParseException {
         LinkedHashMap<String, String> out = new LinkedHashMap<String, String>();
         BooleanQuery booleanQuery = new BooleanQuery();
         QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_IDCONFERENCE_FIELD, new StandardAnalyzer(Version.LUCENE_36));
@@ -269,7 +298,7 @@ public class ConferenceIndexer {
      *
      * @throws Exception
      */
-    public LinkedHashMap<String, Integer> getCalculateIndexConference(String idConference) throws Exception {
+    private LinkedHashMap<String, Integer> getCalculateIndexConference(String idConference) throws Exception {
         LinkedHashMap<String, Integer> out = new LinkedHashMap<String, Integer>();
         ArrayList<Integer> publicationList = this.getPublicationList(idConference);
         int h_index;
@@ -304,7 +333,7 @@ public class ConferenceIndexer {
         return out;
     }
 
-    public ArrayList<Integer> getPublicationList(String idConference) throws IOException, ParseException {
+    private ArrayList<Integer> getPublicationList(String idConference) throws IOException, ParseException {
         ArrayList<Integer> publicationList = new ArrayList<Integer>();
         BooleanQuery booleanQuery = new BooleanQuery();
         QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_IDCONFERENCE_FIELD, new StandardAnalyzer(Version.LUCENE_36));
@@ -332,8 +361,9 @@ public class ConferenceIndexer {
             String database = "cspublicationcrawler";
             int port = 3306;
             String path = "E:\\";
-            ConferenceIndexer indexer = new ConferenceIndexer(user, pass, database, port, path);
-            System.out.println(indexer._run());
+            ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
+            ConferenceIndexer indexer = new ConferenceIndexer(path);
+            System.out.println(indexer._run(connectionPool));
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }

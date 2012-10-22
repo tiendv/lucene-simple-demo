@@ -8,7 +8,6 @@ import constant.ConnectionPool;
 import database.PaperPaperTB;
 import database.RankPaperTB;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Date;
 
@@ -18,24 +17,14 @@ import java.util.Date;
  */
 public class _Rank_Paper {
 
-    private ConnectionPool connectionPool;
-    public Boolean connect = true;
-
     public _Rank_Paper() {
     }
 
-    public _Rank_Paper(String username, String password, String database, int port) {
-        connectionPool = new ConnectionPool(username, password, database, port);
-        if (connectionPool.getConnection() == null) {
-            this.connect = false;
-        }
-    }
-
-    public String _run() {
+    public String _run(ConnectionPool connectionPool) {
         String out = "";
         try {
             long start = new Date().getTime();
-            int count = this._rank();
+            int count = this._rank(connectionPool);
             long end = new Date().getTime();
             out = "Count: " + count + " record - Time index :" + (end - start) + " milisecond";
         } catch (Exception ex) {
@@ -44,7 +33,7 @@ public class _Rank_Paper {
         return out;
     }
 
-    public int _rank() throws SQLException {
+    public int _rank(ConnectionPool connectionPool) {
         int count = 0;
         try {
             Connection connection = connectionPool.getConnection();
@@ -82,8 +71,9 @@ public class _Rank_Paper {
             String pass = "@huydang1920@";
             String database = "cspublicationcrawler";
             int port = 3306;
-            _Rank_Paper rank = new _Rank_Paper(user, pass, database, port);
-            rank._run();
+            ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
+            _Rank_Paper indexer = new _Rank_Paper();
+            System.out.println(indexer._run(connectionPool));
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }

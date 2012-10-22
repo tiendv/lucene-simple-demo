@@ -96,37 +96,52 @@ public class _RankJournalIndexer {
                     int citLast10Year = 0;
                     int g_indexLast10Year = 0;
                     int h_indexLast10Year = 0;
-                    LinkedHashMap<String, Object> object10Year = indexBO.getPapersFromRankSubDomain(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdJournal.get(i)), 10, 3);
-                    if (object10Year != null) {
-                        ArrayList<Integer> publicationList10Year = (ArrayList<Integer>) object10Year.get("list");
-                        LinkedHashMap<String, Integer> index10Year = indexBO.getCalculateIndex(publicationList10Year);
-                        pubLast10Year = Integer.parseInt(object10Year.get("pubCount").toString());
-                        citLast10Year = Integer.parseInt(object10Year.get("citCount").toString());
-                        g_indexLast10Year = index10Year.get("g_index");
-                        h_indexLast10Year = index10Year.get("h_index");
-                    } else {
-                        continue;
-                    }
-                    LinkedHashMap<String, Object> object5Year = indexBO.getPapersFromRankSubDomain(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdJournal.get(i)), 5, 3);
-                    if (object5Year != null) {
-                        ArrayList<Integer> publicationList5Year = (ArrayList<Integer>) object5Year.get("list");
-                        LinkedHashMap<String, Integer> index5Year = indexBO.getCalculateIndex(publicationList5Year);
-                        pubLast5Year = Integer.parseInt(object5Year.get("pubCount").toString());
-                        citLast5Year = Integer.parseInt(object5Year.get("citCount").toString());
-                        g_indexLast5Year = index5Year.get("g_index");
-                        h_indexLast5Year = index5Year.get("h_index");
+                    int publicationCount = 0;
+                    int citationCount = 0;
+                    int h_index = 0;
+                    int g_index = 0;
+                    LinkedHashMap<String, Object> objectAllYear = indexBO.getPapersForRankSubDomain(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdJournal.get(i)), 0, 3);
+                    if (objectAllYear != null) {
+                        ArrayList<Integer> publicationListAllYear = (ArrayList<Integer>) objectAllYear.get("list");
+                        LinkedHashMap<String, Integer> indexAllYear = indexBO.getCalculateIndex(publicationListAllYear);
+                        publicationCount = Integer.parseInt(objectAllYear.get("pubCount").toString());
+                        citationCount = Integer.parseInt(objectAllYear.get("citCount").toString());
+                        h_index = indexAllYear.get("h_index");
+                        g_index = indexAllYear.get("g_index");
+                        LinkedHashMap<String, Object> object10Year = indexBO.getPapersForRankSubDomain(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdJournal.get(i)), 10, 3);
+                        if (object10Year != null) {
+                            ArrayList<Integer> publicationList10Year = (ArrayList<Integer>) object10Year.get("list");
+                            LinkedHashMap<String, Integer> index10Year = indexBO.getCalculateIndex(publicationList10Year);
+                            pubLast10Year = Integer.parseInt(object10Year.get("pubCount").toString());
+                            citLast10Year = Integer.parseInt(object10Year.get("citCount").toString());
+                            g_indexLast10Year = index10Year.get("g_index");
+                            h_indexLast10Year = index10Year.get("h_index");
+                            LinkedHashMap<String, Object> object5Year = indexBO.getPapersForRankSubDomain(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdJournal.get(i)), 5, 3);
+                            if (object5Year != null) {
+                                ArrayList<Integer> publicationList5Year = (ArrayList<Integer>) object5Year.get("list");
+                                LinkedHashMap<String, Integer> index5Year = indexBO.getCalculateIndex(publicationList5Year);
+                                pubLast5Year = Integer.parseInt(object5Year.get("pubCount").toString());
+                                citLast5Year = Integer.parseInt(object5Year.get("citCount").toString());
+                                g_indexLast5Year = index5Year.get("g_index");
+                                h_indexLast5Year = index5Year.get("h_index");
+                            }
+                        }
                     }
                     Document d = new Document();
                     d.add(new NumericField(IndexConst.RANK_JOURNAL_IDJOURNAL_FIELD, Field.Store.YES, false).setIntValue(listIdJournal.get(i)));
                     d.add(new Field(IndexConst.RANK_JOURNAL_IDSUBDOMAIN_FIELD, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Field.Store.YES, Field.Index.ANALYZED));
-                    d.add(new NumericField(IndexConst.RANK_JOURNAL_PUBLAST5YEAR_FIELD, Field.Store.YES, false).setIntValue(pubLast5Year));
-                    d.add(new NumericField(IndexConst.RANK_JOURNAL_PUBLAST10YEAR_FIELD, Field.Store.YES, false).setIntValue(pubLast10Year));
-                    d.add(new NumericField(IndexConst.RANK_JOURNAL_CITLAST5YEAR_FIELD, Field.Store.YES, false).setIntValue(citLast5Year));
-                    d.add(new NumericField(IndexConst.RANK_JOURNAL_CITLAST10YEAR_FIELD, Field.Store.YES, false).setIntValue(citLast10Year));
-                    d.add(new NumericField(IndexConst.RANK_JOURNAL_HINDEXLAST5YEAR_FIELD, Field.Store.YES, false).setIntValue(h_indexLast5Year));
-                    d.add(new NumericField(IndexConst.RANK_JOURNAL_HINDEXLAST10YEAR_FIELD, Field.Store.YES, false).setIntValue(h_indexLast10Year));
-                    d.add(new NumericField(IndexConst.RANK_JOURNAL_GINDEXLAST5YEAR_FIELD, Field.Store.YES, false).setIntValue(g_indexLast5Year));
-                    d.add(new NumericField(IndexConst.RANK_JOURNAL_GINDEXLAST10YEAR_FIELD, Field.Store.YES, false).setIntValue(g_indexLast10Year));
+                    d.add(new NumericField(IndexConst.RANK_JOURNAL_PUBLAST5YEAR_FIELD, Field.Store.YES, true).setIntValue(pubLast5Year));
+                    d.add(new NumericField(IndexConst.RANK_JOURNAL_PUBLAST10YEAR_FIELD, Field.Store.YES, true).setIntValue(pubLast10Year));
+                    d.add(new NumericField(IndexConst.RANK_JOURNAL_CITLAST5YEAR_FIELD, Field.Store.YES, true).setIntValue(citLast5Year));
+                    d.add(new NumericField(IndexConst.RANK_JOURNAL_CITLAST10YEAR_FIELD, Field.Store.YES, true).setIntValue(citLast10Year));
+                    d.add(new NumericField(IndexConst.RANK_JOURNAL_HINDEXLAST5YEAR_FIELD, Field.Store.YES, true).setIntValue(h_indexLast5Year));
+                    d.add(new NumericField(IndexConst.RANK_JOURNAL_HINDEXLAST10YEAR_FIELD, Field.Store.YES, true).setIntValue(h_indexLast10Year));
+                    d.add(new NumericField(IndexConst.RANK_JOURNAL_GINDEXLAST5YEAR_FIELD, Field.Store.YES, true).setIntValue(g_indexLast5Year));
+                    d.add(new NumericField(IndexConst.RANK_JOURNAL_GINDEXLAST10YEAR_FIELD, Field.Store.YES, true).setIntValue(g_indexLast10Year));
+                    d.add(new NumericField(IndexConst.RANK_JOURNAL_PUBLICATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(publicationCount));
+                    d.add(new NumericField(IndexConst.RANK_JOURNAL_CITATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(citationCount));
+                    d.add(new NumericField(IndexConst.RANK_JOURNAL_HINDEX_FIELD, Field.Store.YES, true).setIntValue(h_index));
+                    d.add(new NumericField(IndexConst.RANK_JOURNAL_GINDEX_FIELD, Field.Store.YES, true).setIntValue(g_index));
                     writer.addDocument(d);
                     System.out.println("Indexing : " + count++ + "\t idJournal:" + listIdJournal.get(i) + "\t idSubdomain:" + rs.getString(SubdomainTB.COLUMN_SUBDOMAINID) + "\t pubLast5Year:" + pubLast5Year + "\t citLast5Year:" + citLast5Year + "\t pubLast10Year:" + pubLast10Year + "\t citLast10Year:" + citLast10Year);
                     d = null;

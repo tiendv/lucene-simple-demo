@@ -6,7 +6,6 @@ package bo;
 
 import constant.IndexConst;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -14,7 +13,6 @@ import java.util.GregorianCalendar;
 import java.util.LinkedHashMap;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
@@ -40,15 +38,93 @@ public class IndexBO {
 
     /**
      * @param path (path lucene index)
+     * @param querySearch
+     * @param last
+     * @param
+     * field//1:idAuthor||2:idConference||3:idJournal||4:idOrg||5:idKeyword
+     * @return publicationCount, citationCount and publicationList(for H-Index
+     * and G-Index) for last
+     * @throws Exception
+     */
+    public LinkedHashMap<String, Object> getPapersForAll(String path, String querySearch, int last, int field) throws Exception {
+        try {
+            IndexSearcher searcher = new IndexSearcher(getFSDirectory(path));
+            LinkedHashMap<String, Object> out = null;
+            BooleanQuery blQuery = new BooleanQuery();
+            Sort sort = null;
+            TopDocs topDocs = null;
+            // querySearch
+            if (field == 1) {// Author
+                QueryParser parserAuthor = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDAUTHOR_FIELD, new StandardAnalyzer(Version.LUCENE_36));
+                Query queryAuthor = parserAuthor.parse(querySearch);
+                blQuery.add(queryAuthor, BooleanClause.Occur.MUST);
+            } else if (field == 2) {// Conference
+                QueryParser parserConference = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_IDCONFERENCE_FIELD, new StandardAnalyzer(Version.LUCENE_36));
+                Query queryConference = parserConference.parse(querySearch);
+                blQuery.add(queryConference, BooleanClause.Occur.MUST);
+            } else if (field == 3) {//Journal
+                QueryParser parserJournal = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_IDJOURNAL_FIELD, new StandardAnalyzer(Version.LUCENE_36));
+                Query queryJournal = parserJournal.parse(querySearch);
+                blQuery.add(queryJournal, BooleanClause.Occur.MUST);
+            } else if (field == 4) {// Org
+                QueryParser parserOrg = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDORG_FIELD, new StandardAnalyzer(Version.LUCENE_36));
+                Query queryOrg = parserOrg.parse(querySearch);
+                blQuery.add(queryOrg, BooleanClause.Occur.MUST);
+            } else if (field == 5) {// Keyword
+                QueryParser parserOrg = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDKEYWORD_FIELD, new StandardAnalyzer(Version.LUCENE_36));
+                Query queryOrg = parserOrg.parse(querySearch);
+                blQuery.add(queryOrg, BooleanClause.Occur.MUST);
+            } else {
+                return null;
+            }
+            // Sort
+            sort = new Sort(new SortField[]{
+                        new SortField(IndexConst.PAPER_CITATIONCOUNT_FIELD, SortField.INT, true)});
+            // Year
+            if (last > 0) {
+                Calendar calendar = GregorianCalendar.getInstance();
+                calendar.setTime(new Date());
+                int lastYear = calendar.get(Calendar.YEAR) - last;
+                int currentYear = calendar.get(Calendar.YEAR);
+                Filter filter = NumericRangeFilter.newIntRange(IndexConst.PAPER_YEAR_FIELD, lastYear, currentYear, true, true);
+                topDocs = searcher.search(blQuery, filter, Integer.MAX_VALUE, sort);
+            } else {
+                topDocs = searcher.search(blQuery, Integer.MAX_VALUE, sort);
+            }
+            if (topDocs != null) {
+                out = new LinkedHashMap<String, Object>();
+                ArrayList<Integer> publicationList = new ArrayList<Integer>();
+                int citationCount = 0;
+                ScoreDoc[] hits = topDocs.scoreDocs;
+                for (int i = 0; i < topDocs.totalHits; i++) {
+                    ScoreDoc hit = hits[i];
+                    Document doc = searcher.doc(hit.doc);
+                    citationCount += Integer.parseInt(doc.get(IndexConst.PAPER_CITATIONCOUNT_FIELD));
+                    publicationList.add(Integer.parseInt(doc.get(IndexConst.PAPER_CITATIONCOUNT_FIELD)));
+                }
+                out.put("pubCount", topDocs.totalHits);
+                out.put("citCount", citationCount);
+                out.put("list", publicationList);
+            }
+            return out;
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * @param path (path lucene index)
      * @param idSubdomain
      * @param querySearch
      * @param last
      * @param
      * field//1:idAuthor||2:idConference||3:idJournal||4:idOrg||5:idKeyword
-     * @return total publication and publicationList(for H-Index and G-Index)
+     * @return publicationCount, citationCount and publicationList(for H-Index
+     * and G-Index) for last
      * @throws Exception
      */
-    public LinkedHashMap<String, Object> getPapersFromRankSubDomain(String path, String idSubdomain, String querySearch, int last, int field) throws Exception {
+    public LinkedHashMap<String, Object> getPapersForRankSubDomain(String path, String idSubdomain, String querySearch, int last, int field) throws Exception {
         try {
             IndexSearcher searcher = new IndexSearcher(getFSDirectory(path));
             LinkedHashMap<String, Object> out = null;
@@ -276,12 +352,12 @@ public class IndexBO {
      * @param path (path lucene index)
      * @param idSubdomain
      * @param last
-     * @return
+     * @return publicationCount, citationCount for last
      */
     public LinkedHashMap<String, Integer> getPublicationsFromIdSubdomain(String path, String idSubdomain, int last) throws Exception {
-        LinkedHashMap<String, Integer> out = new LinkedHashMap<String, Integer>();
         try {
             IndexSearcher searcher = new IndexSearcher(getFSDirectory(path));
+            LinkedHashMap<String, Integer> out = null;
             BooleanQuery blQuery = new BooleanQuery();
             QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDSUBDOMAIN_FIELD, new StandardAnalyzer(Version.LUCENE_36));
             Query query = parser.parse(idSubdomain);
@@ -298,6 +374,7 @@ public class IndexBO {
                 topDocs = searcher.search(blQuery, Integer.MAX_VALUE);
             }
             if (topDocs != null) {
+                out = new LinkedHashMap<String, Integer>();
                 int citationCout = 0;
                 ScoreDoc[] hits = topDocs.scoreDocs;
                 for (int i = 0; i < topDocs.totalHits; i++) {
@@ -308,18 +385,17 @@ public class IndexBO {
                 out.put("pubCount", topDocs.totalHits);
                 out.put("citCount", citationCout);
             }
+            return out;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
-            out.put("pubCount", 0);
-            out.put("citCount", 0);
+            return null;
         }
-        return out;
     }
 
     /**
      * calculateIndex
      *
-     * @return h_index, g_index
+     * @return h_index, g_index width publicationList
      * @throws Exception
      */
     public LinkedHashMap<String, Integer> getCalculateIndex(ArrayList<Integer> publicationList) throws Exception {

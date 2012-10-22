@@ -4,6 +4,7 @@
  */
 package indexer;
 
+import bo.IndexBO;
 import constant.Common;
 import constant.ConnectionPool;
 import constant.IndexConst;
@@ -50,35 +51,25 @@ import org.apache.lucene.util.Version;
  */
 public class JournalIndexer {
 
-    private ConnectionPool connectionPool;
     private IndexSearcher searcher = null;
-    private String path = null;
-    public Boolean connect = true;
-    public Boolean folder = true;
+    private String path = "E:\\";
 
-    public JournalIndexer(String username, String password, String database, int port, String path) {
+    public JournalIndexer(String path) {
         try {
             FSDirectory directory = Common.getFSDirectory(path, IndexConst.PAPER_INDEX_PATH);
-            if (directory == null) {
-                folder = false;
-            }
-            this.path = path;
             searcher = new IndexSearcher(directory);
-            connectionPool = new ConnectionPool(username, password, database, port);
-            if (connectionPool.getConnection() == null) {
-                connect = false;
-            }
+            this.path = path;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
     }
 
-    public String _run() {
+    public String _run(ConnectionPool connectionPool) {
         String out = "";
         try {
             File indexDir = new File(path + IndexConst.JOURNAL_INDEX_PATH);
             long start = new Date().getTime();
-            int count = this._index(indexDir);
+            int count = this._index(connectionPool, indexDir);
             long end = new Date().getTime();
             out = "Index : " + count + " files : Time index :" + (end - start) + " milisecond";
         } catch (Exception ex) {
@@ -87,7 +78,7 @@ public class JournalIndexer {
         return out;
     }
 
-    public int _index(File indexDir) {
+    private int _index(ConnectionPool connectionPool, File indexDir) {
         int count = 0;
         try {
             StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
@@ -101,10 +92,10 @@ public class JournalIndexer {
             stmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet rs = stmt.executeQuery();
             // Index data from query
+            IndexBO indexBO = new IndexBO();
             JournalDTO dto = null;
             while ((rs != null) && (rs.next())) {
                 dto = new JournalDTO();
-                Document d = new Document();
                 LinkedHashMap<String, String> listPublicationCitation = this.getListPublicationCitation(rs.getString(JournalTB.COLUMN_JOURNALID));
                 LinkedHashMap<String, Integer> indexJournal = this.getCalculateIndexJournal(rs.getString(JournalTB.COLUMN_JOURNALID));
                 dto.setIdJournal(rs.getString(JournalTB.COLUMN_JOURNALID));
@@ -113,25 +104,65 @@ public class JournalIndexer {
                 dto.setWebsite(rs.getString(JournalTB.COLUMN_WEBSITE));
                 dto.setYearEnd(rs.getInt(JournalTB.COLUMN_YEAREND));
                 dto.setYearStart(rs.getInt(JournalTB.COLUMN_YEARSTART));
-                dto.setListIdSubdomain(this.getListIdSubdomain(rs.getInt(JournalTB.COLUMN_JOURNALID)));
+                dto.setListIdSubdomain(this.getListIdSubdomain(connectionPool, rs.getInt(JournalTB.COLUMN_JOURNALID)));
                 dto.setCitationCount(Integer.parseInt(listPublicationCitation.get("citationCount")));
                 dto.setPublicationCount(Integer.parseInt(listPublicationCitation.get("publicationCount")));
                 dto.setListPublicationCitation(listPublicationCitation.get("listPublicationCitation"));
                 dto.setH_Index(indexJournal.get("h_index"));
                 dto.setG_Index(indexJournal.get("g_index"));
 
+                int pubLast5Year = 0;
+                int citLast5Year = 0;
+                int g_indexLast5Year = 0;
+                int h_indexLast5Year = 0;
+                int pubLast10Year = 0;
+                int citLast10Year = 0;
+                int g_indexLast10Year = 0;
+                int h_indexLast10Year = 0;
+
+                LinkedHashMap<String, Object> object10Year = indexBO.getPapersForAll(path + IndexConst.PAPER_INDEX_PATH, rs.getString(JournalTB.COLUMN_JOURNALID), 10, 3);
+                if (object10Year != null) {
+                    ArrayList<Integer> publicationList10Year = (ArrayList<Integer>) object10Year.get("list");
+                    LinkedHashMap<String, Integer> index10Year = indexBO.getCalculateIndex(publicationList10Year);
+                    pubLast10Year = Integer.parseInt(object10Year.get("pubCount").toString());
+                    citLast10Year = Integer.parseInt(object10Year.get("citCount").toString());
+                    g_indexLast10Year = index10Year.get("g_index");
+                    h_indexLast10Year = index10Year.get("h_index");
+
+                    LinkedHashMap<String, Object> object5Year = indexBO.getPapersForAll(path + IndexConst.PAPER_INDEX_PATH, rs.getString(JournalTB.COLUMN_JOURNALID), 5, 3);
+                    if (object5Year != null) {
+                        ArrayList<Integer> publicationList5Year = (ArrayList<Integer>) object5Year.get("list");
+                        LinkedHashMap<String, Integer> index5Year = indexBO.getCalculateIndex(publicationList5Year);
+                        pubLast5Year = Integer.parseInt(object5Year.get("pubCount").toString());
+                        citLast5Year = Integer.parseInt(object5Year.get("citCount").toString());
+                        g_indexLast5Year = index5Year.get("g_index");
+                        h_indexLast5Year = index5Year.get("h_index");
+                    }
+                }
+
+                Document d = new Document();
                 d.add(new Field(IndexConst.JOURNAL_IDJOURNAL_FIELD, dto.idJournal, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.JOURNAL_JOURNALNAME_FIELD, dto.journalName, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.JOURNAL_ORGANIZATION_FIELD, dto.organization, Field.Store.YES, Field.Index.NO));
                 d.add(new Field(IndexConst.JOURNAL_WEBSITE_FIELD, dto.website, Field.Store.YES, Field.Index.NO));
                 d.add(new Field(IndexConst.JOURNAL_LISTIDSUBDOMAIN_FIELD, dto.listIdSubdomain, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.JOURNAL_LISTPUBLICATIONCITATION_FIELD, dto.listPublicationCitation, Field.Store.YES, Field.Index.NO));
+
                 d.add(new NumericField(IndexConst.JOURNAL_YEAREND_FIELD, Field.Store.YES, false).setIntValue(dto.yearEnd));
                 d.add(new NumericField(IndexConst.JOURNAL_YEARSTART_FIELD, Field.Store.YES, false).setIntValue(dto.yearStart));
-                d.add(new NumericField(IndexConst.JOURNAL_CITATIONCOUNT_FIELD, Field.Store.YES, false).setIntValue(dto.citationCount));
-                d.add(new NumericField(IndexConst.JOURNAL_PUBLICATIONCOUNT_FIELD, Field.Store.YES, false).setIntValue(dto.publicationCount));
-                d.add(new NumericField(IndexConst.JOURNAL_HINDEX_FIELD, Field.Store.YES, false).setIntValue(dto.h_index));
-                d.add(new NumericField(IndexConst.JOURNAL_GINDEX_FIELD, Field.Store.YES, false).setIntValue(dto.g_index));
+                d.add(new NumericField(IndexConst.JOURNAL_PUBLICATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(dto.publicationCount));
+                d.add(new NumericField(IndexConst.JOURNAL_CITATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(dto.citationCount));
+                d.add(new NumericField(IndexConst.JOURNAL_HINDEX_FIELD, Field.Store.YES, true).setIntValue(dto.h_index));
+                d.add(new NumericField(IndexConst.JOURNAL_GINDEX_FIELD, Field.Store.YES, true).setIntValue(dto.g_index));
+
+                d.add(new NumericField(IndexConst.JOURNAL_PUBLAST5YEAR_FIELD, Field.Store.YES, true).setIntValue(pubLast5Year));
+                d.add(new NumericField(IndexConst.JOURNAL_PUBLAST10YEAR_FIELD, Field.Store.YES, true).setIntValue(pubLast10Year));
+                d.add(new NumericField(IndexConst.JOURNAL_CITLAST5YEAR_FIELD, Field.Store.YES, true).setIntValue(citLast5Year));
+                d.add(new NumericField(IndexConst.JOURNAL_CITLAST10YEAR_FIELD, Field.Store.YES, true).setIntValue(citLast10Year));
+                d.add(new NumericField(IndexConst.JOURNAL_HINDEXLAST5YEAR_FIELD, Field.Store.YES, true).setIntValue(h_indexLast5Year));
+                d.add(new NumericField(IndexConst.JOURNAL_HINDEXLAST10YEAR_FIELD, Field.Store.YES, true).setIntValue(h_indexLast10Year));
+                d.add(new NumericField(IndexConst.JOURNAL_GINDEXLAST5YEAR_FIELD, Field.Store.YES, true).setIntValue(g_indexLast5Year));
+                d.add(new NumericField(IndexConst.JOURNAL_GINDEXLAST10YEAR_FIELD, Field.Store.YES, true).setIntValue(g_indexLast10Year));
 
                 writer.addDocument(d);
                 System.out.println("Indexing : " + count++ + "\t" + dto.journalName);
@@ -143,8 +174,6 @@ public class JournalIndexer {
             writer.close();
             stmt.close();
             connection.close();
-            connectionPool.getConnection().close();
-            connectionPool = null;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
             return 0;
@@ -152,7 +181,7 @@ public class JournalIndexer {
         return count;
     }
 
-    public String getListIdSubdomain(int idJournal) throws SQLException, ClassNotFoundException {
+    private String getListIdSubdomain(ConnectionPool connectionPool, int idJournal) throws SQLException, ClassNotFoundException {
         String list = "";
         try {
             Connection connection = connectionPool.getConnection();
@@ -174,7 +203,7 @@ public class JournalIndexer {
         return list;
     }
 
-    public LinkedHashMap<String, String> getListPublicationCitation(String idJournal) throws IOException, ParseException {
+    private LinkedHashMap<String, String> getListPublicationCitation(String idJournal) throws IOException, ParseException {
         LinkedHashMap<String, String> out = new LinkedHashMap<String, String>();
         BooleanQuery booleanQuery = new BooleanQuery();
         QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_IDJOURNAL_FIELD, new StandardAnalyzer(Version.LUCENE_36));
@@ -265,7 +294,7 @@ public class JournalIndexer {
      *
      * @throws Exception
      */
-    public LinkedHashMap<String, Integer> getCalculateIndexJournal(String idJournal) throws Exception {
+    private LinkedHashMap<String, Integer> getCalculateIndexJournal(String idJournal) throws Exception {
         LinkedHashMap<String, Integer> out = new LinkedHashMap<String, Integer>();
         ArrayList<Integer> publicationList = this.getPublicationList(idJournal);
         int h_index;
@@ -300,7 +329,7 @@ public class JournalIndexer {
         return out;
     }
 
-    public ArrayList<Integer> getPublicationList(String idJournal) throws IOException, ParseException {
+    private ArrayList<Integer> getPublicationList(String idJournal) throws IOException, ParseException {
         ArrayList<Integer> publicationList = new ArrayList<Integer>();
         BooleanQuery booleanQuery = new BooleanQuery();
         QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_IDJOURNAL_FIELD, new StandardAnalyzer(Version.LUCENE_36));
@@ -328,8 +357,9 @@ public class JournalIndexer {
             String database = "cspublicationcrawler";
             int port = 3306;
             String path = "E:\\";
-            JournalIndexer indexer = new JournalIndexer(user, pass, database, port, path);
-            System.out.println(indexer._run());
+            ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
+            JournalIndexer indexer = new JournalIndexer(path);
+            System.out.println(indexer._run(connectionPool));
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }

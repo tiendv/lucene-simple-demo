@@ -92,25 +92,32 @@ public class _RankKeyIndexer {
                     int citLast5Year = 0;
                     int pubLast10Year = 0;
                     int citLast10Year = 0;
-                    LinkedHashMap<String, Object> object10Year = indexBO.getPapersFromRankSubDomain(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdKeyword.get(i)), 10, 5);
-                    if (object10Year != null) {
-                        pubLast10Year = Integer.parseInt(object10Year.get("pubCount").toString());
-                        citLast10Year = Integer.parseInt(object10Year.get("citCount").toString());
-                    } else {
-                        continue;
-                    }
-                    LinkedHashMap<String, Object> object5Year = indexBO.getPapersFromRankSubDomain(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdKeyword.get(i)), 5, 5);
-                    if (object5Year != null) {
-                        pubLast5Year = Integer.parseInt(object5Year.get("pubCount").toString());
-                        citLast5Year = Integer.parseInt(object5Year.get("citCount").toString());
+                    int publicationCount = 0;
+                    int citationCount = 0;
+                    LinkedHashMap<String, Object> objectAllYear = indexBO.getPapersForRankSubDomain(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdKeyword.get(i)), 0, 5);
+                    if (objectAllYear != null) {
+                        LinkedHashMap<String, Object> object10Year = indexBO.getPapersForRankSubDomain(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdKeyword.get(i)), 10, 5);
+                        publicationCount = Integer.parseInt(objectAllYear.get("pubCount").toString());
+                        citationCount = Integer.parseInt(objectAllYear.get("citCount").toString());
+                        if (object10Year != null) {
+                            pubLast10Year = Integer.parseInt(object10Year.get("pubCount").toString());
+                            citLast10Year = Integer.parseInt(object10Year.get("citCount").toString());
+                            LinkedHashMap<String, Object> object5Year = indexBO.getPapersForRankSubDomain(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdKeyword.get(i)), 5, 5);
+                            if (object5Year != null) {
+                                pubLast5Year = Integer.parseInt(object5Year.get("pubCount").toString());
+                                citLast5Year = Integer.parseInt(object5Year.get("citCount").toString());
+                            }
+                        }
                     }
                     Document d = new Document();
                     d.add(new NumericField(IndexConst.RANK_KEYWORD_IDKEYWORD_FIELD, Field.Store.YES, false).setIntValue(listIdKeyword.get(i)));
                     d.add(new Field(IndexConst.RANK_KEYWORD_IDSUBDOMAIN_FIELD, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Field.Store.YES, Field.Index.ANALYZED));
-                    d.add(new NumericField(IndexConst.RANK_KEYWORD_PUBLAST5YEAR_FIELD, Field.Store.YES, false).setIntValue(pubLast5Year));
-                    d.add(new NumericField(IndexConst.RANK_KEYWORD_PUBLAST10YEAR_FIELD, Field.Store.YES, false).setIntValue(pubLast10Year));
-                    d.add(new NumericField(IndexConst.RANK_KEYWORD_CITLAST5YEAR_FIELD, Field.Store.YES, false).setIntValue(citLast5Year));
-                    d.add(new NumericField(IndexConst.RANK_KEYWORD_CITLAST10YEAR_FIELD, Field.Store.YES, false).setIntValue(citLast10Year));
+                    d.add(new NumericField(IndexConst.RANK_KEYWORD_PUBLAST5YEAR_FIELD, Field.Store.YES, true).setIntValue(pubLast5Year));
+                    d.add(new NumericField(IndexConst.RANK_KEYWORD_PUBLAST10YEAR_FIELD, Field.Store.YES, true).setIntValue(pubLast10Year));
+                    d.add(new NumericField(IndexConst.RANK_KEYWORD_CITLAST5YEAR_FIELD, Field.Store.YES, true).setIntValue(citLast5Year));
+                    d.add(new NumericField(IndexConst.RANK_KEYWORD_CITLAST10YEAR_FIELD, Field.Store.YES, true).setIntValue(citLast10Year));
+                    d.add(new NumericField(IndexConst.RANK_KEYWORD_PUBLICATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(publicationCount));
+                    d.add(new NumericField(IndexConst.RANK_KEYWORD_CITATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(citationCount));
                     writer.addDocument(d);
                     System.out.println("Indexing : " + count++ + "\t idKeyword:" + listIdKeyword.get(i) + "\t idSubdomain:" + rs.getString(SubdomainTB.COLUMN_SUBDOMAINID) + "\t pubLast5Year:" + pubLast5Year + "\t citLast5Year:" + citLast5Year + "\t pubLast10Year:" + pubLast10Year + "\t citLast10Year:" + citLast10Year);
                     d = null;
