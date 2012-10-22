@@ -146,9 +146,13 @@ public class IndexConst {
     public static final String SUBDOMAIN_IDSUBDOMAIN_FIELD = "idSubdomain";
     public static final String SUBDOMAIN_SUBDOMAINNAME_FIELD = "subdomainName";
     public static final String SUBDOMAIN_IDDOMAIN_FIELD = "idDomain";
-    public static final String SUBDOMAIN_PUBLICATIONCOUNT_FIELD = "publicationCount";
-    public static final String SUBDOMAIN_CITATIONCOUNT_FIELD = "citationCount";
     public static final String SUBDOMAIN_LISTPUBLICATIONCITATION_FIELD = "listPublicationCitation";
+    public static final String SUBDOMAIN_PUBLAST5YEAR_FIELD = "pubLast5Year";
+    public static final String SUBDOMAIN_PUBLAST10YEAR_FIELD = "pubLast10Year";
+    public static final String SUBDOMAIN_PUBLICATIONCOUNT_FIELD = "publicationCount";
+    public static final String SUBDOMAIN_CITLAST5YEAR_FIELD = "citLast5Year";
+    public static final String SUBDOMAIN_CITLAST10YEAR_FIELD = "citLast10Year";
+    public static final String SUBDOMAIN_CITATIONCOUNT_FIELD = "citationCount";
     // ccidf_plus index directory path
     public static final String CCIDF_INDEX_PATH = "INDEX-CCIDF_PLUS";
     // Lucene ccidf_plus field 
@@ -168,7 +172,7 @@ public class IndexConst {
     public static final String RANK_AUTHOR_HINDEXLAST10YEAR_FIELD = "h_indexLast10Year";
     public static final String RANK_AUTHOR_GINDEXLAST5YEAR_FIELD = "g_indexLast5Year";
     public static final String RANK_AUTHOR_GINDEXLAST10YEAR_FIELD = "g_indexLast10Year";
-	public static final String RANK_AUTHOR_HINDEX_FIELD = "h_index";
+    public static final String RANK_AUTHOR_HINDEX_FIELD = "h_index";
     public static final String RANK_AUTHOR_GINDEX_FIELD = "g_index";
     public static final String RANK_AUTHOR_PUBLICATIONCOUNT_FIELD = "publicationCount";
     public static final String RANK_AUTHOR_CITATIONCOUNT_FIELD = "citationCount";
@@ -185,7 +189,7 @@ public class IndexConst {
     public static final String RANK_JOURNAL_HINDEXLAST10YEAR_FIELD = "h_indexLast10Year";
     public static final String RANK_JOURNAL_GINDEXLAST5YEAR_FIELD = "g_indexLast5Year";
     public static final String RANK_JOURNAL_GINDEXLAST10YEAR_FIELD = "g_indexLast10Year";
-	public static final String RANK_JOURNAL_HINDEX_FIELD = "h_index";
+    public static final String RANK_JOURNAL_HINDEX_FIELD = "h_index";
     public static final String RANK_JOURNAL_GINDEX_FIELD = "g_index";
     public static final String RANK_JOURNAL_PUBLICATIONCOUNT_FIELD = "publicationCount";
     public static final String RANK_JOURNAL_CITATIONCOUNT_FIELD = "citationCount";
@@ -202,7 +206,7 @@ public class IndexConst {
     public static final String RANK_CONFERENCE_HINDEXLAST10YEAR_FIELD = "h_indexLast10Year";
     public static final String RANK_CONFERENCE_GINDEXLAST5YEAR_FIELD = "g_indexLast5Year";
     public static final String RANK_CONFERENCE_GINDEXLAST10YEAR_FIELD = "g_indexLast10Year";
-	public static final String RANK_CONFERENCE_HINDEX_FIELD = "h_index";
+    public static final String RANK_CONFERENCE_HINDEX_FIELD = "h_index";
     public static final String RANK_CONFERENCE_GINDEX_FIELD = "g_index";
     public static final String RANK_CONFERENCE_PUBLICATIONCOUNT_FIELD = "publicationCount";
     public static final String RANK_CONFERENCE_CITATIONCOUNT_FIELD = "citationCount";
@@ -219,7 +223,7 @@ public class IndexConst {
     public static final String RANK_ORG_HINDEXLAST10YEAR_FIELD = "h_indexLast10Year";
     public static final String RANK_ORG_GINDEXLAST5YEAR_FIELD = "g_indexLast5Year";
     public static final String RANK_ORG_GINDEXLAST10YEAR_FIELD = "g_indexLast10Year";
-	public static final String RANK_ORG_HINDEX_FIELD = "h_index";
+    public static final String RANK_ORG_HINDEX_FIELD = "h_index";
     public static final String RANK_ORG_GINDEX_FIELD = "g_index";
     public static final String RANK_ORG_PUBLICATIONCOUNT_FIELD = "publicationCount";
     public static final String RANK_ORG_CITATIONCOUNT_FIELD = "citationCount";
@@ -234,14 +238,4 @@ public class IndexConst {
     public static final String RANK_KEYWORD_CITLAST10YEAR_FIELD = "citLast10Year";
     public static final String RANK_KEYWORD_PUBLICATIONCOUNT_FIELD = "publicationCount";
     public static final String RANK_KEYWORD_CITATIONCOUNT_FIELD = "citationCount";
-    // rank_subdomain index directory path									
-    public static final String RANK_SUBDOMAIN_INDEX_PATH = "INDEX-RANK-SUBDOMAIN";
-    // Lucene rank_subdomain field
-    public static final String RANK_SUBDOMAIN_IDSUBDOMAIN_FIELD = "idSubdomain";
-    public static final String RANK_SUBDOMAIN_PUBLAST5YEAR_FIELD = "pubLast5Year";
-    public static final String RANK_SUBDOMAIN_PUBLAST10YEAR_FIELD = "pubLast10Year";
-    public static final String RANK_SUBDOMAIN_CITLAST5YEAR_FIELD = "citLast5Year";
-    public static final String RANK_SUBDOMAIN_CITLAST10YEAR_FIELD = "citLast10Year";
-	public static final String RANK_SUBDOMAIN_PUBLICATIONCOUNT_FIELD = "publicationCount";
-    public static final String RANK_SUBDOMAIN_CITATIONCOUNT_FIELD = "citationCount";
 }
