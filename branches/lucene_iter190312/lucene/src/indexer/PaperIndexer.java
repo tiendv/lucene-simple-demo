@@ -152,7 +152,7 @@ public class PaperIndexer {
                 d = null;
                 paper = null;
             }
-            count = writer.numDocs();
+            //count = writer.numDocs();
             writer.optimize();
             writer.close();
             stmt.close();

@@ -238,4 +238,35 @@ public class IndexConst {
     public static final String RANK_KEYWORD_CITLAST10YEAR_FIELD = "citLast10Year";
     public static final String RANK_KEYWORD_PUBLICATIONCOUNT_FIELD = "publicationCount";
     public static final String RANK_KEYWORD_CITATIONCOUNT_FIELD = "citationCount";
+    // Index_Autocomplete directory path
+    public static final String AUTOCOMPLETE_DIRECTORY_PATH = "INDEX-AUTOCOMPLETE";
+    // Lucene Autocomplete field    
+    public static final String AUTOCOMPLETE_IDOBJECT_FIELD = "idObject";
+    public static final String AUTOCOMPLETE_OBJECT_FIELD = "Object";
+    public static final String AUTOCOMPLETE_KEYWORD_FIELD = "keyword";
+    public static final String AUTOCOMPLETE_TERM_FIELD = "term";
+    
+    public static final String AUTOCOMPLETE_OBJECT_VAL_AUTHOR = "author";
+    public static final String AUTOCOMPLETE_OBJECT_VAL_CONF = "conference";
+    public static final String AUTOCOMPLETE_OBJECT_VAL_JOUR = "journal";
+    public static final String AUTOCOMPLETE_OBJECT_VAL_ORG = "organization";
+    public static final String AUTOCOMPLETE_OBJECT_VAL_KEY = "keyword";
+    
+    // Index_Autocomplete directory path
+    public static final String CHECKSPELL_DIRECTORY_PATH = "INDEX-CHECKSPELL";
+    
+    public static final String CHECKSPELL_IDOBJECT_FIELD = "idObject";
+    public static final String CHECKSPELL_OBJECT_FIELD = "Object";
+    public static final String CHECKSPELL_KEYWORD_FIELD = "keyword";
+    public static final String CHECKSPELL_KEYWORD_COMPARE_FIELD = "compareKeyword";
+    public static final String CHECKSPELL_3GRAM_FIELD = "gram3";
+    public static final String CHECKSPELL_4GRAM_FIELD = "gram4";
+    public static final String CHECKSPELL_4GRAM_START_FIELD = "start4";
+    public static final String CHECKSPELL_4GRAM_END_FIELD = "end3";
+    public static final String CHECKSPELL_3GRAM_START_FIELD = "start3";
+    public static final String CHECKSPELL_3GRAM_END_FIELD = "end3";
+    
+    public static final String CHECKSPELL_OBJECT_VAL_AUTHOR = "author";
+    public static final String CHECKSPELL_OBJECT_VAL_KEY = "keyword";
+    
 }
