@@ -82,7 +82,7 @@ public class SubdomainIndexer {
             IndexWriter writer = new IndexWriter(directory, config);
             // Connection to DB
             Connection connection = connectionPool.getConnection();
-            String sql = "SELECT * FROM " + SubdomainTB.TABLE_NAME + " s";
+            String sql = "SELECT * FROM " + SubdomainTB.TABLE_NAME + " s limit 10";
             PreparedStatement stmt = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet rs = stmt.executeQuery();

@@ -85,7 +85,7 @@ public class KeywordIndexer {
             IndexWriter writer = new IndexWriter(directory, config);
             // Connection to DB
             Connection connection = connectionPool.getConnection();
-            String sql = "SELECT * FROM " + KeywordTB.TABLE_NAME + " k";
+            String sql = "SELECT * FROM " + KeywordTB.TABLE_NAME + " k limit 0,10";
             PreparedStatement stmt = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet rs = stmt.executeQuery();
@@ -264,10 +264,10 @@ public class KeywordIndexer {
         // TODO add your handling code here:
         try {
             String user = "root";
-            String pass = "@huydang1920@";
+            String pass = "root";
             String database = "cspublicationcrawler";
             int port = 3306;
-            String path = "E:\\";
+            String path = "C:\\";
             ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
             KeywordIndexer indexer = new KeywordIndexer(path);
             System.out.println(indexer._run(connectionPool));

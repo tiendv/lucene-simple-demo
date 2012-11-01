@@ -147,7 +147,7 @@ public class _RankAuthorIndexer {
                     d = null;
                 }
             }
-            count = writer.numDocs();
+            //count = writer.numDocs();
             writer.optimize();
             writer.close();
             stmt.close();

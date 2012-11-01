@@ -87,7 +87,7 @@ public class AuthorIndexer {
             IndexWriter writer = new IndexWriter(directory, config);
             // Connection to DB
             Connection connection = connectionPool.getConnection();
-            String sql = "SELECT * FROM " + AuthorTB.TABLE_NAME + " a";
+            String sql = "SELECT * FROM " + AuthorTB.TABLE_NAME + " a limit 10";
             PreparedStatement stmt = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet rs = stmt.executeQuery();
@@ -173,7 +173,7 @@ public class AuthorIndexer {
                 d = null;
                 dto = null;
             }
-            count = writer.numDocs();
+            //count = writer.numDocs();
             writer.optimize();
             writer.close();
             stmt.close();
@@ -484,10 +484,10 @@ public class AuthorIndexer {
         // TODO add your handling code here:
         try {
             String user = "root";
-            String pass = "@huydang1920@";
-            String database = "cspublicationcrawler";
+            String pass = "root";
+            String database = "cspublicationcrawler1";
             int port = 3306;
-            String path = "E:\\";
+            String path = "C:\\";
             ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
             AuthorIndexer indexer = new AuthorIndexer(path);
             System.out.println(indexer._run(connectionPool));
