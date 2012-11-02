@@ -53,7 +53,10 @@ public class ConferenceIndexer {
 
     private IndexSearcher searcher = null;
     private String path = "E:\\";
-
+    /**
+     * hàm khởi tạo searcher 
+     * @param path : đường dẫn tới thư mục lưu trữ Index
+     */
     public ConferenceIndexer(String path) {
         try {
             FSDirectory directory = Common.getFSDirectory(path, IndexConst.PAPER_INDEX_PATH);
@@ -63,7 +66,11 @@ public class ConferenceIndexer {
             System.out.println(ex.getMessage());
         }
     }
-
+    /**
+     * Hàm khởi chạy index
+     * @param connectionPool: kết nối csdl
+     * @return số lượng doc thực hiện index và thời gian thực hiện index
+     */
     public String _run(ConnectionPool connectionPool) {
         String out = "";
         try {
@@ -77,7 +84,12 @@ public class ConferenceIndexer {
         }
         return out;
     }
-
+    /**
+     * @Summary: truy vấn từ trong cơ sở dữ liệu ra tất cả các thông tin của một conference.
+     * Lấy idConf đó thực hiện truy vấn và tính toán các chỉ số: publicationCount, citationCount, H-index, G-index,..
+     * @param connectionPool: kết nối tới csdl
+     * @param indexDir : thư mục lưu trữ file index
+     */
     private int _index(ConnectionPool connectionPool, File indexDir) {
         int count = 0;
         try {
@@ -87,7 +99,7 @@ public class ConferenceIndexer {
             IndexWriter writer = new IndexWriter(directory, config);
             // Connection to DB
             Connection connection = connectionPool.getConnection();
-            String sql = "SELECT * FROM " + ConferenceTB.TABLE_NAME + " c limit 10";
+            String sql = "SELECT * FROM " + ConferenceTB.TABLE_NAME + " c";
             PreparedStatement stmt = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet rs = stmt.executeQuery();
@@ -184,7 +196,12 @@ public class ConferenceIndexer {
         }
         return count;
     }
-
+    /**
+     * truy vấn List các lĩnh vực mà hội nghị này có bài viết
+     * @param connectionPool: kết nối tới csdl
+     * @param idConference: id của 1 conference
+     * @return ListId các lĩnh vực
+     */
     private String getListIdSubdomain(ConnectionPool connectionPool, int idConference) throws SQLException, ClassNotFoundException {
         String list = "";
         try {
@@ -206,7 +223,11 @@ public class ConferenceIndexer {
         }
         return list;
     }
-
+    /**
+     * tính toán các thông tin publication, ciatation theo từng năm của một conference
+     * @param idConference
+     * @return Map chứa thông tin publication, ciatation theo từng năm của một conference
+     */
     private LinkedHashMap<String, String> getListPublicationCitation(String idConference) throws IOException, ParseException {
         LinkedHashMap<String, String> out = new LinkedHashMap<String, String>();
         BooleanQuery booleanQuery = new BooleanQuery();
@@ -294,9 +315,9 @@ public class ConferenceIndexer {
     }
 
     /**
-     * calculateIndexConference
-     *
-     * @throws Exception
+     * Hàm tính toán H-index và G-index cho một Conference
+     * @param idConference
+     * @return H-index và G-index
      */
     private LinkedHashMap<String, Integer> getCalculateIndexConference(String idConference) throws Exception {
         LinkedHashMap<String, Integer> out = new LinkedHashMap<String, Integer>();
@@ -332,7 +353,11 @@ public class ConferenceIndexer {
         out.put("g_index", g_index);
         return out;
     }
-
+    /**
+     * lấy chuỗi các bài viết với citation của bài viết đó được sắp xếp từ cao xuống thấp
+     * @param idConference
+     * @return ArrayList lưu citation từ cao xuống thấp
+     */
     private ArrayList<Integer> getPublicationList(String idConference) throws IOException, ParseException {
         ArrayList<Integer> publicationList = new ArrayList<Integer>();
         BooleanQuery booleanQuery = new BooleanQuery();
@@ -352,7 +377,10 @@ public class ConferenceIndexer {
         }
         return publicationList;
     }
-
+    /**
+     * hàm test index
+     * @param args 
+     */
     public static void main(String args[]) {
         // TODO add your handling code here:
         try {

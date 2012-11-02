@@ -38,7 +38,12 @@ public class CcidfIndexer {
             System.out.println(ex.getMessage());
         }
     }
-
+    /**
+     * 
+     * @param connectionPool: kết nối connection của MySQL
+     * @Summary: khởi chạy index
+     * @return: chuỗi out: số lượng doc được index và thời gian index
+     */
     public String _run(ConnectionPool connectionPool) {
         String out = "";
         try {
@@ -52,7 +57,12 @@ public class CcidfIndexer {
         }
         return out;
     }
-
+    /**
+     * 
+     * @param connectionPool: kết nối connection của MySQL
+     * @param indexDir: thư mục lưu trữ file Index
+     * @return số lượng doc thực hiện index
+     */
     private int _index(ConnectionPool connectionPool, File indexDir) {
         int count = 0;
         try {
@@ -62,7 +72,7 @@ public class CcidfIndexer {
             IndexWriter writer = new IndexWriter(directory, config);
             // Connection to DB
             Connection connection = connectionPool.getConnection();
-            String sql = "SELECT * FROM " + CcidfTB.TABLE_NAME + " c limit 10";
+            String sql = "SELECT * FROM " + CcidfTB.TABLE_NAME + " c";
             PreparedStatement stmt = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet rs = stmt.executeQuery();

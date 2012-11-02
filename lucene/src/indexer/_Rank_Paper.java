@@ -19,7 +19,12 @@ public class _Rank_Paper {
 
     public _Rank_Paper() {
     }
-
+    
+    /**
+     * 
+     * @param connectionPool Kết nối csdl
+     * @return số lượng record trong bảng rank_paper mới tạo, và thời gian thực hiện bảng rank
+     */
     public String _run(ConnectionPool connectionPool) {
         String out = "";
         try {
@@ -32,7 +37,13 @@ public class _Rank_Paper {
         }
         return out;
     }
-
+    /**
+     * 
+     * @param connectionPool
+     * @Summary: Tạo bảng trong csdl(xóa bảng cũ nếu đã tồn tại), 
+     * loại bỏ các record có idpaper trùng với idpaperRef
+     * Insert các record từ bảng paper_paper sang bảng rank, với chỉ số rank tăng dần
+     */
     public int _rank(ConnectionPool connectionPool) {
         int count = 0;
         try {
@@ -63,7 +74,10 @@ public class _Rank_Paper {
         }
         return count;
     }
-
+    /**
+     * hàm chạy thử
+     * @param args 
+     */
     public static void main(String args[]) {
         // TODO add your handling code here:
         try {

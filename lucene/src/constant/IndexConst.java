@@ -252,9 +252,9 @@ public class IndexConst {
     public static final String AUTOCOMPLETE_OBJECT_VAL_ORG = "organization";
     public static final String AUTOCOMPLETE_OBJECT_VAL_KEY = "keyword";
     
-    // Index_Autocomplete directory path
+    // Index_Checkspell directory path
     public static final String CHECKSPELL_DIRECTORY_PATH = "INDEX-CHECKSPELL";
-    
+    // Lucene CheckSpell fields
     public static final String CHECKSPELL_IDOBJECT_FIELD = "idObject";
     public static final String CHECKSPELL_OBJECT_FIELD = "Object";
     public static final String CHECKSPELL_KEYWORD_FIELD = "keyword";

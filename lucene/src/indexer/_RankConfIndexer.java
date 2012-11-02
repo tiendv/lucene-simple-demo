@@ -39,6 +39,15 @@ public class _RankConfIndexer {
     public Boolean connect = true;
     public Boolean folder = true;
 
+    /**
+     * 
+     * @param username
+     * @param password
+     * @param database
+     * @param port
+     * @param path 
+     * @Summary: khởi tạo connection và searcher bằng các thông số trên
+     */
     public _RankConfIndexer(String username, String password, String database, int port, String path) {
         try {
             FSDirectory directory = Common.getFSDirectory(path, IndexConst.PAPER_INDEX_PATH);
@@ -55,7 +64,10 @@ public class _RankConfIndexer {
             System.out.println(ex.getMessage());
         }
     }
-
+    /**
+     * @Summary Khởi chạy index
+     * @return chuỗi thông báo số doc được index và thời gian index
+     */
     public String _run() {
         String out = "";
         try {
@@ -69,7 +81,12 @@ public class _RankConfIndexer {
         }
         return out;
     }
-
+    /**
+     * Thực hiện truy vấn thông tin IdConference và IdSubdomain. Đối với mỗi hội nghị thực hiện truy vấn và tính toán các chỉ số:
+     * PublicationCount, citationCount, H-Index, G-index trong 5 năm và 10 năm gần đây
+     * @param indexDir
+     * @return 
+     */
     public int _index(File indexDir) {
         int count = 0;
         IndexBO indexBO = new IndexBO();
@@ -160,7 +177,10 @@ public class _RankConfIndexer {
         }
         return count;
     }
-
+    /**
+     * hàm để Test index
+     * @param args 
+     */
     public static void main(String args[]) {
         // TODO add your handling code here:
         try {

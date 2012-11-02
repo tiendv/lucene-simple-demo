@@ -51,7 +51,10 @@ public class KeywordIndexer {
 
     private IndexSearcher searcher = null;
     private String path = "E:\\";
-
+    /**
+     * khởi tạo searcher
+     * @param path: đường dẫn thư mục lưu trữ file index
+     */
     public KeywordIndexer(String path) {
         try {
             FSDirectory directory = Common.getFSDirectory(path, IndexConst.PAPER_INDEX_PATH);
@@ -61,7 +64,11 @@ public class KeywordIndexer {
             System.out.println(ex.getMessage());
         }
     }
-
+    /**
+     * hàm khởi chạy index
+     * @param connectionPool kết nối tới csdl
+     * @return số doc thực hiện index, và thời gian index
+     */
     public String _run(ConnectionPool connectionPool) {
         String out = "";
         try {
@@ -75,7 +82,12 @@ public class KeywordIndexer {
         }
         return out;
     }
-
+    /**
+     * Thực hiện truy vấn các thông tin về từ khóa trong csdl, đối với mỗi từ khóa thực hiện truy vấn và tính toán các chỉ số
+     * @param connectionPool: kết nối csdl
+     * @param indexDir: thư mục lưu trữ file index
+     * @return số doc thực hiện index
+     */
     private int _index(ConnectionPool connectionPool, File indexDir) {
         int count = 0;
         try {
@@ -85,7 +97,7 @@ public class KeywordIndexer {
             IndexWriter writer = new IndexWriter(directory, config);
             // Connection to DB
             Connection connection = connectionPool.getConnection();
-            String sql = "SELECT * FROM " + KeywordTB.TABLE_NAME + " k limit 0,10";
+            String sql = "SELECT * FROM " + KeywordTB.TABLE_NAME + " k";
             PreparedStatement stmt = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet rs = stmt.executeQuery();
@@ -151,7 +163,12 @@ public class KeywordIndexer {
         }
         return count;
     }
-
+    /**
+     * Truy vấn chuỗi id các subdomain mà các bài báo trong đó có dử dụng từ khóa
+     * @param connectionPool: kết nối csdl
+     * @param idKeyword: id keyword
+     * @return list các idSubdomain
+     */
     private String getListIdSubdomain(ConnectionPool connectionPool, int idKeyword) throws SQLException, ClassNotFoundException {
         String list = "";
         try {
@@ -173,7 +190,11 @@ public class KeywordIndexer {
         }
         return list;
     }
-
+    /**
+     * truy vấn các thông tin về publication và citation theo thời gian
+     * @param idKeyword
+     * @return map chứa: publicationCount, citationCount, chuỗi lưu thông tin publication, citation sắp xếp theo năm
+     */
     private LinkedHashMap<String, String> getListPublicationCitation(String idKeyword) throws IOException, ParseException {
         LinkedHashMap<String, String> out = new LinkedHashMap<String, String>();
         BooleanQuery booleanQuery = new BooleanQuery();
@@ -259,7 +280,10 @@ public class KeywordIndexer {
         }
         return out;
     }
-
+    /**
+     * hàm test index
+     * @param args 
+     */
     public static void main(String args[]) {
         // TODO add your handling code here:
         try {

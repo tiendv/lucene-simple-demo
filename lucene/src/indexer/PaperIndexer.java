@@ -48,7 +48,10 @@ import org.json.simple.JSONObject;
 public class PaperIndexer {
 
     private String path = "E:\\";
-
+    /**
+     * hàm khởi tạo
+     * @param path 
+     */
     public PaperIndexer(String path) {
         try {
             this.path = path;
@@ -56,7 +59,12 @@ public class PaperIndexer {
             System.out.println(ex.getMessage());
         }
     }
-
+    
+    /**
+     * hàm khởi chạy index
+     * @param connectionPool
+     * @return số doc thực hiện index và thời gian index
+     */
     public String _run(ConnectionPool connectionPool) {
         String out = "";
         try {
@@ -70,7 +78,12 @@ public class PaperIndexer {
         }
         return out;
     }
-
+    /**
+     * thực hiện truy vấn các thông tin của paper từ csdl và thực gọi các hàm tính toán các thông tin khác, thực hiện index
+     * @param connectionPool
+     * @param indexDir
+     * @return số doc thực hiện index
+     */
     private int _index(ConnectionPool connectionPool, File indexDir) {
         int count = 0;
         try {
@@ -80,7 +93,7 @@ public class PaperIndexer {
             IndexWriter writer = new IndexWriter(directory, config);
             // Connection to DB           
             Connection connection = connectionPool.getConnection();
-            String sql = "SELECT * FROM " + PaperTB.TABLE_NAME + " p LIMIT 10";
+            String sql = "SELECT * FROM " + PaperTB.TABLE_NAME + " p";
             PreparedStatement stmt = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet rs = stmt.executeQuery();
@@ -166,7 +179,7 @@ public class PaperIndexer {
 
     /*
      * @pararam idPaper
-     * @return
+     * @return ConferenceName
      */
     private String getConferenceName(ConnectionPool connectionPool, int idPaper) throws SQLException, ClassNotFoundException {
         String name = "";
@@ -189,7 +202,7 @@ public class PaperIndexer {
 
     /*
      * @pararam idPaper
-     * @return
+     * @return getJournalName
      */
     private String getJournalName(ConnectionPool connectionPool, int idPaper) throws SQLException, ClassNotFoundException {
         String name = "";
@@ -212,10 +225,9 @@ public class PaperIndexer {
     }
 
     /* 
-     * getListAuthor
+     * truy vấn thông tin về các tác giả tham gia viết paper
      * @param idPaper
      * @return authors {idAuthor, authorName}, authorsName, listIdAuthor, listIdOrg, orgsName
-     * @author: JSONObject{"authors":[{"idAuthor":1,"authorName":"Michael Randolph Garey"},{"idAuthor":2,"authorName":"David S. Johnson"}]}
      */
     private LinkedHashMap<String, String> getListAuthor(ConnectionPool connectionPool, int idPaper) throws SQLException, ClassNotFoundException {
         LinkedHashMap<String, String> result = new LinkedHashMap<String, String>();
@@ -274,7 +286,7 @@ public class PaperIndexer {
     }
 
     /*
-     * getListCitation
+     * truy vấn thông tin về citation theo thời gian
      * @param idPaper
      * @return citationCount, listCitation
      * listCitation: ArrayList<Object> listCitation = new ArrayList<Object>();
@@ -311,7 +323,7 @@ public class PaperIndexer {
 
     /*
      * @pararam idPaper
-     * @return
+     * @return listSubdomain
      */
     private String getListIdSubdomains(ConnectionPool connectionPool, int idPaper) throws SQLException, ClassNotFoundException {
         String list = "";
@@ -371,7 +383,7 @@ public class PaperIndexer {
 
     /*
      * @pararam idPaper
-     * @return
+     * @return rank of paper
      */
     private int getRank(ConnectionPool connectionPool, int idPaper) throws SQLException, ClassNotFoundException {
         int rank = 0;
@@ -420,7 +432,7 @@ public class PaperIndexer {
 
     /*
      * @pararam idPaper
-     * @return
+     * @return ReferenceCount
      */
     private int getReferenceCount(ConnectionPool connectionPool, int idPaper) throws SQLException {
         int count = 0;
@@ -440,7 +452,10 @@ public class PaperIndexer {
         }
         return count;
     }
-
+    /**
+     * hàm test index
+     * @param args 
+     */
     public static void main(String args[]) {
         // TODO add your handling code here:
         try {

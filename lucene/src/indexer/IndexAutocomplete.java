@@ -59,7 +59,13 @@ public class IndexAutocomplete {
         }
         return out;
     }
-
+    /**
+     *          
+     * @param path: đường dẫn tới folder
+     * @return số doc được index
+     * @Summary: lấy tất cả các từ khóa các trường: authorName, conferenceName, journalName, orgName, keyword.
+     * phân tích thành các token sau đó index vào theo thứ tự của các token đó
+     */
     public static int index(String path) throws IOException {
         int count = 0;
 
