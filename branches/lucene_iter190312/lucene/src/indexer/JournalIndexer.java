@@ -53,7 +53,10 @@ public class JournalIndexer {
 
     private IndexSearcher searcher = null;
     private String path = "E:\\";
-
+    /**
+     * hàm khởi tạo searcher
+     * @param path: đường dẫn tới thư mục lưu trữ file index
+     */
     public JournalIndexer(String path) {
         try {
             FSDirectory directory = Common.getFSDirectory(path, IndexConst.PAPER_INDEX_PATH);
@@ -63,7 +66,11 @@ public class JournalIndexer {
             System.out.println(ex.getMessage());
         }
     }
-
+    /**
+     * hàm khởi chạy index
+     * @param connectionPool: kết nối tới csdl
+     * @return số lượng doc được thực hiện index và thời gian index
+     */
     public String _run(ConnectionPool connectionPool) {
         String out = "";
         try {
@@ -77,7 +84,13 @@ public class JournalIndexer {
         }
         return out;
     }
-
+    /**
+     * Truy vấn các thông tin của journal trong csdl, truy vấn và tính toán các thuộc tính khác của journal:
+     * citationCoun, publicationCount, h-index, g-index
+     * @param connectionPool: kết nối csdl
+     * @param indexDir: thư mục lưu trữ file index
+     * @return số doc được index
+     */
     private int _index(ConnectionPool connectionPool, File indexDir) {
         int count = 0;
         try {
@@ -87,7 +100,7 @@ public class JournalIndexer {
             IndexWriter writer = new IndexWriter(directory, config);
             // Connection to DB
             Connection connection = connectionPool.getConnection();
-            String sql = "SELECT * FROM " + JournalTB.TABLE_NAME + " j limit 10";
+            String sql = "SELECT * FROM " + JournalTB.TABLE_NAME + " j";
             PreparedStatement stmt = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet rs = stmt.executeQuery();
@@ -180,7 +193,14 @@ public class JournalIndexer {
         }
         return count;
     }
-
+    /**
+     * hàm lấy chuỗi idsubdomain mà journal có bài trong đó
+     * @param connectionPool: kết nối csdl
+     * @param idJournal
+     * @return list các idsubdomain
+     * @throws SQLException
+     * @throws ClassNotFoundException 
+     */
     private String getListIdSubdomain(ConnectionPool connectionPool, int idJournal) throws SQLException, ClassNotFoundException {
         String list = "";
         try {
@@ -202,7 +222,11 @@ public class JournalIndexer {
         }
         return list;
     }
-
+    /**
+     * Truy vấn thông tin về publication và citation theo thời gian
+     * @param idJournal
+     * @return map chứa các thông tin như: publicationCount, citationCount, chuỗi publication, citation theo thời gian
+     */
     private LinkedHashMap<String, String> getListPublicationCitation(String idJournal) throws IOException, ParseException {
         LinkedHashMap<String, String> out = new LinkedHashMap<String, String>();
         BooleanQuery booleanQuery = new BooleanQuery();
@@ -290,9 +314,10 @@ public class JournalIndexer {
     }
 
     /**
-     * calculateIndexJournal
-     *
-     * @throws Exception
+     * Tính toán các chỉ số h-index, g-index
+     * @param idJournal
+     * @return h-index, g-index của journal
+     * @throws Exception 
      */
     private LinkedHashMap<String, Integer> getCalculateIndexJournal(String idJournal) throws Exception {
         LinkedHashMap<String, Integer> out = new LinkedHashMap<String, Integer>();
@@ -328,7 +353,11 @@ public class JournalIndexer {
         out.put("g_index", g_index);
         return out;
     }
-
+    /**
+     * Truy vấn số lượng citation của các bài viết trong journal và sắp xếp từ nhiều đến ít
+     * @param idJournal
+     * @return array số lượng citation
+     */
     private ArrayList<Integer> getPublicationList(String idJournal) throws IOException, ParseException {
         ArrayList<Integer> publicationList = new ArrayList<Integer>();
         BooleanQuery booleanQuery = new BooleanQuery();
@@ -348,7 +377,10 @@ public class JournalIndexer {
         }
         return publicationList;
     }
-
+    /**
+     * hàm test index
+     * @param args 
+     */
     public static void main(String args[]) {
         // TODO add your handling code here:
         try {

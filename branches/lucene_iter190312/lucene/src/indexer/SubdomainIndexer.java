@@ -48,7 +48,10 @@ public class SubdomainIndexer {
 
     private IndexSearcher searcher = null;
     private String path = "E:\\";
-
+    /**
+     * hàm khởi tạo
+     * @param path: đường dẫn tới thư mục chứa file index 
+     */
     public SubdomainIndexer(String path) {
         try {
             FSDirectory directory = Common.getFSDirectory(path, IndexConst.PAPER_INDEX_PATH);
@@ -58,7 +61,11 @@ public class SubdomainIndexer {
             System.out.println(ex.getMessage());
         }
     }
-
+    /**
+     * hàm khởi chạy index
+     * @param connectionPool: kết nối csdl
+     * @return số doc thực hiện index và thời gian index
+     */
     public String _run(ConnectionPool connectionPool) {
         String out = "";
         try {
@@ -73,6 +80,12 @@ public class SubdomainIndexer {
         return out;
     }
 
+    /**
+     * truy vấn từ csdl các thông tin của subdomain, gọi các hàm truy vấn và tính toán các chỉ số, index
+     * @param connectionPool: kết nối csdl
+     * @param indexDir: thư mục chứa file index
+     * @return số doc thực hiện index
+     */
     private int _index(ConnectionPool connectionPool, File indexDir) {
         int count = 0;
         try {
@@ -82,7 +95,7 @@ public class SubdomainIndexer {
             IndexWriter writer = new IndexWriter(directory, config);
             // Connection to DB
             Connection connection = connectionPool.getConnection();
-            String sql = "SELECT * FROM " + SubdomainTB.TABLE_NAME + " s limit 10";
+            String sql = "SELECT * FROM " + SubdomainTB.TABLE_NAME + " s";
             PreparedStatement stmt = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet rs = stmt.executeQuery();
@@ -153,7 +166,11 @@ public class SubdomainIndexer {
         }
         return count;
     }
-
+    /**
+     * tính toán các thông tin publication, ciatation theo từng năm của một idSubdomain
+     * @param idSubdomain
+     * @return Map chứa thông tin publication, ciatation theo từng năm của một idSubdomain
+     */
     public LinkedHashMap<String, String> getListPublicationCitation(String idSubdomain) throws IOException, ParseException {
         LinkedHashMap<String, String> out = new LinkedHashMap<String, String>();
         BooleanQuery booleanQuery = new BooleanQuery();
@@ -239,7 +256,10 @@ public class SubdomainIndexer {
         }
         return out;
     }
-
+    /**
+     * hàm test index
+     * @param args 
+     */
     public static void main(String args[]) {
         // TODO add your handling code here:
         try {

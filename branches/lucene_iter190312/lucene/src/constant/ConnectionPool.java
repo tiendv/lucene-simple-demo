@@ -13,8 +13,9 @@ import org.apache.commons.dbcp.PoolingDataSource;
 import org.apache.commons.pool.impl.GenericObjectPool;
 
 /**
- *
- * @author DucHuynh
+ * 
+ * @author Dung Doan
+ * Summary: Create connection pool
  */
 public class ConnectionPool {
 

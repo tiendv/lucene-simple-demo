@@ -54,7 +54,10 @@ public class OrgIndexer {
 
     private IndexSearcher searcher = null;
     private String path = "E:\\";
-
+    /**
+     * khởi tạo searcher
+     * @param path: đường dẫn tới thư mục lưu trữ file index
+     */
     public OrgIndexer(String path) {
         try {
             FSDirectory directory = Common.getFSDirectory(path, IndexConst.PAPER_INDEX_PATH);
@@ -64,7 +67,11 @@ public class OrgIndexer {
             System.out.println(ex.getMessage());
         }
     }
-
+    /**
+     * hàm khởi chạy index
+     * @param connectionPool: kết nối csdl
+     * @return số lượng doc được thực hiện index, thời gian index
+     */
     public String _run(ConnectionPool connectionPool) {
         String out = "";
         try {
@@ -78,7 +85,12 @@ public class OrgIndexer {
         }
         return out;
     }
-
+    /**
+     * Truy vấn các thông tin của tổ chức từ csdl và gọi các hàm tính toán các chỉ số, thực hiện index
+     * @param connectionPool: kết nối csdl
+     * @param indexDir: thư mục lưu trữ file index
+     * @return số doc thực hiện 
+     */
     private int _index(ConnectionPool connectionPool, File indexDir) {
         int count = 0;
         try {
@@ -88,7 +100,7 @@ public class OrgIndexer {
             IndexWriter writer = new IndexWriter(directory, config);
             // Connection to DB
             Connection connection = connectionPool.getConnection();
-            String sql = "SELECT * FROM " + OrgTB.TABLE_NAME + " o limit 10";
+            String sql = "SELECT * FROM " + OrgTB.TABLE_NAME + " o";
             PreparedStatement stmt = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet rs = stmt.executeQuery();
@@ -179,7 +191,14 @@ public class OrgIndexer {
         }
         return count;
     }
-
+    /**
+     * truy vấn lấy ra danh sách các domain mà tổ chức có viết bài
+     * @param connectionPool
+     * @param idOrg
+     * @return list các idSubdomain
+     * @throws SQLException
+     * @throws ClassNotFoundException 
+     */
     private String getListIdSubdomain(ConnectionPool connectionPool, int idOrg) throws SQLException, ClassNotFoundException {
         String list = "";
         try {
@@ -201,7 +220,11 @@ public class OrgIndexer {
         }
         return list;
     }
-
+    /**
+     * truy vấn các thông tin về publication và citation theo thời gian
+     * @param idOrg
+     * @return map chứa: publicationCount, citationCount, chuỗi lưu thông tin publication, citation sắp xếp theo năm
+     */
     private LinkedHashMap<String, String> getListPublicationCitation(String idOrg) throws IOException, ParseException {
         LinkedHashMap<String, String> out = new LinkedHashMap<String, String>();
         BooleanQuery booleanQuery = new BooleanQuery();
@@ -289,9 +312,9 @@ public class OrgIndexer {
     }
 
     /**
-     * calculateIndexOrg
-     *
-     * @throws Exception
+     * Hàm tính toán H-index và G-index cho một idOrg
+     * @param idOrg
+     * @return H-index và G-index
      */
     private LinkedHashMap<String, Integer> getCalculateIndexOrg(String idOrg) throws Exception {
         LinkedHashMap<String, Integer> out = new LinkedHashMap<String, Integer>();
@@ -327,7 +350,11 @@ public class OrgIndexer {
         out.put("g_index", g_index);
         return out;
     }
-
+    /**
+     * lấy chuỗi các bài viết với citation của bài viết đó được sắp xếp từ cao xuống thấp
+     * @param idOrg
+     * @return ArrayList lưu citation từ cao xuống thấp
+     */
     private ArrayList<Integer> getPublicationList(String idOrg) throws IOException, ParseException {
         ArrayList<Integer> publicationList = new ArrayList<Integer>();
         BooleanQuery booleanQuery = new BooleanQuery();
@@ -347,7 +374,10 @@ public class OrgIndexer {
         }
         return publicationList;
     }
-
+    /**
+     * hàm test index
+     * @param args 
+     */
     public static void main(String args[]) {
         // TODO add your handling code here:
         try {

@@ -10,6 +10,7 @@ import java.util.Comparator;
 /**
  *
  * @author Huy Dang
+ * summary: so sanh 2 doi tuong PubCiDTO theo nam
  */
 public class PubCiComparator implements Comparator<PubCiDTO> {
 

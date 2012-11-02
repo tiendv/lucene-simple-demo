@@ -42,11 +42,18 @@ public class CheckSpellIndexer {
 
     static String delims = "[ ,?!()-.]+";
     String Path = "";
-
+    /**
+     * 
+     * @param path đường dẫn tới thư mục lưu trữ
+     */
     public CheckSpellIndexer(String path) {
         this.Path = path;
     }
-
+    /**
+     * 
+     * @Summary: khởi chạy index
+     * @return: chuỗi out: số lượng doc được index và thời gian index
+     */
     public String _run() {
         String out = "";
         try {
@@ -59,7 +66,9 @@ public class CheckSpellIndexer {
         }
         return out;
     }
-
+    /**
+     * lớp AnalysisResult gồm các thuộc tính sau khi annalys để thực hiện index
+     */
     public static class AnalysisResult {
 
         public String input;
@@ -70,7 +79,9 @@ public class CheckSpellIndexer {
         public String end3 = "";
         public String end4 = "";
     }
-
+    /**
+     * @Summary: bộ annalys dùng để phân tích từ khóathành NGram
+     */
     public static class NGramAnalyzer extends Analyzer {
 
         private int minGram;
@@ -86,7 +97,12 @@ public class CheckSpellIndexer {
             return new NGramTokenizer(reader, minGram, maxGram);
         }
     }
-
+    /**
+     * 
+     * @param path : đường dẫn tới folder lưu trữ index
+     * @return số doc được index
+     * @Summary: Truy vấn tên tác giả và từ khóa phân tích thành NGram sau đó thực hiện index
+     */
     public static int index(String path) throws IOException {
         int count = 0;
 
@@ -196,7 +212,11 @@ public class CheckSpellIndexer {
         writer.close();
         return count;
     }
-
+    /**
+     * 
+     * @param input Chuỗi dùng để annalis
+     * @return Đối tượng AnalysisResult được phân tích thành 3gram và 4gram
+     */
     public static AnalysisResult analyze(String input) throws IOException {
         AnalysisResult result = new AnalysisResult();
         result.input = input;
@@ -220,7 +240,10 @@ public class CheckSpellIndexer {
         result.end4 = input.substring(Math.max(0, input.length() - 4), input.length());
         return result;
     }
-
+     /**
+      * 
+      * @Summary: chạy index để test
+      */
     public static void main(String[] args) throws IOException {
         String path = "C:\\";
         int count = index(path);
