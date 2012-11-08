@@ -4,14 +4,11 @@
  */
 package indexer;
 
-import constant.Common;
 import constant.ConnectionPool;
-import constant.IndexConst;
 import database.AuthorPaperTB;
 import database.AuthorTB;
 import database.PaperTB;
 import java.io.File;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,13 +19,6 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.NumericField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.queryParser.ParseException;
-import org.apache.lucene.queryParser.QueryParser;
-import org.apache.lucene.search.BooleanClause;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
@@ -39,23 +29,15 @@ import org.apache.lucene.util.Version;
  */
 public class AuthorConfIndexer {
 
-    private IndexSearcher searcher = null;
     private String path = "E:\\";
 
     public AuthorConfIndexer(String path) {
-        try {
-            FSDirectory directory = Common.getFSDirectory(path, IndexConst.PAPER_INDEX_PATH);
-            searcher = new IndexSearcher(directory);
-            this.path = path;
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
+        this.path = path;
     }
 
     public String _run(ConnectionPool connectionPool) {
         String out = "";
         try {
-
             long start = new Date().getTime();
             int count = this._index(connectionPool);
             long end = new Date().getTime();
@@ -83,18 +65,17 @@ public class AuthorConfIndexer {
             while ((authRs != null) && (authRs.next())) {
                 // Connection to DB
                 Connection confCon = connectionPool.getConnection();
-                String confQuery = "SELECT DISTINCT p." + PaperTB.COLUMN_CONFERENCEID + " FROM " + AuthorPaperTB.TABLE_NAME + " a JOIN " + PaperTB.TABLE_NAME + " p ON (a." + AuthorPaperTB.COLUMN_PAPERID + " = p." + PaperTB.COLUMN_PAPERID + ") WHERE p." + PaperTB.COLUMN_CONFERENCEID + " IS NOT NULL AND a." + AuthorPaperTB.COLUMN_AUTHORID + "=" + authRs.getString(AuthorTB.COLUMN_AUTHORID);
+                String confQuery = "SELECT a." + AuthorPaperTB.COLUMN_AUTHORID + ", p." + PaperTB.COLUMN_CONFERENCEID + ", COUNT(*) AS publicationCount FROM " + AuthorPaperTB.TABLE_NAME + " a JOIN " + PaperTB.TABLE_NAME + " p ON (a." + AuthorPaperTB.COLUMN_PAPERID + " = p." + PaperTB.COLUMN_PAPERID + ") WHERE p." + PaperTB.COLUMN_CONFERENCEID + " IS NOT NULL AND a." + AuthorPaperTB.COLUMN_AUTHORID + "=" + authRs.getString(AuthorTB.COLUMN_AUTHORID) + " GROUP BY a." + AuthorPaperTB.COLUMN_AUTHORID + ", p." + PaperTB.COLUMN_CONFERENCEID;
                 PreparedStatement confStmt = confCon.prepareStatement(confQuery);
                 ResultSet confRs = confStmt.executeQuery();
                 while ((confRs != null) && (confRs.next())) {
-                    int pubCount = this.getPublicationCount(authRs.getString(AuthorTB.COLUMN_AUTHORID), confRs.getString(PaperTB.COLUMN_CONFERENCEID));
                     Document d = new Document();
                     d.add(new Field("idAuthor", authRs.getString(AuthorTB.COLUMN_AUTHORID), Field.Store.YES, Field.Index.ANALYZED));
                     d.add(new Field("idConference", confRs.getString(PaperTB.COLUMN_CONFERENCEID), Field.Store.YES, Field.Index.ANALYZED));
-                    d.add(new NumericField("publicationCount", Field.Store.YES, true).setIntValue(pubCount));
+                    d.add(new NumericField("publicationCount", Field.Store.YES, true).setIntValue(confRs.getInt("publicationCount")));
                     writer.addDocument(d);
                     d = null;
-                    System.out.println("Indexing: " + count++ + "\t" + " idAuthor: " + authRs.getString(AuthorTB.COLUMN_AUTHORID) + "\t" + " idConference: " + confRs.getString(PaperTB.COLUMN_CONFERENCEID) + "\t" + " publicationCount: " + pubCount);
+                    System.out.println("Indexing: " + count++ + "\t" + " idAuthor: " + authRs.getString(AuthorTB.COLUMN_AUTHORID) + "\t" + " idConference: " + confRs.getString(PaperTB.COLUMN_CONFERENCEID) + "\t" + " publicationCount: " + confRs.getString("publicationCount"));
                 }
                 confRs.close();
                 confStmt.close();
@@ -108,31 +89,6 @@ public class AuthorConfIndexer {
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
             return 0;
-        }
-        return count;
-    }
-
-    /**
-     * @param idAuthor
-     * @param idConference
-     * @return
-     * @throws IOException
-     * @throws ParseException
-     */
-    private int getPublicationCount(String idAuthor, String idConference) throws IOException, ParseException {
-        int count = 0;
-        BooleanQuery booleanQuery = new BooleanQuery();
-        // Author
-        QueryParser authorParser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDAUTHOR_FIELD, new StandardAnalyzer(Version.LUCENE_36));
-        Query authorQuery = authorParser.parse(idAuthor);
-        booleanQuery.add(authorQuery, BooleanClause.Occur.MUST);
-        // Conference
-        QueryParser confParser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_IDCONFERENCE_FIELD, new StandardAnalyzer(Version.LUCENE_36));
-        Query confQuery = confParser.parse(idConference);
-        booleanQuery.add(confQuery, BooleanClause.Occur.MUST);
-        TopDocs result = searcher.search(booleanQuery, Integer.MAX_VALUE);
-        if (result != null) {
-            count = result.totalHits;
         }
         return count;
     }
