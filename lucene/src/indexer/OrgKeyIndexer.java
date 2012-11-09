@@ -7,7 +7,8 @@ package indexer;
 import constant.ConnectionPool;
 import database.AuthorPaperTB;
 import database.AuthorTB;
-import database.PaperTB;
+import database.OrgTB;
+import database.PaperKeywordTB;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -27,11 +28,11 @@ import org.apache.lucene.util.Version;
  *
  * @author HuyDang
  */
-public class AuthorJournalIndexer {
+public class OrgKeyIndexer {
 
     private String path = "E:\\";
 
-    public AuthorJournalIndexer(String path) {
+    public OrgKeyIndexer(String path) {
         this.path = path;
     }
 
@@ -54,35 +55,35 @@ public class AuthorJournalIndexer {
         try {
             StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
             IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
-            Directory directory = FSDirectory.open(new File(path + "INDEX-AUTHOR-JOURNAL"));
+            Directory directory = FSDirectory.open(new File(path + "INDEX-ORG-KEYWORD"));
             IndexWriter writer = new IndexWriter(directory, config);
             // Connection to DB
             Connection connection = connectionPool.getConnection();
-            String authQuery = "SELECT " + AuthorTB.COLUMN_AUTHORID + " FROM " + AuthorTB.TABLE_NAME + " a";
-            PreparedStatement authorStmt = connection.prepareStatement(authQuery, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-            authorStmt.setFetchSize(Integer.MIN_VALUE);
-            ResultSet authRs = authorStmt.executeQuery();
+            String orgQuery = "SELECT " + OrgTB.COLUMN_ORGID + " FROM " + OrgTB.TABLE_NAME + " a limit 1";
+            PreparedStatement orgStmt = connection.prepareStatement(orgQuery, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            orgStmt.setFetchSize(Integer.MIN_VALUE);
+            ResultSet orgRs = orgStmt.executeQuery();
             // Index data from query
-            while ((authRs != null) && (authRs.next())) {
+            while ((orgRs != null) && (orgRs.next())) {
                 // Connection to DB
-                Connection jourCon = connectionPool.getConnection();
-                String jourQuery = "SELECT a." + AuthorPaperTB.COLUMN_AUTHORID + ", p." + PaperTB.COLUMN_JOURNALID + ", COUNT(*) AS publicationCount FROM " + AuthorPaperTB.TABLE_NAME + " a JOIN " + PaperTB.TABLE_NAME + " p ON (a." + AuthorPaperTB.COLUMN_PAPERID + " = p." + PaperTB.COLUMN_PAPERID + ") WHERE p." + PaperTB.COLUMN_JOURNALID + " IS NOT NULL AND a." + AuthorPaperTB.COLUMN_AUTHORID + "=" + authRs.getString(AuthorTB.COLUMN_AUTHORID) + " GROUP BY a." + AuthorPaperTB.COLUMN_AUTHORID + ", p." + PaperTB.COLUMN_JOURNALID;
-                PreparedStatement jourStmt = jourCon.prepareStatement(jourQuery);
-                ResultSet jourRs = jourStmt.executeQuery();
-                while ((jourRs != null) && (jourRs.next())) {
+                Connection keyCon = connectionPool.getConnection();
+                String keyQuery = "SELECT a." + AuthorTB.COLUMN_ORGID + ", pk." + PaperKeywordTB.COLUMN_KEYWORDID + ", COUNT(DISTINCT pk." + PaperKeywordTB.COLUMN_PAPERID + ") AS publicationCount FROM " + AuthorTB.TABLE_NAME + " a JOIN " + AuthorPaperTB.TABLE_NAME + " ap ON (a." + AuthorTB.COLUMN_AUTHORID + " = ap." + AuthorPaperTB.COLUMN_AUTHORID + ") JOIN " + PaperKeywordTB.TABLE_NAME + " pk ON (pk." + PaperKeywordTB.COLUMN_PAPERID + " = ap." + AuthorPaperTB.COLUMN_PAPERID + ") WHERE a." + AuthorTB.COLUMN_ORGID + "=" + orgRs.getString(OrgTB.COLUMN_ORGID) + " GROUP BY a." + AuthorTB.COLUMN_ORGID + ", pk." + PaperKeywordTB.COLUMN_KEYWORDID;
+                PreparedStatement keyStmt = keyCon.prepareStatement(keyQuery);
+                ResultSet keyRs = keyStmt.executeQuery();
+                while ((keyRs != null) && (keyRs.next())) {
                     Document d = new Document();
-                    d.add(new Field("idAuthor", authRs.getString(AuthorTB.COLUMN_AUTHORID), Field.Store.YES, Field.Index.ANALYZED));
-                    d.add(new Field("idJournal", jourRs.getString(PaperTB.COLUMN_JOURNALID), Field.Store.YES, Field.Index.ANALYZED));
-                    d.add(new NumericField("publicationCount", Field.Store.YES, true).setIntValue(jourRs.getInt("publicationCount")));
+                    d.add(new Field("idOrg", orgRs.getString(OrgTB.COLUMN_ORGID), Field.Store.YES, Field.Index.ANALYZED));
+                    d.add(new Field("idKeyword", keyRs.getString(PaperKeywordTB.COLUMN_KEYWORDID), Field.Store.YES, Field.Index.ANALYZED));
+                    d.add(new NumericField("publicationCount", Field.Store.YES, true).setIntValue(keyRs.getInt("publicationCount")));
                     writer.addDocument(d);
                     d = null;
-                    System.out.println("Indexing: " + count++ + "\t" + " idAuthor: " + authRs.getString(AuthorTB.COLUMN_AUTHORID) + "\t" + " idJournal: " + jourRs.getString(PaperTB.COLUMN_JOURNALID) + "\t" + " publicationCount: " + jourRs.getString("publicationCount"));
+                    System.out.println("Indexing: " + count++ + "\t" + " idOrg: " + orgRs.getString(OrgTB.COLUMN_ORGID) + "\t" + " idKeyword: " + keyRs.getString(PaperKeywordTB.COLUMN_KEYWORDID) + "\t" + " publicationCount: " + keyRs.getString("publicationCount"));
                 }
-                jourRs.close();
-                jourStmt.close();
-                jourCon.close();
+                keyRs.close();
+                keyStmt.close();
+                keyCon.close();
             }
-            authorStmt.close();
+            orgStmt.close();
             connection.close();
             writer.optimize();
             writer.close();
@@ -102,12 +103,12 @@ public class AuthorJournalIndexer {
         // TODO add your handling code here:
         try {
             String user = "root";
-            String pass = "@huydang1920@";
-            String database = "cspublicationcrawler";
+            String pass = "root";
+            String database = "cspublicationcrawler1";
             int port = 3306;
-            String path = "E:\\GURU\\";
+            String path = "C:\\INDEX\\";
             ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
-            AuthorJournalIndexer indexer = new AuthorJournalIndexer(path);
+            OrgKeyIndexer indexer = new OrgKeyIndexer(path);
             System.out.println(indexer._run(connectionPool));
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
