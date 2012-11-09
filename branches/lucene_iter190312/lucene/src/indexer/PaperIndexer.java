@@ -237,6 +237,7 @@ public class PaperIndexer {
         String listIdAuthor = "";
         String listIdOrg = "";
         String orgsName = "";
+        ArrayList<String> ArrayListIdOrg = new ArrayList<String>();
         try {
             Connection connection = connectionPool.getConnection();
             String sql = "SELECT a." + AuthorTB.COLUMN_AUTHORID + ", a." + AuthorTB.COLUMN_ORGID + ", a." + AuthorTB.COLUMN_AUTHORNAME + ",(SELECT o." + OrgTB.COLUMN_ORGNAME + " FROM " + OrgTB.TABLE_NAME + " o WHERE o." + OrgTB.COLUMN_ORGID + " = a." + AuthorTB.COLUMN_ORGID + ") AS " + OrgTB.COLUMN_ORGNAME + " FROM " + PaperTB.TABLE_NAME + " p JOIN " + AuthorPaperTB.TABLE_NAME + " ap ON ap." + AuthorPaperTB.COLUMN_PAPERID + " = p." + PaperTB.COLUMN_PAPERID + " JOIN " + AuthorTB.TABLE_NAME + " a ON a." + AuthorTB.COLUMN_AUTHORID + " = ap." + AuthorPaperTB.COLUMN_AUTHORID + " WHERE p." + PaperTB.COLUMN_PAPERID + " = ?";
@@ -253,10 +254,14 @@ public class PaperIndexer {
                 authorsName += " " + authorName;
                 orgsName += " " + rs.getString(OrgTB.COLUMN_ORGNAME);
                 listIdAuthor += " " + rs.getString(AuthorTB.COLUMN_AUTHORID);
-                if ((rs.getInt(AuthorTB.COLUMN_ORGID) > 0) && (!listIdOrg.contains(rs.getString(AuthorTB.COLUMN_ORGID)))) {
-                    listIdOrg += " " + rs.getString(AuthorTB.COLUMN_ORGID);
+                if ((rs.getInt(AuthorTB.COLUMN_ORGID) > 0)&&(!ArrayListIdOrg.contains(rs.getString(AuthorTB.COLUMN_ORGID)))) {
+                    ArrayListIdOrg.add(rs.getString(AuthorTB.COLUMN_ORGID));
                 }
                 authors.add(author);
+            }
+            for(int i=0;i<ArrayListIdOrg.size();i++)
+            {
+                listIdOrg+=" "+ArrayListIdOrg.get(i);
             }
             if (!"".equals(authorsName)) {
                 authorsName = authorsName.substring(1);
