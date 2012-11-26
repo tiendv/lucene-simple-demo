@@ -111,9 +111,9 @@ public class CcidfIndexer {
         try {
             String user = "root";
             String pass = "@huydang1920@";
-            String database = "cspublicationcrawler";
+            String database = "pubguru";
             int port = 3306;
-            String path = "E:\\";
+            String path = "E:\\INDEX\\";
             ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
             CcidfIndexer indexer = new CcidfIndexer(path);
             System.out.println(indexer._run(connectionPool));

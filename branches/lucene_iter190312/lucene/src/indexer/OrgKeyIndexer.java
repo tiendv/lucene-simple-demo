@@ -103,10 +103,10 @@ public class OrgKeyIndexer {
         // TODO add your handling code here:
         try {
             String user = "root";
-            String pass = "root";
-            String database = "cspublicationcrawler1";
+            String pass = "@huydang1920@";
+            String database = "pubguru";
             int port = 3306;
-            String path = "C:\\INDEX\\";
+            String path = "E:\\INDEX\\";
             ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
             OrgKeyIndexer indexer = new OrgKeyIndexer(path);
             System.out.println(indexer._run(connectionPool));

@@ -53,7 +53,7 @@ public class _Rank_Paper {
             String drop = "DROP TABLE IF EXISTS `" + RankPaperTB.TABLE_NAME + "`;";
             statement.execute(drop);
             // Create
-            String create = "CREATE TABLE IF NOT EXISTS `" + RankPaperTB.TABLE_NAME + "` (`" + RankPaperTB.COLUMN_PAPERID + "` INT(10) NOT NULL, `" + RankPaperTB.COLUMN_CITATIONCOUNT + "` INT(10) NULL, `" + RankPaperTB.COLUMN_RANK + "` INT(10) NULL AUTO_INCREMENT, PRIMARY KEY (`" + RankPaperTB.COLUMN_PAPERID + "`), INDEX `index2` (`" + RankPaperTB.COLUMN_RANK + "` ASC)) ENGINE = InnoDB DEFAULT CHARACTER SET = utf8;";
+            String create = "CREATE TABLE IF NOT EXISTS `" + RankPaperTB.TABLE_NAME + "` (`" + RankPaperTB.COLUMN_PAPERID + "` INT(10) NOT NULL, `" + RankPaperTB.COLUMN_CITATIONCOUNT + "` INT(10) NULL, `" + RankPaperTB.COLUMN_RANK + "` INT(10) NULL AUTO_INCREMENT, PRIMARY KEY (`" + RankPaperTB.COLUMN_PAPERID + "`), INDEX `index2` (`" + RankPaperTB.COLUMN_RANK + "` ASC)) ENGINE = MyISAM DEFAULT CHARACTER SET = utf8;";
             statement.execute(create);
             // Clean up data
             String detele = "DELETE FROM " + PaperPaperTB.TABLE_NAME + " WHERE " + PaperPaperTB.COLUMN_PAPERID + " = " + PaperPaperTB.COLUMN_PAPERREFID + ";";
@@ -83,7 +83,7 @@ public class _Rank_Paper {
         try {
             String user = "root";
             String pass = "@huydang1920@";
-            String database = "cspublicationcrawler";
+            String database = "pubguru";
             int port = 3306;
             ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
             _Rank_Paper indexer = new _Rank_Paper();

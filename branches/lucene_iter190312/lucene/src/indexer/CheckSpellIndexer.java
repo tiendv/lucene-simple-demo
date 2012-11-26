@@ -245,7 +245,7 @@ public class CheckSpellIndexer {
       * @Summary: chạy index để test
       */
     public static void main(String[] args) throws IOException {
-        String path = "C:\\";
+        String path = "E:\\INDEX\\";
         int count = index(path);
         System.out.println(count);
     }

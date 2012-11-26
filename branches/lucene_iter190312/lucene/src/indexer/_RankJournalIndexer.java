@@ -22,7 +22,6 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.NumericField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
@@ -34,17 +33,17 @@ import org.apache.lucene.util.Version;
 public class _RankJournalIndexer {
 
     private ConnectionPool connectionPool;
-    private IndexSearcher searcher = null;
     private String path = null;
     public Boolean connect = true;
     public Boolean folder = true;
+
     /**
-     * 
+     *
      * @param username
      * @param password
      * @param database
      * @param port
-     * @param path 
+     * @param path
      * @Summary: khởi tạo connection và searcher bằng các thông số trên
      */
     public _RankJournalIndexer(String username, String password, String database, int port, String path) {
@@ -54,7 +53,6 @@ public class _RankJournalIndexer {
                 folder = false;
             }
             this.path = path;
-            searcher = new IndexSearcher(directory);
             connectionPool = new ConnectionPool(username, password, database, port);
             if (connectionPool.getConnection() == null) {
                 connect = false;
@@ -63,6 +61,7 @@ public class _RankJournalIndexer {
             System.out.println(ex.getMessage());
         }
     }
+
     /**
      * @Summary Khởi chạy index
      * @return chuỗi thông báo số doc được index và thời gian index
@@ -80,11 +79,14 @@ public class _RankJournalIndexer {
         }
         return out;
     }
+
     /**
-     * Thực hiện truy vấn thông tin IdJournal và IdSubdomain. Đối với mỗi tạp chí thực hiện truy vấn và tính toán các chỉ số:
-     * PublicationCount, citationCount, H-Index, G-index trong 5 năm và 10 năm gần đây
+     * Thực hiện truy vấn thông tin IdJournal và IdSubdomain. Đối với mỗi tạp
+     * chí thực hiện truy vấn và tính toán các chỉ số: PublicationCount,
+     * citationCount, H-Index, G-index trong 5 năm và 10 năm gần đây
+     *
      * @param indexDir
-     * @return 
+     * @return
      */
     public int _index(File indexDir) {
         int count = 0;
@@ -104,20 +106,21 @@ public class _RankJournalIndexer {
             while ((rs != null) && (rs.next())) {
                 ArrayList<Integer> listIdJournal = indexBO.getListIdJournalFromIdSubDomain(path + IndexConst.JOURNAL_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID));
                 for (int i = 0; i < listIdJournal.size(); i++) {
-                    int pubLast5Year = 0;
-                    int citLast5Year = 0;
-                    int g_indexLast5Year = 0;
-                    int h_indexLast5Year = 0;
-                    int pubLast10Year = 0;
-                    int citLast10Year = 0;
-                    int g_indexLast10Year = 0;
-                    int h_indexLast10Year = 0;
-                    int publicationCount = 0;
-                    int citationCount = 0;
-                    int h_index = 0;
-                    int g_index = 0;
                     LinkedHashMap<String, Object> objectAllYear = indexBO.getPapersForRankSubDomain(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdJournal.get(i)), 0, 3);
                     if (objectAllYear != null) {
+                        int pubLast5Year = 0;
+                        int citLast5Year = 0;
+                        int g_indexLast5Year = 0;
+                        int h_indexLast5Year = 0;
+                        int pubLast10Year = 0;
+                        int citLast10Year = 0;
+                        int g_indexLast10Year = 0;
+                        int h_indexLast10Year = 0;
+                        int publicationCount = 0;
+                        int citationCount = 0;
+                        int h_index = 0;
+                        int g_index = 0;
+
                         ArrayList<Integer> publicationListAllYear = (ArrayList<Integer>) objectAllYear.get("list");
                         LinkedHashMap<String, Integer> indexAllYear = indexBO.getCalculateIndex(publicationListAllYear);
                         publicationCount = Integer.parseInt(objectAllYear.get("pubCount").toString());
@@ -142,25 +145,26 @@ public class _RankJournalIndexer {
                                 h_indexLast5Year = index5Year.get("h_index");
                             }
                         }
+
+                        Document d = new Document();
+                        d.add(new NumericField(IndexConst.RANK_JOURNAL_IDJOURNAL_FIELD, Field.Store.YES, false).setIntValue(listIdJournal.get(i)));
+                        d.add(new Field(IndexConst.RANK_JOURNAL_IDSUBDOMAIN_FIELD, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Field.Store.YES, Field.Index.ANALYZED));
+                        d.add(new NumericField(IndexConst.RANK_JOURNAL_PUBLAST5YEAR_FIELD, Field.Store.YES, true).setIntValue(pubLast5Year));
+                        d.add(new NumericField(IndexConst.RANK_JOURNAL_PUBLAST10YEAR_FIELD, Field.Store.YES, true).setIntValue(pubLast10Year));
+                        d.add(new NumericField(IndexConst.RANK_JOURNAL_CITLAST5YEAR_FIELD, Field.Store.YES, true).setIntValue(citLast5Year));
+                        d.add(new NumericField(IndexConst.RANK_JOURNAL_CITLAST10YEAR_FIELD, Field.Store.YES, true).setIntValue(citLast10Year));
+                        d.add(new NumericField(IndexConst.RANK_JOURNAL_HINDEXLAST5YEAR_FIELD, Field.Store.YES, true).setIntValue(h_indexLast5Year));
+                        d.add(new NumericField(IndexConst.RANK_JOURNAL_HINDEXLAST10YEAR_FIELD, Field.Store.YES, true).setIntValue(h_indexLast10Year));
+                        d.add(new NumericField(IndexConst.RANK_JOURNAL_GINDEXLAST5YEAR_FIELD, Field.Store.YES, true).setIntValue(g_indexLast5Year));
+                        d.add(new NumericField(IndexConst.RANK_JOURNAL_GINDEXLAST10YEAR_FIELD, Field.Store.YES, true).setIntValue(g_indexLast10Year));
+                        d.add(new NumericField(IndexConst.RANK_JOURNAL_PUBLICATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(publicationCount));
+                        d.add(new NumericField(IndexConst.RANK_JOURNAL_CITATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(citationCount));
+                        d.add(new NumericField(IndexConst.RANK_JOURNAL_HINDEX_FIELD, Field.Store.YES, true).setIntValue(h_index));
+                        d.add(new NumericField(IndexConst.RANK_JOURNAL_GINDEX_FIELD, Field.Store.YES, true).setIntValue(g_index));
+                        writer.addDocument(d);
+                        System.out.println("Indexing : " + count++ + "\t idJournal:" + listIdJournal.get(i) + "\t idSubdomain:" + rs.getString(SubdomainTB.COLUMN_SUBDOMAINID) + "\t pubLast5Year:" + pubLast5Year + "\t citLast5Year:" + citLast5Year + "\t pubLast10Year:" + pubLast10Year + "\t citLast10Year:" + citLast10Year);
+                        d = null;
                     }
-                    Document d = new Document();
-                    d.add(new NumericField(IndexConst.RANK_JOURNAL_IDJOURNAL_FIELD, Field.Store.YES, false).setIntValue(listIdJournal.get(i)));
-                    d.add(new Field(IndexConst.RANK_JOURNAL_IDSUBDOMAIN_FIELD, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Field.Store.YES, Field.Index.ANALYZED));
-                    d.add(new NumericField(IndexConst.RANK_JOURNAL_PUBLAST5YEAR_FIELD, Field.Store.YES, true).setIntValue(pubLast5Year));
-                    d.add(new NumericField(IndexConst.RANK_JOURNAL_PUBLAST10YEAR_FIELD, Field.Store.YES, true).setIntValue(pubLast10Year));
-                    d.add(new NumericField(IndexConst.RANK_JOURNAL_CITLAST5YEAR_FIELD, Field.Store.YES, true).setIntValue(citLast5Year));
-                    d.add(new NumericField(IndexConst.RANK_JOURNAL_CITLAST10YEAR_FIELD, Field.Store.YES, true).setIntValue(citLast10Year));
-                    d.add(new NumericField(IndexConst.RANK_JOURNAL_HINDEXLAST5YEAR_FIELD, Field.Store.YES, true).setIntValue(h_indexLast5Year));
-                    d.add(new NumericField(IndexConst.RANK_JOURNAL_HINDEXLAST10YEAR_FIELD, Field.Store.YES, true).setIntValue(h_indexLast10Year));
-                    d.add(new NumericField(IndexConst.RANK_JOURNAL_GINDEXLAST5YEAR_FIELD, Field.Store.YES, true).setIntValue(g_indexLast5Year));
-                    d.add(new NumericField(IndexConst.RANK_JOURNAL_GINDEXLAST10YEAR_FIELD, Field.Store.YES, true).setIntValue(g_indexLast10Year));
-                    d.add(new NumericField(IndexConst.RANK_JOURNAL_PUBLICATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(publicationCount));
-                    d.add(new NumericField(IndexConst.RANK_JOURNAL_CITATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(citationCount));
-                    d.add(new NumericField(IndexConst.RANK_JOURNAL_HINDEX_FIELD, Field.Store.YES, true).setIntValue(h_index));
-                    d.add(new NumericField(IndexConst.RANK_JOURNAL_GINDEX_FIELD, Field.Store.YES, true).setIntValue(g_index));
-                    writer.addDocument(d);
-                    System.out.println("Indexing : " + count++ + "\t idJournal:" + listIdJournal.get(i) + "\t idSubdomain:" + rs.getString(SubdomainTB.COLUMN_SUBDOMAINID) + "\t pubLast5Year:" + pubLast5Year + "\t citLast5Year:" + citLast5Year + "\t pubLast10Year:" + pubLast10Year + "\t citLast10Year:" + citLast10Year);
-                    d = null;
                 }
             }
             count = writer.numDocs();
@@ -176,18 +180,20 @@ public class _RankJournalIndexer {
         }
         return count;
     }
+
     /**
      * hàm để Test index
-     * @param args 
+     *
+     * @param args
      */
     public static void main(String args[]) {
         // TODO add your handling code here:
         try {
             String user = "root";
             String pass = "@huydang1920@";
-            String database = "cspublicationcrawler";
+            String database = "pubguru";
             int port = 3306;
-            String path = "E:\\";
+            String path = "E:\\INDEX\\";
             _RankJournalIndexer indexer = new _RankJournalIndexer(user, pass, database, port, path);
             System.out.println(indexer._run());
         } catch (Exception ex) {
