@@ -8,12 +8,10 @@ import bo.IndexBO;
 import constant.Common;
 import constant.ConnectionPool;
 import constant.IndexConst;
-import constant.PubCiComparator;
 import database.ConferenceTB;
 import database.PaperTB;
 import database.SubdomainPaperTB;
 import dto.ConferenceDTO;
-import dto.PubCiDTO;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
@@ -21,9 +19,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -53,8 +49,10 @@ public class ConferenceIndexer {
 
     private IndexSearcher searcher = null;
     private String path = "E:\\";
+
     /**
-     * hàm khởi tạo searcher 
+     * hàm khởi tạo searcher
+     *
      * @param path : đường dẫn tới thư mục lưu trữ Index
      */
     public ConferenceIndexer(String path) {
@@ -66,8 +64,10 @@ public class ConferenceIndexer {
             System.out.println(ex.getMessage());
         }
     }
+
     /**
      * Hàm khởi chạy index
+     *
      * @param connectionPool: kết nối csdl
      * @return số lượng doc thực hiện index và thời gian thực hiện index
      */
@@ -84,14 +84,17 @@ public class ConferenceIndexer {
         }
         return out;
     }
+
     /**
-     * @Summary: truy vấn từ trong cơ sở dữ liệu ra tất cả các thông tin của một conference.
-     * Lấy idConf đó thực hiện truy vấn và tính toán các chỉ số: publicationCount, citationCount, H-index, G-index,..
+     * @Summary: truy vấn từ trong cơ sở dữ liệu ra tất cả các thông tin của một
+     * conference. Lấy idConf đó thực hiện truy vấn và tính toán các chỉ số:
+     * publicationCount, citationCount, H-index, G-index,..
      * @param connectionPool: kết nối tới csdl
      * @param indexDir : thư mục lưu trữ file index
      */
     private int _index(ConnectionPool connectionPool, File indexDir) {
         int count = 0;
+        IndexBO indexBO = new IndexBO();
         try {
             StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
             IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
@@ -104,12 +107,12 @@ public class ConferenceIndexer {
             stmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet rs = stmt.executeQuery();
             // Index data from query
-            IndexBO indexBO = new IndexBO();
             ConferenceDTO dto = null;
             while ((rs != null) && (rs.next())) {
                 dto = new ConferenceDTO();
-                LinkedHashMap<String, String> listPublicationCitation = this.getListPublicationCitation(rs.getString(ConferenceTB.COLUMN_CONFERENCEID));
-                LinkedHashMap<String, Integer> indexConference = this.getCalculateIndexConference(rs.getString(ConferenceTB.COLUMN_CONFERENCEID));
+                LinkedHashMap<String, String> listPublicationCitation = indexBO.getListPublicationCitation(path + IndexConst.PAPER_INDEX_PATH, rs.getString(ConferenceTB.COLUMN_CONFERENCEID), 2);
+                ArrayList<Integer> publicationList = this.getPublicationList(rs.getString(ConferenceTB.COLUMN_CONFERENCEID));
+                LinkedHashMap<String, Integer> indexConference = indexBO.getCalculateIndex(publicationList);
                 dto.setIdConference(rs.getString(ConferenceTB.COLUMN_CONFERENCEID));
                 dto.setConferenceName(rs.getString(ConferenceTB.COLUMN_CONFERENCENAME));
                 dto.setDuration(rs.getString(ConferenceTB.COLUMN_DURATION));
@@ -163,7 +166,7 @@ public class ConferenceIndexer {
                 d.add(new Field(IndexConst.CONFERENCE_WEBSITE_FIELD, dto.website, Field.Store.YES, Field.Index.NO));
                 d.add(new Field(IndexConst.CONFERENCE_LISTIDSUBDOMAIN_FIELD, dto.listIdSubdomain, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.CONFERENCE_LISTPUBLICATIONCITATION_FIELD, dto.listPublicationCitation, Field.Store.YES, Field.Index.NO));
-                
+
                 d.add(new NumericField(IndexConst.CONFERENCE_YEAREND_FIELD, Field.Store.YES, false).setIntValue(dto.yearEnd));
                 d.add(new NumericField(IndexConst.CONFERENCE_YEARSTART_FIELD, Field.Store.YES, false).setIntValue(dto.yearStart));
                 d.add(new NumericField(IndexConst.CONFERENCE_PUBLICATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(dto.publicationCount));
@@ -196,8 +199,10 @@ public class ConferenceIndexer {
         }
         return count;
     }
+
     /**
      * truy vấn List các lĩnh vực mà hội nghị này có bài viết
+     *
      * @param connectionPool: kết nối tới csdl
      * @param idConference: id của 1 conference
      * @return ListId các lĩnh vực
@@ -223,138 +228,11 @@ public class ConferenceIndexer {
         }
         return list;
     }
-    /**
-     * tính toán các thông tin publication, ciatation theo từng năm của một conference
-     * @param idConference
-     * @return Map chứa thông tin publication, ciatation theo từng năm của một conference
-     */
-    private LinkedHashMap<String, String> getListPublicationCitation(String idConference) throws IOException, ParseException {
-        LinkedHashMap<String, String> out = new LinkedHashMap<String, String>();
-        BooleanQuery booleanQuery = new BooleanQuery();
-        QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_IDCONFERENCE_FIELD, new StandardAnalyzer(Version.LUCENE_36));
-        Query query = parser.parse(idConference);
-        booleanQuery.add(query, BooleanClause.Occur.MUST);
-        TopDocs result = searcher.search(booleanQuery, Integer.MAX_VALUE);
-        if (result != null) {
-            ScoreDoc[] hits = result.scoreDocs;
-            ArrayList<PubCiDTO> pubCiDTOList = new ArrayList<PubCiDTO>();
-            int citationCount = 0;
-            for (int i = 0; i < result.totalHits; i++) {
-                ScoreDoc hit = hits[i];
-                Document doc = searcher.doc(hit.doc);
-                citationCount += Integer.parseInt(doc.get(IndexConst.PAPER_CITATIONCOUNT_FIELD));
-                ArrayList<Object> listCitations = (ArrayList<Object>) Common.SToO(doc.get(IndexConst.PAPER_LISTCITATION_FIELD));
-                Iterator it = listCitations.iterator();
-                while (it.hasNext()) {
-                    LinkedHashMap<String, Integer> temp = (LinkedHashMap<String, Integer>) it.next();
-                    if (pubCiDTOList.isEmpty()) {
-                        PubCiDTO dto = new PubCiDTO();
-                        dto.setCitation(temp.get("citation"));
-                        dto.setPublication(0);
-                        dto.setYear(temp.get("year"));
-                        pubCiDTOList.add(dto);
-                    } else {
-                        Boolean flag = true;
-                        for (int j = 0; j < pubCiDTOList.size(); j++) {
-                            if (temp.get("year") == pubCiDTOList.get(j).getYear()) {
-                                pubCiDTOList.get(j).setCitation(pubCiDTOList.get(j).getCitation() + temp.get("citation"));
-                                flag = false;
-                                break;
-                            }
-                        }
-                        if (flag) {
-                            PubCiDTO dto = new PubCiDTO();
-                            dto.setCitation(temp.get("citation"));
-                            dto.setPublication(0);
-                            dto.setYear(temp.get("year"));
-                            pubCiDTOList.add(dto);
-                        }
-                    }
-                }
-                if (Integer.parseInt(doc.get(IndexConst.PAPER_YEAR_FIELD)) == 0) {
-                    continue;
-                }
-                if (pubCiDTOList.isEmpty()) {
-                    PubCiDTO dto = new PubCiDTO();
-                    dto.setCitation(0);
-                    dto.setPublication(1);
-                    dto.setYear(Integer.parseInt(doc.get(IndexConst.PAPER_YEAR_FIELD)));
-                    pubCiDTOList.add(dto);
-                } else {
-                    Boolean flag = true;
-                    for (int j = 0; j < pubCiDTOList.size(); j++) {
-                        if (Integer.parseInt(doc.get(IndexConst.PAPER_YEAR_FIELD)) == pubCiDTOList.get(j).getYear()) {
-                            pubCiDTOList.get(j).setPublication(pubCiDTOList.get(j).getPublication() + 1);
-                            flag = false;
-                            break;
-                        }
-                    }
-                    if (flag) {
-                        PubCiDTO dto = new PubCiDTO();
-                        dto.setCitation(0);
-                        dto.setPublication(1);
-                        dto.setYear(Integer.parseInt(doc.get(IndexConst.PAPER_YEAR_FIELD)));
-                        pubCiDTOList.add(dto);
-                    }
-                }
-            }
-            Collections.sort(pubCiDTOList, new PubCiComparator());
-            ArrayList<Object> listPublicationCitation = new ArrayList<Object>();
-            for (int i = 0; i < pubCiDTOList.size(); i++) {
-                LinkedHashMap<String, Integer> temp = new LinkedHashMap<String, Integer>();
-                temp.put("publication", pubCiDTOList.get(i).getPublication());
-                temp.put("citation", pubCiDTOList.get(i).getCitation());
-                temp.put("year", pubCiDTOList.get(i).getYear());
-                listPublicationCitation.add(temp);
-            }
-            out.put("publicationCount", Integer.toString(result.totalHits));
-            out.put("citationCount", Integer.toString(citationCount));
-            out.put("listPublicationCitation", Common.OToS(listPublicationCitation));
-        }
-        return out;
-    }
 
     /**
-     * Hàm tính toán H-index và G-index cho một Conference
-     * @param idConference
-     * @return H-index và G-index
-     */
-    private LinkedHashMap<String, Integer> getCalculateIndexConference(String idConference) throws Exception {
-        LinkedHashMap<String, Integer> out = new LinkedHashMap<String, Integer>();
-        ArrayList<Integer> publicationList = this.getPublicationList(idConference);
-        int h_index;
-        int g_index;
-        int citationCount;
-        int citationCountSum;
-        // Calculate h-index for each conference.
-        h_index = 0;
-        while (h_index < publicationList.size()) {
-            citationCount = publicationList.get(h_index);
-            if (citationCount >= (h_index + 1)) {
-                h_index++;
-            } else {
-                break;
-            }
-        }
-        // Calculate g-index for each conference.
-        g_index = 0;
-        citationCountSum = 0;
-        while (true) {
-            if (g_index < publicationList.size()) {
-                citationCountSum += publicationList.get(g_index);
-            }
-            if (citationCountSum >= ((g_index + 1) * (g_index + 1))) {
-                g_index++;
-            } else {
-                break;
-            }
-        }
-        out.put("h_index", h_index);
-        out.put("g_index", g_index);
-        return out;
-    }
-    /**
-     * lấy chuỗi các bài viết với citation của bài viết đó được sắp xếp từ cao xuống thấp
+     * lấy chuỗi các bài viết với citation của bài viết đó được sắp xếp từ cao
+     * xuống thấp
+     *
      * @param idConference
      * @return ArrayList lưu citation từ cao xuống thấp
      */
@@ -377,18 +255,20 @@ public class ConferenceIndexer {
         }
         return publicationList;
     }
+
     /**
      * hàm test index
-     * @param args 
+     *
+     * @param args
      */
     public static void main(String args[]) {
         // TODO add your handling code here:
         try {
             String user = "root";
             String pass = "@huydang1920@";
-            String database = "cspublicationcrawler";
+            String database = "pubguru";
             int port = 3306;
-            String path = "E:\\";
+            String path = "E:\\INDEX\\";
             ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
             ConferenceIndexer indexer = new ConferenceIndexer(path);
             System.out.println(indexer._run(connectionPool));

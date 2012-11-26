@@ -102,9 +102,9 @@ public class AuthorKeyIndexer {
         try {
             String user = "root";
             String pass = "@huydang1920@";
-            String database = "cspublicationcrawler";
+            String database = "pubguru";
             int port = 3306;
-            String path = "E:\\GURU\\";
+            String path = "E:\\INDEX\\";
             ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
             AuthorKeyIndexer indexer = new AuthorKeyIndexer(path);
             System.out.println(indexer._run(connectionPool));

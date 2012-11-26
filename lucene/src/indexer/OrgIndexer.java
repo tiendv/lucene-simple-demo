@@ -8,13 +8,11 @@ import bo.IndexBO;
 import constant.Common;
 import constant.ConnectionPool;
 import constant.IndexConst;
-import constant.PubCiComparator;
 import database.AuthorPaperTB;
 import database.AuthorTB;
 import database.OrgTB;
 import database.SubdomainPaperTB;
 import dto.OrgDTO;
-import dto.PubCiDTO;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
@@ -22,9 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -54,8 +50,10 @@ public class OrgIndexer {
 
     private IndexSearcher searcher = null;
     private String path = "E:\\";
+
     /**
      * khởi tạo searcher
+     *
      * @param path: đường dẫn tới thư mục lưu trữ file index
      */
     public OrgIndexer(String path) {
@@ -67,8 +65,10 @@ public class OrgIndexer {
             System.out.println(ex.getMessage());
         }
     }
+
     /**
      * hàm khởi chạy index
+     *
      * @param connectionPool: kết nối csdl
      * @return số lượng doc được thực hiện index, thời gian index
      */
@@ -85,11 +85,14 @@ public class OrgIndexer {
         }
         return out;
     }
+
     /**
-     * Truy vấn các thông tin của tổ chức từ csdl và gọi các hàm tính toán các chỉ số, thực hiện index
+     * Truy vấn các thông tin của tổ chức từ csdl và gọi các hàm tính toán các
+     * chỉ số, thực hiện index
+     *
      * @param connectionPool: kết nối csdl
      * @param indexDir: thư mục lưu trữ file index
-     * @return số doc thực hiện 
+     * @return số doc thực hiện
      */
     private int _index(ConnectionPool connectionPool, File indexDir) {
         int count = 0;
@@ -109,8 +112,9 @@ public class OrgIndexer {
             OrgDTO dto = null;
             while ((rs != null) && (rs.next())) {
                 dto = new OrgDTO();
-                LinkedHashMap<String, String> listPublicationCitation = this.getListPublicationCitation(rs.getString(OrgTB.COLUMN_ORGID));
-                LinkedHashMap<String, Integer> indexOrg = this.getCalculateIndexOrg(rs.getString(OrgTB.COLUMN_ORGID));
+                LinkedHashMap<String, String> listPublicationCitation = indexBO.getListPublicationCitation(path + IndexConst.PAPER_INDEX_PATH, rs.getString(OrgTB.COLUMN_ORGID), 4);
+                ArrayList<Integer> publicationList = this.getPublicationList(rs.getString(OrgTB.COLUMN_ORGID));
+                LinkedHashMap<String, Integer> indexOrg = indexBO.getCalculateIndex(publicationList);
                 dto.setIdOrg(rs.getString(OrgTB.COLUMN_ORGID));
                 dto.setOrgName(rs.getString(OrgTB.COLUMN_ORGNAME));
                 dto.setContinent(rs.getString(OrgTB.COLUMN_CONTINENT));
@@ -191,13 +195,15 @@ public class OrgIndexer {
         }
         return count;
     }
+
     /**
      * truy vấn lấy ra danh sách các domain mà tổ chức có viết bài
+     *
      * @param connectionPool
      * @param idOrg
      * @return list các idSubdomain
      * @throws SQLException
-     * @throws ClassNotFoundException 
+     * @throws ClassNotFoundException
      */
     private String getListIdSubdomain(ConnectionPool connectionPool, int idOrg) throws SQLException, ClassNotFoundException {
         String list = "";
@@ -220,138 +226,11 @@ public class OrgIndexer {
         }
         return list;
     }
-    /**
-     * truy vấn các thông tin về publication và citation theo thời gian
-     * @param idOrg
-     * @return map chứa: publicationCount, citationCount, chuỗi lưu thông tin publication, citation sắp xếp theo năm
-     */
-    private LinkedHashMap<String, String> getListPublicationCitation(String idOrg) throws IOException, ParseException {
-        LinkedHashMap<String, String> out = new LinkedHashMap<String, String>();
-        BooleanQuery booleanQuery = new BooleanQuery();
-        QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDORG_FIELD, new StandardAnalyzer(Version.LUCENE_36));
-        Query query = parser.parse(idOrg);
-        booleanQuery.add(query, BooleanClause.Occur.MUST);
-        TopDocs result = searcher.search(booleanQuery, Integer.MAX_VALUE);
-        if (result != null) {
-            ScoreDoc[] hits = result.scoreDocs;
-            ArrayList<PubCiDTO> pubCiDTOList = new ArrayList<PubCiDTO>();
-            int citationCount = 0;
-            for (int i = 0; i < result.totalHits; i++) {
-                ScoreDoc hit = hits[i];
-                Document doc = searcher.doc(hit.doc);
-                citationCount += Integer.parseInt(doc.get(IndexConst.PAPER_CITATIONCOUNT_FIELD));
-                ArrayList<Object> listCitations = (ArrayList<Object>) Common.SToO(doc.get(IndexConst.PAPER_LISTCITATION_FIELD));
-                Iterator it = listCitations.iterator();
-                while (it.hasNext()) {
-                    LinkedHashMap<String, Integer> temp = (LinkedHashMap<String, Integer>) it.next();
-                    if (pubCiDTOList.isEmpty()) {
-                        PubCiDTO dto = new PubCiDTO();
-                        dto.setCitation(temp.get("citation"));
-                        dto.setPublication(0);
-                        dto.setYear(temp.get("year"));
-                        pubCiDTOList.add(dto);
-                    } else {
-                        Boolean flag = true;
-                        for (int j = 0; j < pubCiDTOList.size(); j++) {
-                            if (temp.get("year") == pubCiDTOList.get(j).getYear()) {
-                                pubCiDTOList.get(j).setCitation(pubCiDTOList.get(j).getCitation() + temp.get("citation"));
-                                flag = false;
-                                break;
-                            }
-                        }
-                        if (flag) {
-                            PubCiDTO dto = new PubCiDTO();
-                            dto.setCitation(temp.get("citation"));
-                            dto.setPublication(0);
-                            dto.setYear(temp.get("year"));
-                            pubCiDTOList.add(dto);
-                        }
-                    }
-                }
-                if (Integer.parseInt(doc.get(IndexConst.PAPER_YEAR_FIELD)) == 0) {
-                    continue;
-                }
-                if (pubCiDTOList.isEmpty()) {
-                    PubCiDTO dto = new PubCiDTO();
-                    dto.setCitation(0);
-                    dto.setPublication(1);
-                    dto.setYear(Integer.parseInt(doc.get(IndexConst.PAPER_YEAR_FIELD)));
-                    pubCiDTOList.add(dto);
-                } else {
-                    Boolean flag = true;
-                    for (int j = 0; j < pubCiDTOList.size(); j++) {
-                        if (Integer.parseInt(doc.get(IndexConst.PAPER_YEAR_FIELD)) == pubCiDTOList.get(j).getYear()) {
-                            pubCiDTOList.get(j).setPublication(pubCiDTOList.get(j).getPublication() + 1);
-                            flag = false;
-                            break;
-                        }
-                    }
-                    if (flag) {
-                        PubCiDTO dto = new PubCiDTO();
-                        dto.setCitation(0);
-                        dto.setPublication(1);
-                        dto.setYear(Integer.parseInt(doc.get(IndexConst.PAPER_YEAR_FIELD)));
-                        pubCiDTOList.add(dto);
-                    }
-                }
-            }
-            Collections.sort(pubCiDTOList, new PubCiComparator());
-            ArrayList<Object> listPublicationCitation = new ArrayList<Object>();
-            for (int i = 0; i < pubCiDTOList.size(); i++) {
-                LinkedHashMap<String, Integer> temp = new LinkedHashMap<String, Integer>();
-                temp.put("publication", pubCiDTOList.get(i).getPublication());
-                temp.put("citation", pubCiDTOList.get(i).getCitation());
-                temp.put("year", pubCiDTOList.get(i).getYear());
-                listPublicationCitation.add(temp);
-            }
-            out.put("publicationCount", Integer.toString(result.totalHits));
-            out.put("citationCount", Integer.toString(citationCount));
-            out.put("listPublicationCitation", Common.OToS(listPublicationCitation));
-        }
-        return out;
-    }
 
     /**
-     * Hàm tính toán H-index và G-index cho một idOrg
-     * @param idOrg
-     * @return H-index và G-index
-     */
-    private LinkedHashMap<String, Integer> getCalculateIndexOrg(String idOrg) throws Exception {
-        LinkedHashMap<String, Integer> out = new LinkedHashMap<String, Integer>();
-        ArrayList<Integer> publicationList = this.getPublicationList(idOrg);
-        int h_index;
-        int g_index;
-        int citationCount;
-        int citationCountSum;
-        // Calculate h-index for each org.
-        h_index = 0;
-        while (h_index < publicationList.size()) {
-            citationCount = publicationList.get(h_index);
-            if (citationCount >= (h_index + 1)) {
-                h_index++;
-            } else {
-                break;
-            }
-        }
-        // Calculate g-index for each org.
-        g_index = 0;
-        citationCountSum = 0;
-        while (true) {
-            if (g_index < publicationList.size()) {
-                citationCountSum += publicationList.get(g_index);
-            }
-            if (citationCountSum >= ((g_index + 1) * (g_index + 1))) {
-                g_index++;
-            } else {
-                break;
-            }
-        }
-        out.put("h_index", h_index);
-        out.put("g_index", g_index);
-        return out;
-    }
-    /**
-     * lấy chuỗi các bài viết với citation của bài viết đó được sắp xếp từ cao xuống thấp
+     * lấy chuỗi các bài viết với citation của bài viết đó được sắp xếp từ cao
+     * xuống thấp
+     *
      * @param idOrg
      * @return ArrayList lưu citation từ cao xuống thấp
      */
@@ -374,18 +253,20 @@ public class OrgIndexer {
         }
         return publicationList;
     }
+
     /**
      * hàm test index
-     * @param args 
+     *
+     * @param args
      */
     public static void main(String args[]) {
         // TODO add your handling code here:
         try {
             String user = "root";
             String pass = "@huydang1920@";
-            String database = "cspublicationcrawler";
+            String database = "pubguru";
             int port = 3306;
-            String path = "E:\\";
+            String path = "E:\\INDEX\\";
             ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
             OrgIndexer indexer = new OrgIndexer(path);
             System.out.println(indexer._run(connectionPool));

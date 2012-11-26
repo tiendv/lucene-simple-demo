@@ -4,7 +4,6 @@
  */
 package indexer;
 
-import constant.ConnectionPool;
 import constant.IndexConst;
 import java.io.File;
 import java.io.IOException;
@@ -36,17 +35,11 @@ public class IndexAutocomplete {
 
     static String delims = "[ .,?!()-]+";
     String Path = "";
-    
-    public IndexAutocomplete(String path)
-    {
+
+    public IndexAutocomplete(String path) {
         this.Path = path;
     }
 
-    public static void main(String[] args) throws IOException {
-        String path = "C:\\";
-        int count = index(path);
-        System.out.println(count);
-    }
     public String _run() {
         String out = "";
         try {
@@ -59,12 +52,14 @@ public class IndexAutocomplete {
         }
         return out;
     }
+
     /**
-     *          
+     *
      * @param path: đường dẫn tới folder
      * @return số doc được index
-     * @Summary: lấy tất cả các từ khóa các trường: authorName, conferenceName, journalName, orgName, keyword.
-     * phân tích thành các token sau đó index vào theo thứ tự của các token đó
+     * @Summary: lấy tất cả các từ khóa các trường: authorName, conferenceName,
+     * journalName, orgName, keyword. phân tích thành các token sau đó index vào
+     * theo thứ tự của các token đó
      */
     public static int index(String path) throws IOException {
         int count = 0;
@@ -90,7 +85,7 @@ public class IndexAutocomplete {
 
         //Index keyword
         File indexDir = new File(Dictionary);
-        StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36,Collections.EMPTY_SET);
+        StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36, Collections.EMPTY_SET);
         IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
         Directory directory = FSDirectory.open(indexDir);
         IndexWriter writer = new IndexWriter(directory, config);
@@ -249,5 +244,11 @@ public class IndexAutocomplete {
         writer.close();
 
         return count;
+    }
+
+    public static void main(String[] args) throws IOException {
+        String path = "E:\\INDEX\\";
+        int count = index(path);
+        System.out.println(count);
     }
 }
