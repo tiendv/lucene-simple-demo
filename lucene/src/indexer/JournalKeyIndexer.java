@@ -6,6 +6,7 @@ package indexer;
 
 import constant.ConnectionPool;
 import database.JournalTB;
+import database.KeywordTB;
 import database.PaperKeywordTB;
 import database.PaperTB;
 import java.io.File;
@@ -58,7 +59,7 @@ public class JournalKeyIndexer {
             IndexWriter writer = new IndexWriter(directory, config);
             // Connection to DB
             Connection connection = connectionPool.getConnection();
-            String jourQuery = "SELECT " + JournalTB.COLUMN_JOURNALID + " FROM " + JournalTB.TABLE_NAME + " a";
+            String jourQuery = "SELECT " + JournalTB.COLUMN_JOURNALID + ", " + JournalTB.COLUMN_JOURNALNAME + " FROM " + JournalTB.TABLE_NAME + " a";
             PreparedStatement jourStmt = connection.prepareStatement(jourQuery, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             jourStmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet jourRs = jourStmt.executeQuery();
@@ -66,17 +67,19 @@ public class JournalKeyIndexer {
             while ((jourRs != null) && (jourRs.next())) {
                 // Connection to DB
                 Connection keyCon = connectionPool.getConnection();
-                String keyQuery = "SELECT p." + PaperTB.COLUMN_JOURNALID + ", pk." + PaperKeywordTB.COLUMN_KEYWORDID + ", COUNT(*) AS publicationCount FROM " + PaperTB.TABLE_NAME + " p JOIN " + PaperKeywordTB.TABLE_NAME + " pk ON (p." + PaperTB.COLUMN_PAPERID + " = pk." + PaperKeywordTB.COLUMN_PAPERID + ") WHERE p." + PaperTB.COLUMN_JOURNALID + "=" + jourRs.getString(JournalTB.COLUMN_JOURNALID) + " GROUP BY p." + PaperTB.COLUMN_JOURNALID + ", pk." + PaperKeywordTB.COLUMN_KEYWORDID;
+                String keyQuery = "SELECT pk." + PaperKeywordTB.COLUMN_KEYWORDID + ", (SELECT k." + KeywordTB.COLUMN_KEYWORD + " FROM " + KeywordTB.TABLE_NAME + " k WHERE k." + KeywordTB.COLUMN_KEYWORDID + " = pk." + PaperKeywordTB.COLUMN_KEYWORDID + ") AS keyword, COUNT(*) AS publicationCount FROM " + PaperTB.TABLE_NAME + " p JOIN " + PaperKeywordTB.TABLE_NAME + " pk ON (p." + PaperTB.COLUMN_PAPERID + " = pk." + PaperKeywordTB.COLUMN_PAPERID + ") WHERE p." + PaperTB.COLUMN_JOURNALID + "=" + jourRs.getString(JournalTB.COLUMN_JOURNALID) + " GROUP BY p." + PaperTB.COLUMN_JOURNALID + ", pk." + PaperKeywordTB.COLUMN_KEYWORDID;
                 PreparedStatement keyStmt = keyCon.prepareStatement(keyQuery);
                 ResultSet keyRs = keyStmt.executeQuery();
                 while ((keyRs != null) && (keyRs.next())) {
                     Document d = new Document();
                     d.add(new Field("idJournal", jourRs.getString(JournalTB.COLUMN_JOURNALID), Field.Store.YES, Field.Index.ANALYZED));
+                    d.add(new Field("journalName", jourRs.getString(JournalTB.COLUMN_JOURNALNAME), Field.Store.YES, Field.Index.NO));
                     d.add(new Field("idKeyword", keyRs.getString(PaperKeywordTB.COLUMN_KEYWORDID), Field.Store.YES, Field.Index.ANALYZED));
+                    d.add(new Field("keyword", keyRs.getString("keyword"), Field.Store.YES, Field.Index.NO));
                     d.add(new NumericField("publicationCount", Field.Store.YES, true).setIntValue(keyRs.getInt("publicationCount")));
                     writer.addDocument(d);
                     d = null;
-                    System.out.println("Indexing: " + count++ + "\t" + " idJournal: " + jourRs.getString(JournalTB.COLUMN_JOURNALID) + "\t" + " idKeyword: " + keyRs.getString(PaperKeywordTB.COLUMN_KEYWORDID) + "\t" + " publicationCount: " + keyRs.getString("publicationCount"));
+                    System.out.println("Indexing: " + count++ + "\t" + " idJournal: " + jourRs.getString(JournalTB.COLUMN_JOURNALID) + "\t" + " journalName: " + jourRs.getString(JournalTB.COLUMN_JOURNALNAME) + "\t" + " idKeyword: " + keyRs.getString(PaperKeywordTB.COLUMN_KEYWORDID) + "\t" + " keyword: " + keyRs.getString("keyword") + "\t" + " publicationCount: " + keyRs.getString("publicationCount"));
                 }
                 keyRs.close();
                 keyStmt.close();

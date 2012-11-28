@@ -56,7 +56,7 @@ public class AuthorCoAuthorIndexer {
             IndexWriter writer = new IndexWriter(directory, config);
             // Connection to DB
             Connection connection = connectionPool.getConnection();
-            String authQuery = "SELECT " + AuthorTB.COLUMN_AUTHORID + " FROM " + AuthorTB.TABLE_NAME + " a";
+            String authQuery = "SELECT " + AuthorTB.COLUMN_AUTHORID + ", " + AuthorTB.COLUMN_AUTHORNAME + " FROM " + AuthorTB.TABLE_NAME + " a";
             PreparedStatement authorStmt = connection.prepareStatement(authQuery, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             authorStmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet authRs = authorStmt.executeQuery();
@@ -64,17 +64,19 @@ public class AuthorCoAuthorIndexer {
             while ((authRs != null) && (authRs.next())) {
                 // Connection to DB
                 Connection coCon = connectionPool.getConnection();
-                String coQuery = "SELECT ap2." + AuthorPaperTB.COLUMN_AUTHORID + ", COUNT(*) AS publicationCount FROM " + AuthorPaperTB.TABLE_NAME + " ap1 JOIN " + AuthorPaperTB.TABLE_NAME + " ap2 ON (ap1." + AuthorPaperTB.COLUMN_PAPERID + "=ap2." + AuthorPaperTB.COLUMN_PAPERID + ") WHERE ap1." + AuthorPaperTB.COLUMN_AUTHORID + "=" + authRs.getString(AuthorTB.COLUMN_AUTHORID) + " AND ap2." + AuthorPaperTB.COLUMN_AUTHORID + "<>" + authRs.getString(AuthorTB.COLUMN_AUTHORID) + " GROUP BY ap1." + AuthorPaperTB.COLUMN_AUTHORID + ", ap2." + AuthorPaperTB.COLUMN_AUTHORID + " ORDER BY publicationCount DESC";
+                String coQuery = "SELECT ap2." + AuthorPaperTB.COLUMN_AUTHORID + " AS coAuthor, (SELECT a." + AuthorTB.COLUMN_AUTHORNAME + " FROM " + AuthorTB.TABLE_NAME + " a WHERE a." + AuthorTB.COLUMN_AUTHORID + " = ap2." + AuthorPaperTB.COLUMN_AUTHORID + ") AS coAuthorName, COUNT(*) AS publicationCount FROM " + AuthorPaperTB.TABLE_NAME + " ap1 JOIN " + AuthorPaperTB.TABLE_NAME + " ap2 ON (ap1." + AuthorPaperTB.COLUMN_PAPERID + "=ap2." + AuthorPaperTB.COLUMN_PAPERID + ") WHERE ap1." + AuthorPaperTB.COLUMN_AUTHORID + "=" + authRs.getString(AuthorTB.COLUMN_AUTHORID) + " AND ap2." + AuthorPaperTB.COLUMN_AUTHORID + "<>" + authRs.getString(AuthorTB.COLUMN_AUTHORID) + " GROUP BY ap1." + AuthorPaperTB.COLUMN_AUTHORID + ", ap2." + AuthorPaperTB.COLUMN_AUTHORID + " ORDER BY publicationCount DESC";
                 PreparedStatement coStmt = coCon.prepareStatement(coQuery);
                 ResultSet coRs = coStmt.executeQuery();
                 while ((coRs != null) && (coRs.next())) {
                     Document d = new Document();
                     d.add(new Field("idAuthor", authRs.getString(AuthorTB.COLUMN_AUTHORID), Field.Store.YES, Field.Index.ANALYZED));
-                    d.add(new Field("coAuthor", coRs.getString(AuthorPaperTB.COLUMN_AUTHORID), Field.Store.YES, Field.Index.ANALYZED));
+                    d.add(new Field("authorName", authRs.getString(AuthorTB.COLUMN_AUTHORNAME), Field.Store.YES, Field.Index.NO));
+                    d.add(new Field("coAuthor", coRs.getString("coAuthor"), Field.Store.YES, Field.Index.ANALYZED));
+                    d.add(new Field("coAuthorName", coRs.getString("coAuthorName"), Field.Store.YES, Field.Index.NO));
                     d.add(new NumericField("publicationCount", Field.Store.YES, true).setIntValue(coRs.getInt("publicationCount")));
                     writer.addDocument(d);
                     d = null;
-                    System.out.println("Indexing: " + count++ + "\t" + " idAuthor: " + authRs.getString(AuthorTB.COLUMN_AUTHORID) + "\t" + " coAuthor: " + coRs.getString(AuthorPaperTB.COLUMN_AUTHORID) + "\t" + " publicationCount: " + coRs.getString("publicationCount"));
+                    System.out.println("Indexing: " + count++ + "\t" + " idAuthor: " + authRs.getString(AuthorTB.COLUMN_AUTHORID) + "\t" + " authorName: " + authRs.getString(AuthorTB.COLUMN_AUTHORNAME) + "\t" + " coAuthor: " + coRs.getString("coAuthor") + "\t" + " coAuthorName: " + coRs.getString("coAuthorName") + "\t" + " publicationCount: " + coRs.getString("publicationCount"));
                 }
                 coRs.close();
                 coStmt.close();
