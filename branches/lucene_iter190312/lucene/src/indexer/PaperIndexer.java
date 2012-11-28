@@ -134,19 +134,19 @@ public class PaperIndexer {
                 paper.setRank(this.getRank(connectionPool, rs.getInt(PaperTB.COLUMN_PAPERID)));
 
                 d.add(new Field(IndexConst.PAPER_IDPAPER_FIELD, paper.idPaper, Field.Store.YES, Field.Index.ANALYZED));
-                d.add(new Field(IndexConst.PAPER_TITLE_FIELD, paper.title, Field.Store.YES, Field.Index.ANALYZED));
-                d.add(new Field(IndexConst.PAPER_ABSTRACT_FIELD, paper.abstractContent, Field.Store.YES, Field.Index.ANALYZED));
-                d.add(new Field(IndexConst.PAPER_CONFERENCENAME_FIELD, paper.conferenceName, Field.Store.YES, Field.Index.ANALYZED));
+                d.add(new Field(IndexConst.PAPER_TITLE_FIELD, paper.title, Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.WITH_POSITIONS_OFFSETS));
+                d.add(new Field(IndexConst.PAPER_ABSTRACT_FIELD, paper.abstractContent, Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.WITH_POSITIONS_OFFSETS));
+                d.add(new Field(IndexConst.PAPER_CONFERENCENAME_FIELD, paper.conferenceName, Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.WITH_POSITIONS_OFFSETS));
                 d.add(new Field(IndexConst.PAPER_DOI_FIELD, paper.doi, Field.Store.YES, Field.Index.NO));
                 d.add(new Field(IndexConst.PAPER_ORGSNAME_FIELD, paper.orgsName, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.PAPER_IDCONFERENCE_FIELD, paper.idConference, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.PAPER_IDJOURNAL_FIELD, paper.idJournal, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.PAPER_ISBN_FIELD, paper.isbn, Field.Store.YES, Field.Index.NO));
-                d.add(new Field(IndexConst.PAPER_JOURNALNAME_FIELD, paper.journalName, Field.Store.YES, Field.Index.ANALYZED));
+                d.add(new Field(IndexConst.PAPER_JOURNALNAME_FIELD, paper.journalName, Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.WITH_POSITIONS_OFFSETS));
                 d.add(new Field(IndexConst.PAPER_PAGES_FIELD, paper.pages, Field.Store.YES, Field.Index.NO));
                 d.add(new Field(IndexConst.PAPER_VOLUME_FIELD, paper.volume, Field.Store.YES, Field.Index.NO));
                 d.add(new Field(IndexConst.PAPER_VIEWPUBLICATION_FIELD, paper.viewPublication, Field.Store.YES, Field.Index.NO));
-                d.add(new Field(IndexConst.PAPER_AUTHORS_FIELD, paper.authors, Field.Store.YES, Field.Index.NO));
+                d.add(new Field(IndexConst.PAPER_AUTHORS_FIELD, paper.authors, Field.Store.YES, Field.Index.ANALYZED, Field.TermVector.WITH_POSITIONS_OFFSETS));
                 d.add(new Field(IndexConst.PAPER_AUTHORSNAME_FIELD, paper.authorsName, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.PAPER_KEYWORDSNAME_FIELD, paper.keywordsName, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.PAPER_LISTCITATION_FIELD, paper.listCitation, Field.Store.YES, Field.Index.NO));
@@ -465,10 +465,10 @@ public class PaperIndexer {
         // TODO add your handling code here:
         try {
             String user = "root";
-            String pass = "@huydang1920@";
-            String database = "pubguru";
+            String pass = "root";
+            String database = "cspublicationcrawler1";
             int port = 3306;
-            String path = "E:\\INDEX\\";
+            String path = "C:\\INDEX\\";
             ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
             PaperIndexer indexer = new PaperIndexer(path);
             System.out.println(indexer._run(connectionPool));
