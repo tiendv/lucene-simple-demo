@@ -7,6 +7,7 @@ package indexer;
 import constant.ConnectionPool;
 import database.AuthorPaperTB;
 import database.AuthorTB;
+import database.ConferenceTB;
 import database.PaperTB;
 import java.io.File;
 import java.sql.Connection;
@@ -57,7 +58,7 @@ public class AuthorConfIndexer {
             IndexWriter writer = new IndexWriter(directory, config);
             // Connection to DB
             Connection connection = connectionPool.getConnection();
-            String authQuery = "SELECT " + AuthorTB.COLUMN_AUTHORID + " FROM " + AuthorTB.TABLE_NAME + " a";
+            String authQuery = "SELECT " + AuthorTB.COLUMN_AUTHORID + ", " + AuthorTB.COLUMN_AUTHORNAME + " FROM " + AuthorTB.TABLE_NAME + " a";
             PreparedStatement authorStmt = connection.prepareStatement(authQuery, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             authorStmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet authRs = authorStmt.executeQuery();
@@ -65,17 +66,19 @@ public class AuthorConfIndexer {
             while ((authRs != null) && (authRs.next())) {
                 // Connection to DB
                 Connection confCon = connectionPool.getConnection();
-                String confQuery = "SELECT a." + AuthorPaperTB.COLUMN_AUTHORID + ", p." + PaperTB.COLUMN_CONFERENCEID + ", COUNT(*) AS publicationCount FROM " + AuthorPaperTB.TABLE_NAME + " a JOIN " + PaperTB.TABLE_NAME + " p ON (a." + AuthorPaperTB.COLUMN_PAPERID + " = p." + PaperTB.COLUMN_PAPERID + ") WHERE p." + PaperTB.COLUMN_CONFERENCEID + " IS NOT NULL AND a." + AuthorPaperTB.COLUMN_AUTHORID + "=" + authRs.getString(AuthorTB.COLUMN_AUTHORID) + " GROUP BY a." + AuthorPaperTB.COLUMN_AUTHORID + ", p." + PaperTB.COLUMN_CONFERENCEID;
+                String confQuery = "SELECT p." + PaperTB.COLUMN_CONFERENCEID + ", (SELECT c." + ConferenceTB.COLUMN_CONFERENCENAME + " FROM " + ConferenceTB.TABLE_NAME + " c WHERE c." + ConferenceTB.COLUMN_CONFERENCEID + " = p." + PaperTB.COLUMN_CONFERENCEID + ") AS conferenceName, COUNT(*) AS publicationCount FROM " + AuthorPaperTB.TABLE_NAME + " a JOIN " + PaperTB.TABLE_NAME + " p ON (a." + AuthorPaperTB.COLUMN_PAPERID + " = p." + PaperTB.COLUMN_PAPERID + ") WHERE p." + PaperTB.COLUMN_CONFERENCEID + " IS NOT NULL AND a." + AuthorPaperTB.COLUMN_AUTHORID + "=" + authRs.getString(AuthorTB.COLUMN_AUTHORID) + " GROUP BY a." + AuthorPaperTB.COLUMN_AUTHORID + ", p." + PaperTB.COLUMN_CONFERENCEID;
                 PreparedStatement confStmt = confCon.prepareStatement(confQuery);
                 ResultSet confRs = confStmt.executeQuery();
                 while ((confRs != null) && (confRs.next())) {
                     Document d = new Document();
                     d.add(new Field("idAuthor", authRs.getString(AuthorTB.COLUMN_AUTHORID), Field.Store.YES, Field.Index.ANALYZED));
+                    d.add(new Field("authorName", authRs.getString(AuthorTB.COLUMN_AUTHORNAME), Field.Store.YES, Field.Index.NO));
                     d.add(new Field("idConference", confRs.getString(PaperTB.COLUMN_CONFERENCEID), Field.Store.YES, Field.Index.ANALYZED));
+                    d.add(new Field("conferenceName", confRs.getString("conferenceName"), Field.Store.YES, Field.Index.NO));
                     d.add(new NumericField("publicationCount", Field.Store.YES, true).setIntValue(confRs.getInt("publicationCount")));
                     writer.addDocument(d);
                     d = null;
-                    System.out.println("Indexing: " + count++ + "\t" + " idAuthor: " + authRs.getString(AuthorTB.COLUMN_AUTHORID) + "\t" + " idConference: " + confRs.getString(PaperTB.COLUMN_CONFERENCEID) + "\t" + " publicationCount: " + confRs.getString("publicationCount"));
+                    System.out.println("Indexing: " + count++ + "\t" + " idAuthor: " + authRs.getString(AuthorTB.COLUMN_AUTHORID) + "\t" + " authorName: " + authRs.getString(AuthorTB.COLUMN_AUTHORNAME) + "\t" + " idConference: " + confRs.getString(PaperTB.COLUMN_CONFERENCEID) + "\t" + " conferenceName: " + confRs.getString("conferenceName") + "\t" + " publicationCount: " + confRs.getString("publicationCount"));
                 }
                 confRs.close();
                 confStmt.close();

@@ -7,6 +7,7 @@ package indexer;
 import constant.ConnectionPool;
 import database.AuthorPaperTB;
 import database.AuthorTB;
+import database.KeywordTB;
 import database.OrgTB;
 import database.PaperKeywordTB;
 import java.io.File;
@@ -59,7 +60,7 @@ public class OrgKeyIndexer {
             IndexWriter writer = new IndexWriter(directory, config);
             // Connection to DB
             Connection connection = connectionPool.getConnection();
-            String orgQuery = "SELECT " + OrgTB.COLUMN_ORGID + " FROM " + OrgTB.TABLE_NAME + " a limit 1";
+            String orgQuery = "SELECT " + OrgTB.COLUMN_ORGID + ", " + OrgTB.COLUMN_ORGNAME + " FROM " + OrgTB.TABLE_NAME + " a";
             PreparedStatement orgStmt = connection.prepareStatement(orgQuery, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             orgStmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet orgRs = orgStmt.executeQuery();
@@ -67,17 +68,19 @@ public class OrgKeyIndexer {
             while ((orgRs != null) && (orgRs.next())) {
                 // Connection to DB
                 Connection keyCon = connectionPool.getConnection();
-                String keyQuery = "SELECT a." + AuthorTB.COLUMN_ORGID + ", pk." + PaperKeywordTB.COLUMN_KEYWORDID + ", COUNT(DISTINCT pk." + PaperKeywordTB.COLUMN_PAPERID + ") AS publicationCount FROM " + AuthorTB.TABLE_NAME + " a JOIN " + AuthorPaperTB.TABLE_NAME + " ap ON (a." + AuthorTB.COLUMN_AUTHORID + " = ap." + AuthorPaperTB.COLUMN_AUTHORID + ") JOIN " + PaperKeywordTB.TABLE_NAME + " pk ON (pk." + PaperKeywordTB.COLUMN_PAPERID + " = ap." + AuthorPaperTB.COLUMN_PAPERID + ") WHERE a." + AuthorTB.COLUMN_ORGID + "=" + orgRs.getString(OrgTB.COLUMN_ORGID) + " GROUP BY a." + AuthorTB.COLUMN_ORGID + ", pk." + PaperKeywordTB.COLUMN_KEYWORDID;
+                String keyQuery = "SELECT pk." + PaperKeywordTB.COLUMN_KEYWORDID + ", (SELECT k." + KeywordTB.COLUMN_KEYWORD + " FROM " + KeywordTB.TABLE_NAME + " k WHERE k." + KeywordTB.COLUMN_KEYWORDID + " = pk." + PaperKeywordTB.COLUMN_KEYWORDID + ") AS keyword, COUNT(DISTINCT pk." + PaperKeywordTB.COLUMN_PAPERID + ") AS publicationCount FROM " + AuthorTB.TABLE_NAME + " a JOIN " + AuthorPaperTB.TABLE_NAME + " ap ON (a." + AuthorTB.COLUMN_AUTHORID + " = ap." + AuthorPaperTB.COLUMN_AUTHORID + ") JOIN " + PaperKeywordTB.TABLE_NAME + " pk ON (pk." + PaperKeywordTB.COLUMN_PAPERID + " = ap." + AuthorPaperTB.COLUMN_PAPERID + ") WHERE a." + AuthorTB.COLUMN_ORGID + "=" + orgRs.getString(OrgTB.COLUMN_ORGID) + " GROUP BY a." + AuthorTB.COLUMN_ORGID + ", pk." + PaperKeywordTB.COLUMN_KEYWORDID;
                 PreparedStatement keyStmt = keyCon.prepareStatement(keyQuery);
                 ResultSet keyRs = keyStmt.executeQuery();
                 while ((keyRs != null) && (keyRs.next())) {
                     Document d = new Document();
                     d.add(new Field("idOrg", orgRs.getString(OrgTB.COLUMN_ORGID), Field.Store.YES, Field.Index.ANALYZED));
+                    d.add(new Field("orgName", orgRs.getString(OrgTB.COLUMN_ORGNAME), Field.Store.YES, Field.Index.NO));
                     d.add(new Field("idKeyword", keyRs.getString(PaperKeywordTB.COLUMN_KEYWORDID), Field.Store.YES, Field.Index.ANALYZED));
+                    d.add(new Field("keyword", keyRs.getString("keyword"), Field.Store.YES, Field.Index.NO));
                     d.add(new NumericField("publicationCount", Field.Store.YES, true).setIntValue(keyRs.getInt("publicationCount")));
                     writer.addDocument(d);
                     d = null;
-                    System.out.println("Indexing: " + count++ + "\t" + " idOrg: " + orgRs.getString(OrgTB.COLUMN_ORGID) + "\t" + " idKeyword: " + keyRs.getString(PaperKeywordTB.COLUMN_KEYWORDID) + "\t" + " publicationCount: " + keyRs.getString("publicationCount"));
+                    System.out.println("Indexing: " + count++ + "\t" + " idOrg: " + orgRs.getString(OrgTB.COLUMN_ORGID) + "\t" + " orgName: " + orgRs.getString(OrgTB.COLUMN_ORGNAME) + "\t" + " idKeyword: " + keyRs.getString(PaperKeywordTB.COLUMN_KEYWORDID) + "\t" + " keyword: " + keyRs.getString("keyword") + "\t" + " publicationCount: " + keyRs.getString("publicationCount"));
                 }
                 keyRs.close();
                 keyStmt.close();
