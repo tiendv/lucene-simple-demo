@@ -232,6 +232,7 @@ public class IndexAutocomplete {
             d.add(new Field(IndexConst.AUTOCOMPLETE_KEYWORD_FIELD, doc.get(IndexConst.ORG_ORGNAME_FIELD), Field.Store.YES, Field.Index.ANALYZED));
             d.add(new Field(IndexConst.AUTOCOMPLETE_IDOBJECT_FIELD, doc.get(IndexConst.ORG_IDORG_FIELD), Field.Store.YES, Field.Index.ANALYZED));
             d.add(new Field(IndexConst.AUTOCOMPLETE_OBJECT_FIELD, IndexConst.AUTOCOMPLETE_OBJECT_VAL_ORG, Field.Store.YES, Field.Index.ANALYZED));
+            d.add(new Field(IndexConst.AUTOCOMPLETE_LIST_SUBDOMAIN, doc.get(IndexConst.ORG_LISTIDSUBDOMAIN_FIELD), Field.Store.YES, Field.Index.ANALYZED));
             int NumberTerm = 1;
             for (String term : st) {
                 d.add(new Field(IndexConst.AUTOCOMPLETE_TERM_FIELD + Integer.toString(NumberTerm), term, Field.Store.YES, Field.Index.ANALYZED));
@@ -247,7 +248,7 @@ public class IndexAutocomplete {
     }
 
     public static void main(String[] args) throws IOException {
-        String path = "E:\\INDEX\\";
+        String path = "E:\\Projects\\DataPubGuru\\INDEX\\";
         int count = index(path);
         System.out.println(count);
     }
