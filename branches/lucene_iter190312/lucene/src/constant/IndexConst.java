@@ -245,6 +245,7 @@ public class IndexConst {
     public static final String AUTOCOMPLETE_OBJECT_FIELD = "Object";
     public static final String AUTOCOMPLETE_KEYWORD_FIELD = "keyword";
     public static final String AUTOCOMPLETE_TERM_FIELD = "term";
+    public static final String AUTOCOMPLETE_LIST_SUBDOMAIN = "ListIdSubdomain";
     
     public static final String AUTOCOMPLETE_OBJECT_VAL_AUTHOR = "author";
     public static final String AUTOCOMPLETE_OBJECT_VAL_CONF = "conference";
