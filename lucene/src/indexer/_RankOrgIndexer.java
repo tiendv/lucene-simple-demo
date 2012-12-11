@@ -147,7 +147,7 @@ public class _RankOrgIndexer {
                         }
 
                         Document d = new Document();
-                        d.add(new NumericField(IndexConst.RANK_ORG_IDORG_FIELD, Field.Store.YES, false).setIntValue(listIdOrg.get(i)));
+                        d.add(new NumericField(IndexConst.RANK_ORG_IDORG_FIELD, Field.Store.YES, true).setIntValue(listIdOrg.get(i)));
                         d.add(new Field(IndexConst.RANK_ORG_IDSUBDOMAIN_FIELD, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Field.Store.YES, Field.Index.ANALYZED));
                         d.add(new NumericField(IndexConst.RANK_ORG_PUBLAST5YEAR_FIELD, Field.Store.YES, true).setIntValue(pubLast5Year));
                         d.add(new NumericField(IndexConst.RANK_ORG_PUBLAST10YEAR_FIELD, Field.Store.YES, true).setIntValue(pubLast10Year));
@@ -191,9 +191,9 @@ public class _RankOrgIndexer {
         try {
             String user = "root";
             String pass = "@huydang1920@";
-            String database = "cspublicationcrawler";
+            String database = "pubguru";
             int port = 3306;
-            String path = "E:\\";
+            String path = "E:\\INDEX\\";
             _RankOrgIndexer indexer = new _RankOrgIndexer(user, pass, database, port, path);
             System.out.println(indexer._run());
         } catch (Exception ex) {
