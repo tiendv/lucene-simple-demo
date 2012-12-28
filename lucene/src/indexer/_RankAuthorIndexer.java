@@ -98,15 +98,18 @@ public class _RankAuthorIndexer {
             IndexWriter writer = new IndexWriter(directory, config);
             // Connection to DB
             Connection connection = connectionPool.getConnection();
-            String sql = "SELECT * FROM " + SubdomainTB.TABLE_NAME + " s";
+            String sql = "SELECT * FROM " + SubdomainTB.TABLE_NAME + " s LIMIT 11, 100";
             PreparedStatement stmt = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet rs = stmt.executeQuery();
             // Index data from query
             while ((rs != null) && (rs.next())) {
-                ArrayList<Integer> listIdAuthor = indexBO.getListIdAuthorFromIdSubDomain(path + IndexConst.AUTHOR_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID));
-                for (int i = 0; i < listIdAuthor.size(); i++) {
-                    LinkedHashMap<String, Object> objectAllYear = indexBO.getPapersForRankSubDomain(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdAuthor.get(i)), 0, 1);
+                ArrayList<Object> listAuthor = indexBO.getListIdAuthorFromIdSubDomain(path + IndexConst.AUTHOR_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID));
+                for (int i = 0; i < listAuthor.size(); i++) {
+                    LinkedHashMap<String, String> item = (LinkedHashMap<String, String>) listAuthor.get(i);
+                    String idAuthor = item.get("idAuthor");
+                    String idOrg = item.get("idOrg");
+                    LinkedHashMap<String, Object> objectAllYear = indexBO.getPapersForRankSubDomain(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), idAuthor, 0, 1);
                     if (objectAllYear != null) {
                         int pubLast5Year = 0;
                         int citLast5Year = 0;
@@ -126,7 +129,7 @@ public class _RankAuthorIndexer {
                         citationCount = Integer.parseInt(objectAllYear.get("citCount").toString());
                         h_index = indexAllYear.get("h_index");
                         g_index = indexAllYear.get("g_index");
-                        LinkedHashMap<String, Object> object10Year = indexBO.getPapersForRankSubDomain(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdAuthor.get(i)), 10, 1);
+                        LinkedHashMap<String, Object> object10Year = indexBO.getPapersForRankSubDomain(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), idAuthor, 10, 1);
                         if (object10Year != null) {
                             ArrayList<Integer> publicationList10Year = (ArrayList<Integer>) object10Year.get("list");
                             LinkedHashMap<String, Integer> index10Year = indexBO.getCalculateIndex(publicationList10Year);
@@ -134,7 +137,7 @@ public class _RankAuthorIndexer {
                             citLast10Year = Integer.parseInt(object10Year.get("citCount").toString());
                             g_indexLast10Year = index10Year.get("g_index");
                             h_indexLast10Year = index10Year.get("h_index");
-                            LinkedHashMap<String, Object> object5Year = indexBO.getPapersForRankSubDomain(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdAuthor.get(i)), 5, 1);
+                            LinkedHashMap<String, Object> object5Year = indexBO.getPapersForRankSubDomain(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), idAuthor, 5, 1);
                             if (object5Year != null) {
                                 ArrayList<Integer> publicationList5Year = (ArrayList<Integer>) object5Year.get("list");
                                 LinkedHashMap<String, Integer> index5Year = indexBO.getCalculateIndex(publicationList5Year);
@@ -146,7 +149,8 @@ public class _RankAuthorIndexer {
                         }
                         // Write
                         Document d = new Document();
-                        d.add(new NumericField(IndexConst.RANK_AUTHOR_IDAUTHOR_FIELD, Field.Store.YES, false).setIntValue(listIdAuthor.get(i)));
+                        d.add(new Field(IndexConst.RANK_AUTHOR_IDAUTHOR_FIELD, idAuthor, Field.Store.YES, Field.Index.ANALYZED));
+                        d.add(new Field(IndexConst.RANK_AUTHOR_IDORG_FIELD, idOrg, Field.Store.YES, Field.Index.ANALYZED));
                         d.add(new Field(IndexConst.RANK_AUTHOR_IDSUBDOMAIN_FIELD, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Field.Store.YES, Field.Index.ANALYZED));
                         d.add(new NumericField(IndexConst.RANK_AUTHOR_PUBLAST5YEAR_FIELD, Field.Store.YES, true).setIntValue(pubLast5Year));
                         d.add(new NumericField(IndexConst.RANK_AUTHOR_PUBLAST10YEAR_FIELD, Field.Store.YES, true).setIntValue(pubLast10Year));
@@ -161,12 +165,12 @@ public class _RankAuthorIndexer {
                         d.add(new NumericField(IndexConst.RANK_AUTHOR_HINDEX_FIELD, Field.Store.YES, true).setIntValue(h_index));
                         d.add(new NumericField(IndexConst.RANK_AUTHOR_GINDEX_FIELD, Field.Store.YES, true).setIntValue(g_index));
                         writer.addDocument(d);
-                        System.out.println("Indexing : " + count++ + "\t idAuthor:" + listIdAuthor.get(i) + "\t idSubdomain:" + rs.getString(SubdomainTB.COLUMN_SUBDOMAINID) + "\t pubLast5Year:" + pubLast5Year + "\t citLast5Year:" + citLast5Year + "\t pubLast10Year:" + pubLast10Year + "\t citLast10Year:" + citLast10Year);
+                        System.out.println("Indexing : " + count++ + "\t idAuthor:" + idAuthor + "\t idSubdomain:" + rs.getString(SubdomainTB.COLUMN_SUBDOMAINID) + "\t pubLast5Year:" + pubLast5Year + "\t citLast5Year:" + citLast5Year + "\t pubLast10Year:" + pubLast10Year + "\t citLast10Year:" + citLast10Year);
                         d = null;
                     }
                 }
             }
-            //count = writer.numDocs();
+            count = writer.numDocs();
             writer.optimize();
             writer.close();
             stmt.close();

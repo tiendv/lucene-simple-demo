@@ -15,8 +15,10 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.queryParser.ParseException;
@@ -33,6 +35,7 @@ import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
+import org.json.simple.JSONObject;
 
 /**
  *
@@ -210,26 +213,29 @@ public class IndexBO {
      * @return listIdAuthor
      * @throws Exception
      */
-    public ArrayList<Integer> getListIdAuthorFromIdSubDomain(String path, String idSubdomain) throws Exception {
+    public ArrayList<Object> getListIdAuthorFromIdSubDomain(String path, String idSubdomain) throws Exception {
         try {
             IndexSearcher searcher = new IndexSearcher(getFSDirectory(path));
-            ArrayList<Integer> listAuthor = null;
+            ArrayList<Object> out = null;
             BooleanQuery blQuery = new BooleanQuery();
             QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.AUTHOR_LISTIDSUBDOMAIN_FIELD, new StandardAnalyzer(Version.LUCENE_36));
             Query query = parser.parse(idSubdomain);
             blQuery.add(query, BooleanClause.Occur.MUST);
             TopDocs topDocs = searcher.search(blQuery, Integer.MAX_VALUE);
             if (topDocs != null && topDocs.totalHits > 0) {
-                listAuthor = new ArrayList<Integer>();
+                out = new ArrayList<Object>();
                 ScoreDoc[] hits = topDocs.scoreDocs;
                 for (int i = 0; i < topDocs.totalHits; i++) {
                     ScoreDoc hit = hits[i];
                     Document doc = searcher.doc(hit.doc);
-                    listAuthor.add(Integer.parseInt(doc.get(IndexConst.AUTHOR_IDAUTHOR_FIELD)));
+                    LinkedHashMap<String, String> item = new LinkedHashMap<String, String>();
+                    item.put("idAuthor", doc.get(IndexConst.AUTHOR_IDAUTHOR_FIELD));
+                    item.put("idOrg", doc.get(IndexConst.AUTHOR_IDORG_FIELD));
+                    out.add(item);
                 }
             }
             searcher.close();
-            return listAuthor;
+            return out;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
             return null;
@@ -570,6 +576,128 @@ public class IndexBO {
             System.out.println(ex.getMessage());
             return null;
         }
+    }
+
+    /**
+     * Tính toán Map với các thông tin publication, ciatation theo từng năm của
+     * một idSearch đối với một subdomain
+     *
+     * @param path (path lucene index)
+     * @param idSearch
+     * @param idSubdomain
+     * @param
+     * field//1:idAuthor||2:idConference||3:idJournal||4:idOrg||5:idKeyword
+     */
+    public String getChartFromIdSubdomain(String path, String idSubdomain, String idSearch, int field) {
+        try {
+            IndexSearcher searcher = new IndexSearcher(getFSDirectory(path));
+            BooleanQuery blQuery = new BooleanQuery();
+            // idSubdomain
+            QueryParser parserSub = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDSUBDOMAIN_FIELD, new StandardAnalyzer(Version.LUCENE_36));
+            Query querySub = parserSub.parse(idSubdomain);
+            blQuery.add(querySub, BooleanClause.Occur.MUST);
+            // idSearch
+            if (field == 2) {// Conference
+                QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_IDCONFERENCE_FIELD, new StandardAnalyzer(Version.LUCENE_36));
+                Query query = parser.parse(idSearch);
+                blQuery.add(query, BooleanClause.Occur.MUST);
+            } else if (field == 3) {//Journal
+                QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_IDJOURNAL_FIELD, new StandardAnalyzer(Version.LUCENE_36));
+                Query query = parser.parse(idSearch);
+                blQuery.add(query, BooleanClause.Occur.MUST);
+            } else if (field == 4) {// Org
+                QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDORG_FIELD, new StandardAnalyzer(Version.LUCENE_36));
+                Query query = parser.parse(idSearch);
+                blQuery.add(query, BooleanClause.Occur.MUST);
+            } else if (field == 5) {// Keyword
+                QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDKEYWORD_FIELD, new StandardAnalyzer(Version.LUCENE_36));
+                Query query = parser.parse(idSearch);
+                blQuery.add(query, BooleanClause.Occur.MUST);
+            } else {
+                return null;
+            }
+            TopDocs result = searcher.search(blQuery, Integer.MAX_VALUE);
+            // Result
+            ArrayList<Object> listPublicationCitation = new ArrayList<Object>();
+            if (result != null && result.totalHits > 0) {
+                ScoreDoc[] hits = result.scoreDocs;
+                ArrayList<PubCiDTO> pubCiDTOList = new ArrayList<PubCiDTO>();
+                for (int i = 0; i < result.totalHits; i++) {
+                    ScoreDoc hit = hits[i];
+                    Document doc = searcher.doc(hit.doc);
+                    ArrayList<Object> listCitations = (ArrayList<Object>) Common.SToO(doc.get(IndexConst.PAPER_LISTCITATION_FIELD));
+                    Iterator it = listCitations.iterator();
+                    while (it.hasNext()) {
+                        LinkedHashMap<String, Integer> temp = (LinkedHashMap<String, Integer>) it.next();
+                        if (pubCiDTOList.isEmpty()) {
+                            PubCiDTO dto = new PubCiDTO();
+                            dto.setCitation(temp.get("citation"));
+                            dto.setPublication(0);
+                            dto.setYear(temp.get("year"));
+                            pubCiDTOList.add(dto);
+                        } else {
+                            Boolean flag = true;
+                            for (int j = 0; j < pubCiDTOList.size(); j++) {
+                                if (temp.get("year") == pubCiDTOList.get(j).getYear()) {
+                                    pubCiDTOList.get(j).setCitation(pubCiDTOList.get(j).getCitation() + temp.get("citation"));
+                                    flag = false;
+                                    break;
+                                }
+                            }
+                            if (flag) {
+                                PubCiDTO dto = new PubCiDTO();
+                                dto.setCitation(temp.get("citation"));
+                                dto.setPublication(0);
+                                dto.setYear(temp.get("year"));
+                                pubCiDTOList.add(dto);
+                            }
+                        }
+                    }
+                    if (Integer.parseInt(doc.get(IndexConst.PAPER_YEAR_FIELD)) == 0) {
+                        continue;
+                    }
+                    if (pubCiDTOList.isEmpty()) {
+                        PubCiDTO dto = new PubCiDTO();
+                        dto.setCitation(0);
+                        dto.setPublication(1);
+                        dto.setYear(Integer.parseInt(doc.get(IndexConst.PAPER_YEAR_FIELD)));
+                        pubCiDTOList.add(dto);
+                    } else {
+                        Boolean flag = true;
+                        for (int j = 0; j < pubCiDTOList.size(); j++) {
+                            if (Integer.parseInt(doc.get(IndexConst.PAPER_YEAR_FIELD)) == pubCiDTOList.get(j).getYear()) {
+                                pubCiDTOList.get(j).setPublication(pubCiDTOList.get(j).getPublication() + 1);
+                                flag = false;
+                                break;
+                            }
+                        }
+                        if (flag) {
+                            PubCiDTO dto = new PubCiDTO();
+                            dto.setCitation(0);
+                            dto.setPublication(1);
+                            dto.setYear(Integer.parseInt(doc.get(IndexConst.PAPER_YEAR_FIELD)));
+                            pubCiDTOList.add(dto);
+                        }
+                    }
+                }
+                Collections.sort(pubCiDTOList, new PubCiComparator());
+                for (int i = 0; i < pubCiDTOList.size(); i++) {
+                    LinkedHashMap<String, Integer> temp = new LinkedHashMap<String, Integer>();
+                    temp.put("publication", pubCiDTOList.get(i).getPublication());
+                    temp.put("citation", pubCiDTOList.get(i).getCitation());
+                    temp.put("year", pubCiDTOList.get(i).getYear());
+                    listPublicationCitation.add(temp);
+                }
+            }
+            searcher.close();
+            Map json = new HashMap();
+            json.put("listPublicationCitation", listPublicationCitation);
+            JSONObject outJSON = new JSONObject(json);
+            return outJSON.toJSONString();
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+        return "";
     }
 
     public static FSDirectory getFSDirectory(String path) {
