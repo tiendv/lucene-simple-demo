@@ -163,6 +163,7 @@ public class IndexConst {
     public static final String RANK_AUTHOR_INDEX_PATH = "INDEX-RANK-AUTHOR";
     // Lucene rank_author field 
     public static final String RANK_AUTHOR_IDAUTHOR_FIELD = "idAuthor";
+    public static final String RANK_AUTHOR_IDORG_FIELD = "idOrg";
     public static final String RANK_AUTHOR_IDSUBDOMAIN_FIELD = "idSubdomain";
     public static final String RANK_AUTHOR_PUBLAST5YEAR_FIELD = "pubLast5Year";
     public static final String RANK_AUTHOR_PUBLAST10YEAR_FIELD = "pubLast10Year";
@@ -215,6 +216,7 @@ public class IndexConst {
     // Lucene rank_org field 
     public static final String RANK_ORG_IDORG_FIELD = "idOrg";
     public static final String RANK_ORG_IDSUBDOMAIN_FIELD = "idSubdomain";
+    public static final String RANK_LISTPUBLICATIONCITATION_FIELD = "listPublicationCitation";
     public static final String RANK_ORG_PUBLAST5YEAR_FIELD = "pubLast5Year";
     public static final String RANK_ORG_PUBLAST10YEAR_FIELD = "pubLast10Year";
     public static final String RANK_ORG_CITLAST5YEAR_FIELD = "citLast5Year";
@@ -246,13 +248,11 @@ public class IndexConst {
     public static final String AUTOCOMPLETE_KEYWORD_FIELD = "keyword";
     public static final String AUTOCOMPLETE_TERM_FIELD = "term";
     public static final String AUTOCOMPLETE_LIST_SUBDOMAIN = "ListIdSubdomain";
-    
     public static final String AUTOCOMPLETE_OBJECT_VAL_AUTHOR = "author";
     public static final String AUTOCOMPLETE_OBJECT_VAL_CONF = "conference";
     public static final String AUTOCOMPLETE_OBJECT_VAL_JOUR = "journal";
     public static final String AUTOCOMPLETE_OBJECT_VAL_ORG = "organization";
     public static final String AUTOCOMPLETE_OBJECT_VAL_KEY = "keyword";
-    
     // Index_Checkspell directory path
     public static final String CHECKSPELL_DIRECTORY_PATH = "INDEX-CHECKSPELL";
     // Lucene CheckSpell fields
@@ -266,8 +266,6 @@ public class IndexConst {
     public static final String CHECKSPELL_4GRAM_END_FIELD = "end3";
     public static final String CHECKSPELL_3GRAM_START_FIELD = "start3";
     public static final String CHECKSPELL_3GRAM_END_FIELD = "end3";
-    
     public static final String CHECKSPELL_OBJECT_VAL_AUTHOR = "author";
     public static final String CHECKSPELL_OBJECT_VAL_KEY = "keyword";
-    
 }
