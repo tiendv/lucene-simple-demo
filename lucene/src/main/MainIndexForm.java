@@ -6,6 +6,7 @@ package main;
 
 import constant.ConnectionPool;
 import constant.IndexConst;
+import indexer.AuthorCitationIndexer;
 import indexer.AuthorIndexer;
 import indexer.CcidfIndexer;
 import indexer.CheckSpellIndexer;
@@ -91,6 +92,14 @@ public class MainIndexForm extends javax.swing.JFrame {
         btAutocompleteIndexer = new javax.swing.JButton();
         btCheckSpellIndexer = new javax.swing.JButton();
         btAutoRun = new javax.swing.JButton();
+        btAuthorCitation = new javax.swing.JButton();
+        btAuthorCoAuthor = new javax.swing.JButton();
+        btAuthorConference = new javax.swing.JButton();
+        btAuthorJournal = new javax.swing.JButton();
+        btAuthorKeyword = new javax.swing.JButton();
+        btConferenceKeyword = new javax.swing.JButton();
+        btJournalKeyword = new javax.swing.JButton();
+        btOrgKeyword = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Index data PubGuru");
@@ -256,6 +265,70 @@ public class MainIndexForm extends javax.swing.JFrame {
             }
         });
 
+        btAuthorCitation.setText("AuthorCitationIndexer");
+        btAuthorCitation.setToolTipText("Create INDEX-AUTHOR-CITATION");
+        btAuthorCitation.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btAuthorCitationActionPerformed(evt);
+            }
+        });
+
+        btAuthorCoAuthor.setText("AuthorCoAuthorIndexer");
+        btAuthorCoAuthor.setToolTipText("Create INDEX-AUTHOR-COAUTHOR");
+        btAuthorCoAuthor.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btAuthorCoAuthorActionPerformed(evt);
+            }
+        });
+
+        btAuthorConference.setText("AuthorConferenceIndexer");
+        btAuthorConference.setToolTipText("Create INDEX-AUTHOR-CONFERENCE");
+        btAuthorConference.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btAuthorConferenceActionPerformed(evt);
+            }
+        });
+
+        btAuthorJournal.setText("AuthorJournalIndexer");
+        btAuthorJournal.setToolTipText("Create INDEX-AUTHOR-JOURNAL");
+        btAuthorJournal.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btAuthorJournalActionPerformed(evt);
+            }
+        });
+
+        btAuthorKeyword.setText("AuthorKeywordIndexer");
+        btAuthorKeyword.setToolTipText("Create INDEX-AUTHOR-KEYWORD");
+        btAuthorKeyword.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btAuthorKeywordActionPerformed(evt);
+            }
+        });
+
+        btConferenceKeyword.setText("ConferenceKeywordIndexer");
+        btConferenceKeyword.setToolTipText("Create INDEX-CONFERENCE-KEYWORD");
+        btConferenceKeyword.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btConferenceKeywordActionPerformed(evt);
+            }
+        });
+
+        btJournalKeyword.setText("JournalKeywordIndexer");
+        btJournalKeyword.setToolTipText("Create INDEX-JOURNAL-KEYWORD");
+        btJournalKeyword.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btJournalKeywordActionPerformed(evt);
+            }
+        });
+
+        btOrgKeyword.setText("OrgKeywordIndexer");
+        btOrgKeyword.setToolTipText("Create INDEX-ORG-KEYWORD");
+        btOrgKeyword.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btOrgKeywordActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -305,28 +378,46 @@ public class MainIndexForm extends javax.swing.JFrame {
                                 .addComponent(btAutoRun, javax.swing.GroupLayout.PREFERRED_SIZE, 288, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(459, 459, 459))))
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jLabel1)
-                            .addComponent(jLabel4))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtUserName, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtPort, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(50, 50, 50)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jLabel3)
                             .addGroup(layout.createSequentialGroup()
-                                .addGap(24, 24, 24)
-                                .addComponent(jLabel5)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(txtDatabase, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(58, 58, 58)
-                                .addComponent(jLabel2)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(jLabel1)
+                                    .addComponent(jLabel4))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtPassWord, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(txtPath))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtUserName, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(txtPort, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(50, 50, 50)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(jLabel3)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(24, 24, 24)
+                                        .addComponent(jLabel5)))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(txtDatabase, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(58, 58, 58)
+                                        .addComponent(jLabel2)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(txtPassWord, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(txtPath)))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(btAuthorCitation, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(btAuthorCoAuthor, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(btAuthorConference, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(btAuthorJournal, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(btAuthorKeyword, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(btConferenceKeyword, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(btJournalKeyword, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(btOrgKeyword, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -376,10 +467,22 @@ public class MainIndexForm extends javax.swing.JFrame {
                     .addComponent(btAutocompleteIndexer)
                     .addComponent(btCheckSpellIndexer)
                     .addComponent(btCcidfIndexer))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btAuthorCitation)
+                    .addComponent(btAuthorCoAuthor)
+                    .addComponent(btAuthorConference)
+                    .addComponent(btAuthorJournal)
+                    .addComponent(btAuthorKeyword))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btConferenceKeyword)
+                    .addComponent(btJournalKeyword)
+                    .addComponent(btOrgKeyword))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(prBar, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 160, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 156, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -465,7 +568,8 @@ public class MainIndexForm extends javax.swing.JFrame {
             if (!file.exists()) {
                 // It returns false if File or directory does not exist
                 txtalog.append("Directory you are searching does not exist : " + file.exists() + "\n");
-                this.btRankPaper.setEnabled(true);
+                this.setEnabledAll();
+                prBar.setIndeterminate(false);
                 return;
             } else {
                 // It returns true if File or directory exists
@@ -886,6 +990,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                 // It returns false if File or directory does not exist
                 txtalog.append("Directory you are searching does not exist : " + file.exists() + "\n");
                 this.setEnabledAll();
+                prBar.setIndeterminate(false);
                 return;
             } else {
                 // It returns true if File or directory exists
@@ -1363,7 +1468,8 @@ public class MainIndexForm extends javax.swing.JFrame {
             if (!file.exists()) {
                 // It returns false if File or directory does not exist
                 txtalog.append("Directory you are searching does not exist : " + file.exists() + "\n");
-                this.btRankPaper.setEnabled(true);
+                this.setEnabledAll();
+                prBar.setIndeterminate(false);
                 return;
             } else {
                 // It returns true if File or directory exists
@@ -1694,6 +1800,94 @@ public class MainIndexForm extends javax.swing.JFrame {
             txtalog.setText(ex.getMessage());
         }
     }//GEN-LAST:event_btAutoRunActionPerformed
+
+    private void btAuthorCitationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btAuthorCitationActionPerformed
+      try {
+            prBar.setIndeterminate(true);
+            txtalog.setText("Begin!\n");
+            this.setDisabledAll();
+            this.path = this.txtPath.getText();
+            final String user = txtUserName.getText();
+            final String pass = txtPassWord.getText();
+            final String database = txtDatabase.getText();
+            final int port = Integer.parseInt(txtPort.getText());
+            File file = new File(this.path);
+            if (!file.exists()) {
+                // It returns false if File or directory does not exist
+                txtalog.append("Directory you are searching does not exist : " + file.exists() + "\n");
+                this.setEnabledAll();
+                prBar.setIndeterminate(false);
+                return;
+            } else {
+                // It returns true if File or directory exists
+                txtalog.append("Directory you are searching does exist : " + file.exists() + "\n");
+                if (!"\\".equals(this.path.substring(this.path.length() - 1, this.path.length()))) {
+                    this.path += "\\";
+                    this.txtPath.setText(this.path);
+                }
+            }
+            // Delete folder
+            File indexDir = new File(this.path + IndexConst.AUTHOR_CITATION_DIRECTORY_PATH);
+            if (indexDir.exists()) {
+                delete(indexDir);
+            }
+            // Connect Database
+            SwingWorker<String, Void> worker = new SwingWorker<String, Void>() {
+                @Override
+                protected String doInBackground() throws Exception {
+                    ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
+                    if (connectionPool.getConnection() == null) {
+                        txtalog.append("Error: Can not connect to database!\n");
+                    } else {
+                        txtalog.append("Connect database success!\nINDEX-AUTHOR-CITATION is running \n");
+                        AuthorCitationIndexer index = new AuthorCitationIndexer(path);
+                        txtalog.append(index._run(connectionPool));
+                    }
+                    connectionPool.getConnection().close();
+                    connectionPool = null;
+                    return null;
+                }
+                
+                @Override
+                public void done() {
+                    txtalog.append("\nFinished!\n");
+                    prBar.setIndeterminate(false);
+                    setEnabledAll();
+                }
+            };
+            worker.execute();
+        } catch (Exception ex) {
+            txtalog.append(ex.getMessage());
+        }  // TODO add your handling code here:
+    }//GEN-LAST:event_btAuthorCitationActionPerformed
+
+    private void btAuthorCoAuthorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btAuthorCoAuthorActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btAuthorCoAuthorActionPerformed
+
+    private void btAuthorConferenceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btAuthorConferenceActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btAuthorConferenceActionPerformed
+
+    private void btAuthorJournalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btAuthorJournalActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btAuthorJournalActionPerformed
+
+    private void btAuthorKeywordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btAuthorKeywordActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btAuthorKeywordActionPerformed
+
+    private void btConferenceKeywordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btConferenceKeywordActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btConferenceKeywordActionPerformed
+
+    private void btJournalKeywordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btJournalKeywordActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btJournalKeywordActionPerformed
+
+    private void btOrgKeywordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btOrgKeywordActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btOrgKeywordActionPerformed
     
     public void setDisabledAll() {
         this.btAuthorIndexer.setEnabled(false);
@@ -1719,6 +1913,14 @@ public class MainIndexForm extends javax.swing.JFrame {
         this.txtPort.setEditable(false);
         this.txtUserName.setEditable(false);
         this.txtalog.setEditable(false);
+        this.btAuthorCitation.setEnabled(false);
+        this.btAuthorCoAuthor.setEnabled(false);
+        this.btAuthorConference.setEnabled(false);
+        this.btAuthorJournal.setEnabled(false);
+        this.btAuthorKeyword.setEnabled(false);
+        this.btConferenceKeyword.setEnabled(false);
+        this.btJournalKeyword.setEnabled(false);
+        this.btOrgKeyword.setEnabled(false);
     }
     
     public void setEnabledAll() {
@@ -1728,6 +1930,14 @@ public class MainIndexForm extends javax.swing.JFrame {
         this.txtPort.setEditable(true);
         this.txtUserName.setEditable(true);
         
+        this.btAuthorCitation.setEnabled(true);
+        this.btAuthorCoAuthor.setEnabled(true);
+        this.btAuthorConference.setEnabled(true);
+        this.btAuthorJournal.setEnabled(true);
+        this.btAuthorKeyword.setEnabled(true);
+        this.btConferenceKeyword.setEnabled(true);
+        this.btJournalKeyword.setEnabled(true);
+        this.btOrgKeyword.setEnabled(true);
         this.btAutoRun.setEnabled(true);
         this.btRankPaper.setEnabled(true);
         this.btCcidfIndexer.setEnabled(true);
@@ -1834,15 +2044,23 @@ public class MainIndexForm extends javax.swing.JFrame {
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btAuthorCitation;
+    private javax.swing.JButton btAuthorCoAuthor;
+    private javax.swing.JButton btAuthorConference;
     private javax.swing.JButton btAuthorIndexer;
+    private javax.swing.JButton btAuthorJournal;
+    private javax.swing.JButton btAuthorKeyword;
     private javax.swing.JButton btAutoRun;
     private javax.swing.JButton btAutocompleteIndexer;
     private javax.swing.JButton btCcidfIndexer;
     private javax.swing.JButton btCheckSpellIndexer;
     private javax.swing.JButton btConferenceIndexer;
+    private javax.swing.JButton btConferenceKeyword;
     private javax.swing.JButton btJournalIndexer;
+    private javax.swing.JButton btJournalKeyword;
     private javax.swing.JButton btKeywordIndexer;
     private javax.swing.JButton btOrgIndexer;
+    private javax.swing.JButton btOrgKeyword;
     private javax.swing.JButton btPaperIndexer;
     private javax.swing.JButton btRankAuthorIndexer;
     private javax.swing.JButton btRankConfIndexer;

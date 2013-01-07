@@ -5,6 +5,7 @@
 package indexer;
 
 import constant.ConnectionPool;
+import constant.IndexConst;
 import database.AuthorPaperTB;
 import database.AuthorTB;
 import database.PaperPaperTB;
@@ -55,7 +56,7 @@ public class AuthorCitationIndexer {
         try {
             StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
             IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
-            Directory directory = FSDirectory.open(new File(path + "INDEX-AUTHOR-CITATION"));
+            Directory directory = FSDirectory.open(new File(path + IndexConst.AUTHOR_CITATION_DIRECTORY_PATH));
             IndexWriter writer = new IndexWriter(directory, config);
             // Connection to DB
             Connection connection = connectionPool.getConnection();
