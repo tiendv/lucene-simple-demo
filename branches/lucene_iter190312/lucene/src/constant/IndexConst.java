@@ -268,4 +268,6 @@ public class IndexConst {
     public static final String CHECKSPELL_3GRAM_END_FIELD = "end3";
     public static final String CHECKSPELL_OBJECT_VAL_AUTHOR = "author";
     public static final String CHECKSPELL_OBJECT_VAL_KEY = "keyword";
+    //Index-Author-Citation
+    public static final String AUTHOR_CITATION_DIRECTORY_PATH = "INDEX-AUTHOR-CITATION";
 }

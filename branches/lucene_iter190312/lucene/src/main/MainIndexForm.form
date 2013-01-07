@@ -79,34 +79,56 @@
                           </Group>
                       </Group>
                   </Group>
-                  <Group type="102" alignment="0" attributes="0">
-                      <Group type="103" groupAlignment="1" attributes="0">
-                          <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
-                          <Component id="jLabel4" min="-2" max="-2" attributes="0"/>
-                      </Group>
-                      <EmptySpace max="-2" attributes="0"/>
+                  <Group type="102" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="txtUserName" alignment="0" min="-2" pref="135" max="-2" attributes="0"/>
-                          <Component id="txtPort" alignment="0" min="-2" pref="135" max="-2" attributes="0"/>
-                      </Group>
-                      <EmptySpace min="-2" pref="50" max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                          <Component id="jLabel3" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Group type="102" alignment="0" attributes="0">
-                              <EmptySpace min="24" pref="24" max="-2" attributes="0"/>
-                              <Component id="jLabel5" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                      </Group>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
                           <Group type="102" attributes="0">
-                              <Component id="txtDatabase" min="-2" pref="135" max="-2" attributes="0"/>
-                              <EmptySpace min="-2" pref="58" max="-2" attributes="0"/>
-                              <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="1" attributes="0">
+                                  <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
+                                  <Component id="jLabel4" min="-2" max="-2" attributes="0"/>
+                              </Group>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="txtPassWord" min="-2" pref="135" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="txtUserName" alignment="0" min="-2" pref="135" max="-2" attributes="0"/>
+                                  <Component id="txtPort" alignment="0" min="-2" pref="135" max="-2" attributes="0"/>
+                              </Group>
+                              <EmptySpace min="-2" pref="50" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                  <Component id="jLabel3" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <EmptySpace min="24" pref="24" max="-2" attributes="0"/>
+                                      <Component id="jLabel5" min="-2" max="-2" attributes="0"/>
+                                  </Group>
+                              </Group>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                  <Group type="102" attributes="0">
+                                      <Component id="txtDatabase" min="-2" pref="135" max="-2" attributes="0"/>
+                                      <EmptySpace min="-2" pref="58" max="-2" attributes="0"/>
+                                      <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="txtPassWord" min="-2" pref="135" max="-2" attributes="0"/>
+                                  </Group>
+                                  <Component id="txtPath" max="32767" attributes="0"/>
+                              </Group>
                           </Group>
-                          <Component id="txtPath" max="32767" attributes="0"/>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="btAuthorCitation" min="-2" pref="135" max="-2" attributes="0"/>
+                              <EmptySpace type="separate" max="-2" attributes="0"/>
+                              <Component id="btAuthorCoAuthor" min="-2" pref="135" max="-2" attributes="0"/>
+                              <EmptySpace type="separate" max="-2" attributes="0"/>
+                              <Component id="btAuthorConference" min="-2" pref="135" max="-2" attributes="0"/>
+                              <EmptySpace type="separate" max="-2" attributes="0"/>
+                              <Component id="btAuthorJournal" min="-2" pref="135" max="-2" attributes="0"/>
+                              <EmptySpace type="separate" max="-2" attributes="0"/>
+                              <Component id="btAuthorKeyword" min="-2" pref="135" max="-2" attributes="0"/>
+                          </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="btConferenceKeyword" min="-2" pref="135" max="-2" attributes="0"/>
+                              <EmptySpace type="separate" max="-2" attributes="0"/>
+                              <Component id="btJournalKeyword" min="-2" pref="135" max="-2" attributes="0"/>
+                              <EmptySpace type="separate" max="-2" attributes="0"/>
+                              <Component id="btOrgKeyword" min="-2" pref="135" max="-2" attributes="0"/>
+                          </Group>
                       </Group>
                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                   </Group>
@@ -170,10 +192,24 @@
                   <Component id="btCheckSpellIndexer" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="btCcidfIndexer" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+              <EmptySpace type="separate" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="btAuthorCitation" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="btAuthorCoAuthor" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="btAuthorConference" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="btAuthorJournal" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="btAuthorKeyword" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace type="separate" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="btConferenceKeyword" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="btJournalKeyword" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="btOrgKeyword" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
               <Component id="prBar" min="-2" pref="34" max="-2" attributes="0"/>
-              <EmptySpace type="unrelated" max="-2" attributes="0"/>
-              <Component id="jScrollPane1" pref="160" max="32767" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="jScrollPane1" pref="156" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
@@ -398,6 +434,78 @@
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btAutoRunActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JButton" name="btAuthorCitation">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="AuthorCitationIndexer"/>
+        <Property name="toolTipText" type="java.lang.String" value="Create INDEX-AUTHOR-CITATION"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btAuthorCitationActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JButton" name="btAuthorCoAuthor">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="AuthorCoAuthorIndexer"/>
+        <Property name="toolTipText" type="java.lang.String" value="Create INDEX-AUTHOR-COAUTHOR"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btAuthorCoAuthorActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JButton" name="btAuthorConference">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="AuthorConferenceIndexer"/>
+        <Property name="toolTipText" type="java.lang.String" value="Create INDEX-AUTHOR-CONFERENCE"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btAuthorConferenceActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JButton" name="btAuthorJournal">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="AuthorJournalIndexer"/>
+        <Property name="toolTipText" type="java.lang.String" value="Create INDEX-AUTHOR-JOURNAL"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btAuthorJournalActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JButton" name="btAuthorKeyword">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="AuthorKeywordIndexer"/>
+        <Property name="toolTipText" type="java.lang.String" value="Create INDEX-AUTHOR-KEYWORD"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btAuthorKeywordActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JButton" name="btConferenceKeyword">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="ConferenceKeywordIndexer"/>
+        <Property name="toolTipText" type="java.lang.String" value="Create INDEX-CONFERENCE-KEYWORD"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btConferenceKeywordActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JButton" name="btJournalKeyword">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="JournalKeywordIndexer"/>
+        <Property name="toolTipText" type="java.lang.String" value="Create INDEX-JOURNAL-KEYWORD"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btJournalKeywordActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JButton" name="btOrgKeyword">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="OrgKeywordIndexer"/>
+        <Property name="toolTipText" type="java.lang.String" value="Create INDEX-ORG-KEYWORD"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btOrgKeywordActionPerformed"/>
       </Events>
     </Component>
   </SubComponents>
