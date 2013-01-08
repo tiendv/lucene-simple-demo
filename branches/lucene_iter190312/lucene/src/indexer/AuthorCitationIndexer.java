@@ -82,6 +82,7 @@ public class AuthorCitationIndexer {
                     System.out.println("Indexing: " + count++ + "\t" + " idAuthor: " + rs.getString(AuthorTB.COLUMN_AUTHORID) + "\t" + " cidAuthor: " + item.get("idAuthor").toString() + "\t" + " citationCount: " + Integer.parseInt(item.get("citationCount").toString()));
                 }
             }
+            rs.close();
             stmt.close();
             connection.close();
             writer.optimize();
@@ -105,7 +106,7 @@ public class AuthorCitationIndexer {
             String sql = "SELECT ap." + AuthorPaperTB.COLUMN_AUTHORID + ", COUNT(ap." + AuthorPaperTB.COLUMN_AUTHORID + ") AS citationCount "
                     + "FROM " + PaperPaperTB.TABLE_NAME + " pp JOIN " + AuthorPaperTB.TABLE_NAME + " ap ON (ap." + AuthorPaperTB.COLUMN_PAPERID + " = pp." + PaperPaperTB.COLUMN_PAPERID + ") "
                     + "WHERE pp." + PaperPaperTB.COLUMN_PAPERREFID + " IN (" + list + ") AND ap." + AuthorPaperTB.COLUMN_AUTHORID + " <> ? "
-                    + "GROUP BY ap." + AuthorPaperTB.COLUMN_AUTHORID;
+                    + "GROUP BY ap." + AuthorPaperTB.COLUMN_AUTHORID + " ORDER BY citationCount DESC LIMIT 20";
             PreparedStatement stmt = connection.prepareStatement(sql);
             stmt.setInt(1, idAuthor);
             ResultSet rs = stmt.executeQuery();
@@ -116,6 +117,7 @@ public class AuthorCitationIndexer {
                 item.put("citationCount", rs.getInt("citationCount"));
                 out.add(item);
             }
+            rs.close();
             stmt.close();
             connection.close();
             return out;
@@ -139,6 +141,7 @@ public class AuthorCitationIndexer {
             if (!"".equals(list)) {
                 list = list.substring(1);
             }
+            rs.close();
             stmt.close();
             connection.close();
         } catch (Exception ex) {
@@ -158,7 +161,7 @@ public class AuthorCitationIndexer {
             String pass = "@huydang1920@";
             String database = "pubguru";
             int port = 3306;
-            String path = "E:\\INDEX\\";
+            String path = "E:\\INDEX\\INDEX\\";
             ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
             AuthorCitationIndexer indexer = new AuthorCitationIndexer(path);
             System.out.println(indexer._run(connectionPool));
