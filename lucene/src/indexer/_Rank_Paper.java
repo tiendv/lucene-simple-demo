@@ -8,6 +8,7 @@ import constant.ConnectionPool;
 import database.PaperPaperTB;
 import database.RankPaperTB;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Date;
 
@@ -19,11 +20,12 @@ public class _Rank_Paper {
 
     public _Rank_Paper() {
     }
-    
+
     /**
-     * 
+     *
      * @param connectionPool Kết nối csdl
-     * @return số lượng record trong bảng rank_paper mới tạo, và thời gian thực hiện bảng rank
+     * @return số lượng record trong bảng rank_paper mới tạo, và thời gian thực
+     * hiện bảng rank
      */
     public String _run(ConnectionPool connectionPool) {
         String out = "";
@@ -37,17 +39,18 @@ public class _Rank_Paper {
         }
         return out;
     }
+
     /**
-     * 
+     *
      * @param connectionPool
-     * @Summary: Tạo bảng trong csdl(xóa bảng cũ nếu đã tồn tại), 
-     * loại bỏ các record có idpaper trùng với idpaperRef
-     * Insert các record từ bảng paper_paper sang bảng rank, với chỉ số rank tăng dần
+     * @Summary: Tạo bảng trong csdl(xóa bảng cũ nếu đã tồn tại), loại bỏ các
+     * record có idpaper trùng với idpaperRef Insert các record từ bảng
+     * paper_paper sang bảng rank, với chỉ số rank tăng dần
      */
-    public int _rank(ConnectionPool connectionPool) {
+    public int _rank(ConnectionPool connectionPool) throws SQLException {
         int count = 0;
+        Connection connection = connectionPool.getConnection();
         try {
-            Connection connection = connectionPool.getConnection();
             Statement statement = connection.createStatement();
             // Drop
             String drop = "DROP TABLE IF EXISTS `" + RankPaperTB.TABLE_NAME + "`;";
@@ -67,22 +70,24 @@ public class _Rank_Paper {
             count = statement.executeUpdate(insert);
 
             statement.close();
-            connection.close();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         } finally {
+            connection.close();
         }
         return count;
     }
+
     /**
      * hàm chạy thử
-     * @param args 
+     *
+     * @param args
      */
     public static void main(String args[]) {
         // TODO add your handling code here:
         try {
             String user = "root";
-            String pass = "@huydang1920@";
+            String pass = "root";
             String database = "pubguru";
             int port = 3306;
             ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);

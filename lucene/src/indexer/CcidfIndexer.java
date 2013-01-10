@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -66,7 +67,7 @@ public class CcidfIndexer {
      * @param indexDir: thư mục lưu trữ file Index
      * @return số lượng doc thực hiện index
      */
-    private int _index(ConnectionPool connectionPool, File indexDir) throws IOException {
+    private int _index(ConnectionPool connectionPool, File indexDir) throws IOException, SQLException {
         int count = 0;
 
         StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
@@ -98,12 +99,13 @@ public class CcidfIndexer {
                 d = null;
                 dto = null;
             }
-            count = writer.numDocs();
+            rs.close();
             stmt.close();
-            connection.close();
+            count = writer.numDocs();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         } finally {
+            connection.close();
             writer.optimize();
             writer.close();
             directory.close();
@@ -115,7 +117,7 @@ public class CcidfIndexer {
         // TODO add your handling code here:
         try {
             String user = "root";
-            String pass = "@huydang1920@";
+            String pass = "root";
             String database = "pubguru";
             int port = 3306;
             String path = "E:\\INDEX\\";

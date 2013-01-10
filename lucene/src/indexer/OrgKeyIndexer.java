@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -53,16 +54,23 @@ public class OrgKeyIndexer {
         return out;
     }
 
-    private int _index(ConnectionPool connectionPool) throws IOException {
+    /**
+     * Truy vấn các thông tin org, keyword, publicationCount từ csdl thực
+     * hiện index
+     *
+     * @param connectionPool: kết nối csdl
+     * @param indexDir: thư mục lưu trữ file index
+     * @return số doc thực hiện
+     */
+    private int _index(ConnectionPool connectionPool) throws IOException, SQLException {
         int count = 0;
-
         StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
         IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
         Directory directory = FSDirectory.open(new File(path + IndexConst.ORG_KEYWORD_DIRECTORY_PATH));
         IndexWriter writer = new IndexWriter(directory, config);
-        // Connection to DB
-        try {
+        // Connection to DB        
             Connection connection = connectionPool.getConnection();
+        try {
             String orgQuery = "SELECT " + OrgTB.COLUMN_ORGID + ", " + OrgTB.COLUMN_ORGNAME + " FROM " + OrgTB.TABLE_NAME + " a";
             PreparedStatement orgStmt = connection.prepareStatement(orgQuery, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             orgStmt.setFetchSize(Integer.MIN_VALUE);
@@ -89,11 +97,12 @@ public class OrgKeyIndexer {
                 keyStmt.close();
                 keyCon.close();
             }
+            orgRs.close();
             orgStmt.close();
-            connection.close();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
-        } finally {
+        } finally {            
+            connection.close();
             writer.optimize();
             writer.close();
             directory.close();

@@ -94,7 +94,7 @@ public class OrgIndexer {
      * @param indexDir: thư mục lưu trữ file index
      * @return số doc thực hiện
      */
-    private int _index(ConnectionPool connectionPool, File indexDir) throws IOException {
+    private int _index(ConnectionPool connectionPool, File indexDir) throws IOException, SQLException {
         int count = 0;
         StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
         IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
@@ -185,11 +185,12 @@ public class OrgIndexer {
                 dto = null;
             }
             count = writer.numDocs();
+            rs.close();
             stmt.close();
-            connection.close();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         } finally {
+            connection.close();
             writer.optimize();
             writer.close();
             directory.close();
@@ -207,9 +208,9 @@ public class OrgIndexer {
      * @throws ClassNotFoundException
      */
     private String getListIdSubdomain(ConnectionPool connectionPool, int idOrg) throws SQLException, ClassNotFoundException {
+        Connection connection = connectionPool.getConnection();
         String list = "";
         try {
-            Connection connection = connectionPool.getConnection();
             String sql = "SELECT s." + SubdomainPaperTB.COLUMN_SUBDOMAINID + " FROM " + AuthorPaperTB.TABLE_NAME + " ap JOIN " + SubdomainPaperTB.TABLE_NAME + " s ON s." + SubdomainPaperTB.COLUMN_PAPERID + "=ap." + AuthorPaperTB.COLUMN_PAPERID + " JOIN " + AuthorTB.TABLE_NAME + " a ON ap." + AuthorPaperTB.COLUMN_AUTHORID + " = a." + AuthorTB.COLUMN_AUTHORID + " WHERE a." + AuthorTB.COLUMN_ORGID + "=? GROUP BY s." + SubdomainPaperTB.COLUMN_SUBDOMAINID + "";
             PreparedStatement stmt = connection.prepareStatement(sql);
             stmt.setInt(1, idOrg);
@@ -220,10 +221,12 @@ public class OrgIndexer {
             if (!"".equals(list)) {
                 list = list.substring(1);
             }
+            rs.close();
             stmt.close();
-            connection.close();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
+        } finally {
+            connection.close();
         }
         return list;
     }
@@ -237,20 +240,25 @@ public class OrgIndexer {
      */
     private ArrayList<Integer> getPublicationList(String idOrg) throws IOException, ParseException {
         ArrayList<Integer> publicationList = new ArrayList<Integer>();
-        BooleanQuery booleanQuery = new BooleanQuery();
-        QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDORG_FIELD, new StandardAnalyzer(Version.LUCENE_36));
-        Query query = parser.parse(idOrg);
-        booleanQuery.add(query, BooleanClause.Occur.MUST);
-        Sort sort = new Sort(new SortField[]{
-                    new SortField(IndexConst.PAPER_CITATIONCOUNT_FIELD, SortField.INT, true)});
-        TopDocs result = searcher.search(booleanQuery, Integer.MAX_VALUE, sort);
-        if (result != null) {
-            ScoreDoc[] hits = result.scoreDocs;
-            for (int i = 0; i < result.totalHits; i++) {
-                ScoreDoc hit = hits[i];
-                Document doc = searcher.doc(hit.doc);
-                publicationList.add(Integer.parseInt(doc.get(IndexConst.PAPER_CITATIONCOUNT_FIELD)));
+        try {
+            BooleanQuery booleanQuery = new BooleanQuery();
+            QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDORG_FIELD, new StandardAnalyzer(Version.LUCENE_36));
+            Query query = parser.parse(idOrg);
+            booleanQuery.add(query, BooleanClause.Occur.MUST);
+            Sort sort = new Sort(new SortField[]{
+                        new SortField(IndexConst.PAPER_CITATIONCOUNT_FIELD, SortField.INT, true)});
+            TopDocs result = searcher.search(booleanQuery, Integer.MAX_VALUE, sort);
+            if (result != null) {
+                ScoreDoc[] hits = result.scoreDocs;
+                for (int i = 0; i < result.totalHits; i++) {
+                    ScoreDoc hit = hits[i];
+                    Document doc = searcher.doc(hit.doc);
+                    publicationList.add(Integer.parseInt(doc.get(IndexConst.PAPER_CITATIONCOUNT_FIELD)));
+                }
             }
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        } finally {
         }
         return publicationList;
     }
@@ -264,7 +272,7 @@ public class OrgIndexer {
         // TODO add your handling code here:
         try {
             String user = "root";
-            String pass = "@huydang1920@";
+            String pass = "root";
             String database = "pubguru";
             int port = 3306;
             String path = "E:\\INDEX\\";

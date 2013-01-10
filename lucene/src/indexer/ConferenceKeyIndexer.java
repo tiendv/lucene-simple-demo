@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -54,7 +55,15 @@ public class ConferenceKeyIndexer {
         return out;
     }
 
-    private int _index(ConnectionPool connectionPool) throws CorruptIndexException, LockObtainFailedException, IOException {
+    /**
+     * Truy vấn các thông tin conference, keyword, publicationCount từ csdl thực
+     * hiện index
+     *
+     * @param connectionPool: kết nối csdl
+     * @param indexDir: thư mục lưu trữ file index
+     * @return số doc thực hiện
+     */
+    private int _index(ConnectionPool connectionPool) throws CorruptIndexException, LockObtainFailedException, IOException, SQLException {
         int count = 0;
 
         StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
@@ -91,12 +100,10 @@ public class ConferenceKeyIndexer {
                 keyCon.close();
             }
             confStmt.close();
-            connection.close();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
-        }
-        finally  
-        {
+        } finally {
+            connection.close();
             writer.optimize();
             writer.close();
             directory.close();
@@ -112,7 +119,7 @@ public class ConferenceKeyIndexer {
         // TODO add your handling code here:
         try {
             String user = "root";
-            String pass = "@huydang1920@";
+            String pass = "root";
             String database = "pubguru";
             int port = 3306;
             String path = "E:\\INDEX\\";

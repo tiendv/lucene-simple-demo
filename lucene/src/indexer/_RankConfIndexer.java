@@ -5,7 +5,6 @@
 package indexer;
 
 import bo.IndexBO;
-import constant.Common;
 import constant.ConnectionPool;
 import constant.IndexConst;
 import database.SubdomainTB;
@@ -14,6 +13,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -33,31 +33,16 @@ import org.apache.lucene.util.Version;
  */
 public class _RankConfIndexer {
 
-    private ConnectionPool connectionPool;
-    private String path = null;
-    public Boolean connect = true;
-    public Boolean folder = true;
+    private String path = "E:\\";
 
     /**
      *
-     * @param username
-     * @param password
-     * @param database
-     * @param port
      * @param path
      * @Summary: khởi tạo connection và searcher bằng các thông số trên
      */
-    public _RankConfIndexer(String username, String password, String database, int port, String path) {
+    public _RankConfIndexer(String path) {
         try {
-            FSDirectory directory = Common.getFSDirectory(path, IndexConst.PAPER_INDEX_PATH);
-            if (directory == null) {
-                folder = false;
-            }
             this.path = path;
-            connectionPool = new ConnectionPool(username, password, database, port);
-            if (connectionPool.getConnection() == null) {
-                connect = false;
-            }
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
@@ -67,12 +52,12 @@ public class _RankConfIndexer {
      * @Summary Khởi chạy index
      * @return chuỗi thông báo số doc được index và thời gian index
      */
-    public String _run() {
+    public String _run(ConnectionPool connectionPool) {
         String out = "";
         try {
             File indexDir = new File(path + IndexConst.RANK_CONFERENCE_INDEX_PATH);
             long start = new Date().getTime();
-            int count = this._index(indexDir);
+            int count = this._index(connectionPool, indexDir);
             long end = new Date().getTime();
             out = "Index : " + count + " files : Time index :" + (end - start) + " milisecond";
         } catch (Exception ex) {
@@ -89,10 +74,9 @@ public class _RankConfIndexer {
      * @param indexDir
      * @return
      */
-    public int _index(File indexDir) throws IOException {
+    public int _index(ConnectionPool connectionPool, File indexDir) throws IOException, SQLException {
         int count = 0;
         IndexBO indexBO = new IndexBO();
-
         StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
         IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
         Directory directory = FSDirectory.open(indexDir);
@@ -169,15 +153,13 @@ public class _RankConfIndexer {
                     }
                 }
             }
-            count = writer.numDocs();
-
+            rs.close();
             stmt.close();
-            connection.close();
-            connectionPool.getConnection().close();
-            connectionPool = null;
+            count = writer.numDocs();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         } finally {
+            connection.close();
             writer.optimize();
             writer.close();
             directory.close();
@@ -195,11 +177,12 @@ public class _RankConfIndexer {
         try {
             String user = "root";
             String pass = "root";
-            String database = "cspublicationcrawler1";
+            String database = "pubguru";
             int port = 3306;
             String path = "E:\\INDEX\\";
-            _RankConfIndexer indexer = new _RankConfIndexer(user, pass, database, port, path);
-            System.out.println(indexer._run());
+            ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
+            _RankConfIndexer indexer = new _RankConfIndexer(path);
+            System.out.println(indexer._run(connectionPool));
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
