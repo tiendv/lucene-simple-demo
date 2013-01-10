@@ -10,6 +10,7 @@ import database.AuthorPaperTB;
 import database.AuthorTB;
 import database.PaperPaperTB;
 import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -51,15 +52,16 @@ public class AuthorCitationIndexer {
         return out;
     }
 
-    private int _index(ConnectionPool connectionPool) {
+    private int _index(ConnectionPool connectionPool) throws IOException {
         int count = 0;
+
+        StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
+        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
+        Directory directory = FSDirectory.open(new File(path + IndexConst.AUTHOR_CITATION_DIRECTORY_PATH));
+        IndexWriter writer = new IndexWriter(directory, config);
+        // Connection to DB
+        Connection connection = connectionPool.getConnection();
         try {
-            StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
-            IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
-            Directory directory = FSDirectory.open(new File(path + IndexConst.AUTHOR_CITATION_DIRECTORY_PATH));
-            IndexWriter writer = new IndexWriter(directory, config);
-            // Connection to DB
-            Connection connection = connectionPool.getConnection();
             String query = "SELECT " + AuthorTB.COLUMN_AUTHORID + " FROM " + AuthorTB.TABLE_NAME + " a";
             PreparedStatement stmt = connection.prepareStatement(query, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(Integer.MIN_VALUE);
@@ -85,12 +87,12 @@ public class AuthorCitationIndexer {
             rs.close();
             stmt.close();
             connection.close();
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        } finally {
             writer.optimize();
             writer.close();
             directory.close();
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-            return 0;
         }
         return count;
     }

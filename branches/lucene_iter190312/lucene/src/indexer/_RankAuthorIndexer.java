@@ -10,6 +10,7 @@ import constant.ConnectionPool;
 import constant.IndexConst;
 import database.SubdomainTB;
 import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -88,17 +89,18 @@ public class _RankAuthorIndexer {
      * @param indexDir
      * @return
      */
-    public int _index(File indexDir) {
+    public int _index(File indexDir) throws IOException {
         int count = 0;
         IndexBO indexBO = new IndexBO();
+
+        StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
+        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
+        Directory directory = FSDirectory.open(indexDir);
+        IndexWriter writer = new IndexWriter(directory, config);
+        // Connection to DB
+        Connection connection = connectionPool.getConnection();
         try {
-            StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
-            IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
-            Directory directory = FSDirectory.open(indexDir);
-            IndexWriter writer = new IndexWriter(directory, config);
-            // Connection to DB
-            Connection connection = connectionPool.getConnection();
-            String sql = "SELECT * FROM " + SubdomainTB.TABLE_NAME + " s LIMIT 11, 100";
+            String sql = "SELECT * FROM " + SubdomainTB.TABLE_NAME + " s";
             PreparedStatement stmt = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet rs = stmt.executeQuery();
@@ -171,15 +173,17 @@ public class _RankAuthorIndexer {
                 }
             }
             count = writer.numDocs();
-            writer.optimize();
-            writer.close();
+
             stmt.close();
             connection.close();
             connectionPool.getConnection().close();
             connectionPool = null;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
-            return 0;
+        } finally {
+            writer.optimize();
+            writer.close();
+            directory.close();
         }
         return count;
     }

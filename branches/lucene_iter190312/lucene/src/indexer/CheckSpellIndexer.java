@@ -210,6 +210,7 @@ public class CheckSpellIndexer {
         }
         writer.optimize();
         writer.close();
+        directory.close();
         return count;
     }
     /**

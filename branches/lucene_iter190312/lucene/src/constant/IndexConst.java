@@ -270,4 +270,11 @@ public class IndexConst {
     public static final String CHECKSPELL_OBJECT_VAL_KEY = "keyword";
     //Index-Author-Citation
     public static final String AUTHOR_CITATION_DIRECTORY_PATH = "INDEX-AUTHOR-CITATION";
+    public static final String AUTHOR_COAUTHOR_DIRECTORY_PATH = "INDEX-AUTHOR-COAUTHOR";
+    public static final String AUTHOR_CONFERENCE_DIRECTORY_PATH = "INDEX-AUTHOR-CONFERENCE";
+    public static final String AUTHOR_JOURNAL_DIRECTORY_PATH = "INDEX-AUTHOR-JOURNAL";
+    public static final String AUTHOR_KEYWORD_DIRECTORY_PATH = "INDEX-AUTHOR-KEYWORD";
+    public static final String CONFERENCE_KEYWORD_DIRECTORY_PATH = "INDEX-CONFERENCE-KEYWORD";
+    public static final String JOURNAL_KEYWORD_DIRECTORY_PATH = "INDEX-JOURNAL-KEYWORD";
+    public static final String ORG_KEYWORD_DIRECTORY_PATH = "INDEX-ORG-KEYWORD";
 }

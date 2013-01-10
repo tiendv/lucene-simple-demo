@@ -21,6 +21,7 @@ import database.SubdomainPaperTB;
 import database.SubdomainTB;
 import dto.PaperDTO;
 import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -48,9 +49,11 @@ import org.json.simple.JSONObject;
 public class PaperIndexer {
 
     private String path = "E:\\";
+
     /**
      * hàm khởi tạo
-     * @param path 
+     *
+     * @param path
      */
     public PaperIndexer(String path) {
         try {
@@ -59,9 +62,10 @@ public class PaperIndexer {
             System.out.println(ex.getMessage());
         }
     }
-    
+
     /**
      * hàm khởi chạy index
+     *
      * @param connectionPool
      * @return số doc thực hiện index và thời gian index
      */
@@ -78,21 +82,25 @@ public class PaperIndexer {
         }
         return out;
     }
+
     /**
-     * thực hiện truy vấn các thông tin của paper từ csdl và thực gọi các hàm tính toán các thông tin khác, thực hiện index
+     * thực hiện truy vấn các thông tin của paper từ csdl và thực gọi các hàm
+     * tính toán các thông tin khác, thực hiện index
+     *
      * @param connectionPool
      * @param indexDir
      * @return số doc thực hiện index
      */
-    private int _index(ConnectionPool connectionPool, File indexDir) {
+    private int _index(ConnectionPool connectionPool, File indexDir) throws IOException {
         int count = 0;
+
+        StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
+        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
+        Directory directory = FSDirectory.open(indexDir);
+        IndexWriter writer = new IndexWriter(directory, config);
+        // Connection to DB           
+        Connection connection = connectionPool.getConnection();
         try {
-            StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
-            IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
-            Directory directory = FSDirectory.open(indexDir);
-            IndexWriter writer = new IndexWriter(directory, config);
-            // Connection to DB           
-            Connection connection = connectionPool.getConnection();
             String sql = "SELECT * FROM " + PaperTB.TABLE_NAME + " p";
             PreparedStatement stmt = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(Integer.MIN_VALUE);
@@ -166,13 +174,14 @@ public class PaperIndexer {
                 paper = null;
             }
             //count = writer.numDocs();
-            writer.optimize();
-            writer.close();
             stmt.close();
             connection.close();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
-            return 0;
+        } finally {
+            writer.optimize();
+            writer.close();
+            directory.close();
         }
         return count;
     }
@@ -254,14 +263,13 @@ public class PaperIndexer {
                 authorsName += " " + authorName;
                 orgsName += " " + rs.getString(OrgTB.COLUMN_ORGNAME);
                 listIdAuthor += " " + rs.getString(AuthorTB.COLUMN_AUTHORID);
-                if ((rs.getInt(AuthorTB.COLUMN_ORGID) > 0)&&(!ArrayListIdOrg.contains(rs.getString(AuthorTB.COLUMN_ORGID)))) {
+                if ((rs.getInt(AuthorTB.COLUMN_ORGID) > 0) && (!ArrayListIdOrg.contains(rs.getString(AuthorTB.COLUMN_ORGID)))) {
                     ArrayListIdOrg.add(rs.getString(AuthorTB.COLUMN_ORGID));
                 }
                 authors.add(author);
             }
-            for(int i=0;i<ArrayListIdOrg.size();i++)
-            {
-                listIdOrg+=" "+ArrayListIdOrg.get(i);
+            for (int i = 0; i < ArrayListIdOrg.size(); i++) {
+                listIdOrg += " " + ArrayListIdOrg.get(i);
             }
             if (!"".equals(authorsName)) {
                 authorsName = authorsName.substring(1);
@@ -457,16 +465,18 @@ public class PaperIndexer {
         }
         return count;
     }
+
     /**
      * hàm test index
-     * @param args 
+     *
+     * @param args
      */
     public static void main(String args[]) {
         // TODO add your handling code here:
         try {
             String user = "root";
-            String pass = "@huydang1920@";
-            String database = "pubguru";
+            String pass = "root";
+            String database = "cspublicationcrawler1";
             int port = 3306;
             String path = "E:\\INDEX\\";
             ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);

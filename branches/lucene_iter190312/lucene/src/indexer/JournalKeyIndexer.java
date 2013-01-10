@@ -5,11 +5,13 @@
 package indexer;
 
 import constant.ConnectionPool;
+import constant.IndexConst;
 import database.JournalTB;
 import database.KeywordTB;
 import database.PaperKeywordTB;
 import database.PaperTB;
 import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -50,14 +52,15 @@ public class JournalKeyIndexer {
         return out;
     }
 
-    private int _index(ConnectionPool connectionPool) {
+    private int _index(ConnectionPool connectionPool) throws IOException {
         int count = 0;
+
+        StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
+        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
+        Directory directory = FSDirectory.open(new File(path + IndexConst.JOURNAL_KEYWORD_DIRECTORY_PATH));
+        IndexWriter writer = new IndexWriter(directory, config);
+        // Connection to DB
         try {
-            StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
-            IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
-            Directory directory = FSDirectory.open(new File(path + "INDEX-JOURNAL-KEYWORD"));
-            IndexWriter writer = new IndexWriter(directory, config);
-            // Connection to DB
             Connection connection = connectionPool.getConnection();
             String jourQuery = "SELECT " + JournalTB.COLUMN_JOURNALID + ", " + JournalTB.COLUMN_JOURNALNAME + " FROM " + JournalTB.TABLE_NAME + " a";
             PreparedStatement jourStmt = connection.prepareStatement(jourQuery, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -87,12 +90,13 @@ public class JournalKeyIndexer {
             }
             jourStmt.close();
             connection.close();
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }finally
+        {
             writer.optimize();
             writer.close();
             directory.close();
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-            return 0;
         }
         return count;
     }

@@ -241,9 +241,9 @@ public class IndexAutocomplete {
             writer.addDocument(d);
             d = null;
         }
-
+        writer.optimize();
         writer.close();
-
+        directory.close();
         return count;
     }
 

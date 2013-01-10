@@ -5,11 +5,13 @@
 package indexer;
 
 import constant.ConnectionPool;
+import constant.IndexConst;
 import database.ConferenceTB;
 import database.KeywordTB;
 import database.PaperKeywordTB;
 import database.PaperTB;
 import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,10 +20,12 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.NumericField;
+import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.util.Version;
 
 /**
@@ -50,15 +54,16 @@ public class ConferenceKeyIndexer {
         return out;
     }
 
-    private int _index(ConnectionPool connectionPool) {
+    private int _index(ConnectionPool connectionPool) throws CorruptIndexException, LockObtainFailedException, IOException {
         int count = 0;
+
+        StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
+        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
+        Directory directory = FSDirectory.open(new File(path + IndexConst.CONFERENCE_KEYWORD_DIRECTORY_PATH));
+        IndexWriter writer = new IndexWriter(directory, config);
+        // Connection to DB
+        Connection connection = connectionPool.getConnection();
         try {
-            StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
-            IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
-            Directory directory = FSDirectory.open(new File(path + "INDEX-CONFERENCE-KEYWORD"));
-            IndexWriter writer = new IndexWriter(directory, config);
-            // Connection to DB
-            Connection connection = connectionPool.getConnection();
             String confQuery = "SELECT " + ConferenceTB.COLUMN_CONFERENCEID + ", " + ConferenceTB.COLUMN_CONFERENCENAME + " FROM " + ConferenceTB.TABLE_NAME + " a";
             PreparedStatement confStmt = connection.prepareStatement(confQuery, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             confStmt.setFetchSize(Integer.MIN_VALUE);
@@ -87,12 +92,14 @@ public class ConferenceKeyIndexer {
             }
             confStmt.close();
             connection.close();
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+        finally  
+        {
             writer.optimize();
             writer.close();
             directory.close();
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-            return 0;
         }
         return count;
     }

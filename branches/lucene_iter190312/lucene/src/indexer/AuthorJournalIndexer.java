@@ -5,11 +5,13 @@
 package indexer;
 
 import constant.ConnectionPool;
+import constant.IndexConst;
 import database.AuthorPaperTB;
 import database.AuthorTB;
 import database.JournalTB;
 import database.PaperTB;
 import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -50,15 +52,15 @@ public class AuthorJournalIndexer {
         return out;
     }
 
-    private int _index(ConnectionPool connectionPool) {
+    private int _index(ConnectionPool connectionPool) throws IOException {
         int count = 0;
+        StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
+        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
+        Directory directory = FSDirectory.open(new File(path + IndexConst.AUTHOR_JOURNAL_DIRECTORY_PATH));
+        IndexWriter writer = new IndexWriter(directory, config);
+        // Connection to DB
+        Connection connection = connectionPool.getConnection();
         try {
-            StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
-            IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
-            Directory directory = FSDirectory.open(new File(path + "INDEX-AUTHOR-JOURNAL"));
-            IndexWriter writer = new IndexWriter(directory, config);
-            // Connection to DB
-            Connection connection = connectionPool.getConnection();
             String authQuery = "SELECT " + AuthorTB.COLUMN_AUTHORID + ", " + AuthorTB.COLUMN_AUTHORNAME + " FROM " + AuthorTB.TABLE_NAME + " a";
             PreparedStatement authorStmt = connection.prepareStatement(authQuery, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             authorStmt.setFetchSize(Integer.MIN_VALUE);
@@ -87,12 +89,13 @@ public class AuthorJournalIndexer {
             }
             authorStmt.close();
             connection.close();
+
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        } finally {
             writer.optimize();
             writer.close();
             directory.close();
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-            return 0;
         }
         return count;
     }
