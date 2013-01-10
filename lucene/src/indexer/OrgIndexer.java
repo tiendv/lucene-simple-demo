@@ -94,15 +94,15 @@ public class OrgIndexer {
      * @param indexDir: thư mục lưu trữ file index
      * @return số doc thực hiện
      */
-    private int _index(ConnectionPool connectionPool, File indexDir) {
+    private int _index(ConnectionPool connectionPool, File indexDir) throws IOException {
         int count = 0;
+        StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
+        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
+        Directory directory = FSDirectory.open(indexDir);
+        IndexWriter writer = new IndexWriter(directory, config);
+        // Connection to DB
+        Connection connection = connectionPool.getConnection();
         try {
-            StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
-            IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
-            Directory directory = FSDirectory.open(indexDir);
-            IndexWriter writer = new IndexWriter(directory, config);
-            // Connection to DB
-            Connection connection = connectionPool.getConnection();
             String sql = "SELECT * FROM " + OrgTB.TABLE_NAME + " o";
             PreparedStatement stmt = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(Integer.MIN_VALUE);
@@ -185,13 +185,14 @@ public class OrgIndexer {
                 dto = null;
             }
             count = writer.numDocs();
-            writer.optimize();
-            writer.close();
             stmt.close();
             connection.close();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
-            return 0;
+        } finally {
+            writer.optimize();
+            writer.close();
+            directory.close();
         }
         return count;
     }

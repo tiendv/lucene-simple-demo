@@ -66,16 +66,14 @@
                                       <EmptySpace type="separate" max="-2" attributes="0"/>
                                       <Component id="btKeywordIndexer" min="-2" pref="135" max="-2" attributes="0"/>
                                   </Group>
-                                  <Group type="102" alignment="0" attributes="0">
-                                      <Component id="btAutocompleteIndexer" min="-2" pref="135" max="-2" attributes="0"/>
-                                      <EmptySpace type="separate" max="-2" attributes="0"/>
-                                      <Component id="btCcidfIndexer" min="-2" pref="135" max="-2" attributes="0"/>
-                                  </Group>
+                                  <Component id="btAutocompleteIndexer" alignment="0" min="-2" pref="135" max="-2" attributes="0"/>
                               </Group>
                           </Group>
                           <Group type="102" alignment="1" attributes="0">
                               <Component id="btAutoRun" min="-2" pref="288" max="-2" attributes="0"/>
-                              <EmptySpace min="-2" pref="459" max="-2" attributes="0"/>
+                              <EmptySpace type="separate" max="-2" attributes="0"/>
+                              <Component id="btCcidfIndexer" min="-2" pref="135" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="306" max="-2" attributes="0"/>
                           </Group>
                       </Group>
                   </Group>
@@ -161,7 +159,10 @@
                   </Group>
               </Group>
               <EmptySpace min="-2" pref="14" max="-2" attributes="0"/>
-              <Component id="btAutoRun" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="btAutoRun" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="btCcidfIndexer" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
               <EmptySpace min="-2" pref="15" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="btRankPaper" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -190,7 +191,6 @@
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="btAutocompleteIndexer" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="btCheckSpellIndexer" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="btCcidfIndexer" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="separate" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">

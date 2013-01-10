@@ -12,6 +12,7 @@ import database.PaperKeywordTB;
 import database.SubdomainPaperTB;
 import dto.KeywordDTO;
 import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -77,16 +78,16 @@ public class KeywordIndexer {
      * @param indexDir: thư mục lưu trữ file index
      * @return số doc thực hiện index
      */
-    private int _index(ConnectionPool connectionPool, File indexDir) {
+    private int _index(ConnectionPool connectionPool, File indexDir) throws IOException {
         int count = 0;
         IndexBO indexBO = new IndexBO();
+        StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
+        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
+        Directory directory = FSDirectory.open(indexDir);
+        IndexWriter writer = new IndexWriter(directory, config);
+        // Connection to DB
+        Connection connection = connectionPool.getConnection();
         try {
-            StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
-            IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
-            Directory directory = FSDirectory.open(indexDir);
-            IndexWriter writer = new IndexWriter(directory, config);
-            // Connection to DB
-            Connection connection = connectionPool.getConnection();
             String sql = "SELECT * FROM " + KeywordTB.TABLE_NAME + " k";
             PreparedStatement stmt = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(Integer.MIN_VALUE);
@@ -100,9 +101,11 @@ public class KeywordIndexer {
                 dto.setKeyword(rs.getString(KeywordTB.COLUMN_KEYWORD));
                 dto.setStemmingVariations(rs.getString(KeywordTB.COLUMN_STEMMINGVARIATIONS));
                 dto.setListIdSubdomain(this.getListIdSubdomain(connectionPool, rs.getInt(KeywordTB.COLUMN_KEYWORDID)));
-                dto.setCitationCount(Integer.parseInt(listPublicationCitation.get("citationCount")));
-                dto.setPublicationCount(Integer.parseInt(listPublicationCitation.get("publicationCount")));
-                dto.setListPublicationCitation(listPublicationCitation.get("listPublicationCitation"));
+                if (listPublicationCitation != null) {
+                    dto.setCitationCount(Integer.parseInt(listPublicationCitation.get("citationCount")));
+                    dto.setPublicationCount(Integer.parseInt(listPublicationCitation.get("publicationCount")));
+                    dto.setListPublicationCitation(listPublicationCitation.get("listPublicationCitation"));
+                }
 
                 int pubLast5Year = 0;
                 int citLast5Year = 0;
@@ -142,13 +145,14 @@ public class KeywordIndexer {
                 dto = null;
             }
             count = writer.numDocs();
-            writer.optimize();
-            writer.close();
             stmt.close();
             connection.close();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
-            return 0;
+        } finally {
+            writer.optimize();
+            writer.close();
+            directory.close();
         }
         return count;
     }

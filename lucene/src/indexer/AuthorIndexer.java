@@ -63,8 +63,9 @@ public class AuthorIndexer {
             System.out.println(ex.getMessage());
         }
     }
+
     /**
-     * 
+     *
      * @param connectionPool: kết nối connection của MySQL
      * @Summary: khởi chạy index
      * @return: chuỗi out: số lượng doc được index và thời gian index
@@ -84,22 +85,23 @@ public class AuthorIndexer {
     }
 
     /**
-     * 
+     *
      * @param connectionPool: kết nối connection của MySQL
      * @param indexDir: thư mục lưu trữ file Index
      * @Summary:Truy vấn trong csdl MySQL lấy ra thông tin tất cả các tác giả,
      * sử dụng IdAuthor để truy vấn và tính toán các thuộc tính.
      * @return: trả về số doc được index
      */
-    private int _index(ConnectionPool connectionPool, File indexDir) {
+    private int _index(ConnectionPool connectionPool, File indexDir) throws IOException {
         int count = 0;
+
+        StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
+        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
+        Directory directory = FSDirectory.open(indexDir);
+        IndexWriter writer = new IndexWriter(directory, config);
+        // Connection to DB
+        Connection connection = connectionPool.getConnection();
         try {
-            StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
-            IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
-            Directory directory = FSDirectory.open(indexDir);
-            IndexWriter writer = new IndexWriter(directory, config);
-            // Connection to DB
-            Connection connection = connectionPool.getConnection();
             String sql = "SELECT * FROM " + AuthorTB.TABLE_NAME + " a";
             PreparedStatement stmt = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(Integer.MIN_VALUE);
@@ -187,20 +189,22 @@ public class AuthorIndexer {
                 dto = null;
             }
             //count = writer.numDocs();
-            writer.optimize();
-            writer.close();
+
             stmt.close();
             connection.close();
             searcher = null;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
-            return 0;
+        } finally {
+            writer.optimize();
+            writer.close();
+            directory.close();
         }
         return count;
     }
 
     /**
-     * 
+     *
      * @param connectionPool kết nối tới csdl
      * @param idAuthor: idAuthor truy vấn
      * @return List IdSubdomain của tác giả
@@ -234,11 +238,12 @@ public class AuthorIndexer {
     }
 
     /**
-     * 
+     *
      * @param connectionPool kết nối tới csdl
      * @param idAuthor: idAuthor truy vấn
-     * @return LinkedHashMap bao gồm:PublicationCount, CitationCount, List co-Author, 
-     * listPublicationCitation(Publication, citation theo thời gian) của tác giả
+     * @return LinkedHashMap bao gồm:PublicationCount, CitationCount, List
+     * co-Author, listPublicationCitation(Publication, citation theo thời gian)
+     * của tác giả
      */
     private LinkedHashMap<String, String> getListPublicationCitation(ConnectionPool connectionPool, String idAuthor) throws IOException, ParseException, SQLException, ClassNotFoundException {
         LinkedHashMap<String, String> out = new LinkedHashMap<String, String>();
@@ -335,7 +340,7 @@ public class AuthorIndexer {
     }
 
     /**
-     * 
+     *
      * @param connectionPool kết nối tới csdl
      * @param listIdPaper list chứa các idpaper của tác giả
      * @return số co-AuthorCount của tác giả
@@ -401,7 +406,7 @@ public class AuthorIndexer {
 
     /**
      * @Summary: Sắp xếp các bài viết theo thứ tự giảm dần số trích dẫn.
-     * 
+     *
      */
     private ArrayList<Integer> getPublicationList(String idAuthor) throws IOException, ParseException {
         ArrayList<Integer> publicationList = new ArrayList<Integer>();
@@ -424,11 +429,12 @@ public class AuthorIndexer {
     }
 
     /**
-     * 
+     *
      * @param connectionPool: kết nối csdl
      * @param idAuthor : Id tác giả
      * @param idSubdomain :Id subdomain
-     * @return Map chứa thông tin H-index và H-index của tác giả theo từng tác giả
+     * @return Map chứa thông tin H-index và H-index của tác giả theo từng tác
+     * giả
      */
     private LinkedHashMap<String, Integer> getPublicationByIdAuthorAndIdSubdomain(ConnectionPool connectionPool, String idAuthor, String idSubdomain) throws IOException, ParseException, SQLException, ClassNotFoundException {
         LinkedHashMap<String, Integer> out = new LinkedHashMap<String, Integer>();
@@ -500,8 +506,9 @@ public class AuthorIndexer {
         out.put("g_index", g_index);
         return out;
     }
+
     /**
-     * 
+     *
      * @Summary: hàm test index
      */
     public static void main(String args[]) {

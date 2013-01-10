@@ -9,6 +9,7 @@ import constant.IndexConst;
 import database.CcidfTB;
 import dto.CcidfDTO;
 import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -38,8 +39,9 @@ public class CcidfIndexer {
             System.out.println(ex.getMessage());
         }
     }
+
     /**
-     * 
+     *
      * @param connectionPool: kết nối connection của MySQL
      * @Summary: khởi chạy index
      * @return: chuỗi out: số lượng doc được index và thời gian index
@@ -57,21 +59,23 @@ public class CcidfIndexer {
         }
         return out;
     }
+
     /**
-     * 
+     *
      * @param connectionPool: kết nối connection của MySQL
      * @param indexDir: thư mục lưu trữ file Index
      * @return số lượng doc thực hiện index
      */
-    private int _index(ConnectionPool connectionPool, File indexDir) {
+    private int _index(ConnectionPool connectionPool, File indexDir) throws IOException {
         int count = 0;
+
+        StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
+        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
+        Directory directory = FSDirectory.open(indexDir);
+        IndexWriter writer = new IndexWriter(directory, config);
+        // Connection to DB
+        Connection connection = connectionPool.getConnection();
         try {
-            StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
-            IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
-            Directory directory = FSDirectory.open(indexDir);
-            IndexWriter writer = new IndexWriter(directory, config);
-            // Connection to DB
-            Connection connection = connectionPool.getConnection();
             String sql = "SELECT * FROM " + CcidfTB.TABLE_NAME + " c";
             PreparedStatement stmt = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(Integer.MIN_VALUE);
@@ -95,13 +99,14 @@ public class CcidfIndexer {
                 dto = null;
             }
             count = writer.numDocs();
-            writer.optimize();
-            writer.close();
             stmt.close();
             connection.close();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
-            return 0;
+        } finally {
+            writer.optimize();
+            writer.close();
+            directory.close();
         }
         return count;
     }

@@ -94,16 +94,17 @@ public class JournalIndexer {
      * @param indexDir: thư mục lưu trữ file index
      * @return số doc được index
      */
-    private int _index(ConnectionPool connectionPool, File indexDir) {
+    private int _index(ConnectionPool connectionPool, File indexDir) throws IOException {
         int count = 0;
         IndexBO indexBO = new IndexBO();
+
+        StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
+        IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
+        Directory directory = FSDirectory.open(indexDir);
+        IndexWriter writer = new IndexWriter(directory, config);
+        // Connection to DB
+        Connection connection = connectionPool.getConnection();
         try {
-            StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
-            IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
-            Directory directory = FSDirectory.open(indexDir);
-            IndexWriter writer = new IndexWriter(directory, config);
-            // Connection to DB
-            Connection connection = connectionPool.getConnection();
             String sql = "SELECT * FROM " + JournalTB.TABLE_NAME + " j";
             PreparedStatement stmt = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(Integer.MIN_VALUE);
@@ -122,9 +123,11 @@ public class JournalIndexer {
                 dto.setYearEnd(rs.getInt(JournalTB.COLUMN_YEAREND));
                 dto.setYearStart(rs.getInt(JournalTB.COLUMN_YEARSTART));
                 dto.setListIdSubdomain(this.getListIdSubdomain(connectionPool, rs.getInt(JournalTB.COLUMN_JOURNALID)));
-                dto.setCitationCount(Integer.parseInt(listPublicationCitation.get("citationCount")));
-                dto.setPublicationCount(Integer.parseInt(listPublicationCitation.get("publicationCount")));
-                dto.setListPublicationCitation(listPublicationCitation.get("listPublicationCitation"));
+                if (listPublicationCitation != null) {
+                    dto.setCitationCount(Integer.parseInt(listPublicationCitation.get("citationCount")));
+                    dto.setPublicationCount(Integer.parseInt(listPublicationCitation.get("publicationCount")));
+                    dto.setListPublicationCitation(listPublicationCitation.get("listPublicationCitation"));
+                }
                 dto.setH_Index(indexJournal.get("h_index"));
                 dto.setG_Index(indexJournal.get("g_index"));
 
@@ -187,13 +190,14 @@ public class JournalIndexer {
                 dto = null;
             }
             count = writer.numDocs();
-            writer.optimize();
-            writer.close();
             stmt.close();
             connection.close();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
-            return 0;
+        } finally {
+            writer.optimize();
+            writer.close();
+            directory.close();
         }
         return count;
     }
@@ -265,8 +269,8 @@ public class JournalIndexer {
         // TODO add your handling code here:
         try {
             String user = "root";
-            String pass = "@huydang1920@";
-            String database = "pubguru";
+            String pass = "root";
+            String database = "cspublicationcrawler1";
             int port = 3306;
             String path = "E:\\INDEX\\";
             ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);

@@ -7,14 +7,21 @@ package main;
 import constant.ConnectionPool;
 import constant.IndexConst;
 import indexer.AuthorCitationIndexer;
+import indexer.AuthorCoAuthorIndexer;
+import indexer.AuthorConfIndexer;
 import indexer.AuthorIndexer;
+import indexer.AuthorJournalIndexer;
+import indexer.AuthorKeyIndexer;
 import indexer.CcidfIndexer;
 import indexer.CheckSpellIndexer;
 import indexer.ConferenceIndexer;
+import indexer.ConferenceKeyIndexer;
 import indexer.IndexAutocomplete;
 import indexer.JournalIndexer;
+import indexer.JournalKeyIndexer;
 import indexer.KeywordIndexer;
 import indexer.OrgIndexer;
+import indexer.OrgKeyIndexer;
 import indexer.PaperIndexer;
 import indexer.SubdomainIndexer;
 import indexer._RankAuthorIndexer;
@@ -370,13 +377,12 @@ public class MainIndexForm extends javax.swing.JFrame {
                                         .addComponent(btOrgIndexer, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addGap(18, 18, 18)
                                         .addComponent(btKeywordIndexer, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(btAutocompleteIndexer, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGap(18, 18, 18)
-                                        .addComponent(btCcidfIndexer, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                    .addComponent(btAutocompleteIndexer, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)))
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                 .addComponent(btAutoRun, javax.swing.GroupLayout.PREFERRED_SIZE, 288, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(459, 459, 459))))
+                                .addGap(18, 18, 18)
+                                .addComponent(btCcidfIndexer, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(306, 306, 306))))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
@@ -441,7 +447,9 @@ public class MainIndexForm extends javax.swing.JFrame {
                         .addComponent(jLabel5)
                         .addComponent(txtPath, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(14, 14, 14)
-                .addComponent(btAutoRun)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btAutoRun)
+                    .addComponent(btCcidfIndexer))
                 .addGap(15, 15, 15)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btRankPaper)
@@ -465,8 +473,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btAutocompleteIndexer)
-                    .addComponent(btCheckSpellIndexer)
-                    .addComponent(btCcidfIndexer))
+                    .addComponent(btCheckSpellIndexer))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btAuthorCitation)
@@ -1483,7 +1490,7 @@ public class MainIndexForm extends javax.swing.JFrame {
             SwingWorker<String, Void> Index = new SwingWorker<String, Void>() {
                 @Override
                 protected String doInBackground() throws Exception {
-
+                    
                     //Create table RankPaper
                     ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
                     if (connectionPool.getConnection() == null) {
@@ -1491,8 +1498,8 @@ public class MainIndexForm extends javax.swing.JFrame {
                     } else {
                         txtalog.append("\n------------------CREATE-RANK-PAPER---------------------\n");
                         txtalog.append("Connect database success!\nRank Paper is running \n");
-                        _Rank_Paper rank = new _Rank_Paper();
-                        txtalog.append(rank._run(connectionPool));
+                        //_Rank_Paper rank = new _Rank_Paper();
+                        //txtalog.append(rank._run(connectionPool));
                         rankPaper = true;
                      txtalog.append("\nRank Paper is finished!");
                         txtalog.append("\n-----------------------------------------------------------------------\n");
@@ -1642,7 +1649,159 @@ public class MainIndexForm extends javax.swing.JFrame {
                     txtalog.append("\n-----------------------------------------------------------------------\n");
                     connectionPool.getConnection().close();
                     connectionPool = null;
-
+                    
+                    //INDEX-AUTHOR-CITATION
+                    indexDir = new File(path + IndexConst.AUTHOR_CITATION_DIRECTORY_PATH);
+                    if (indexDir.exists()) {
+                        delete(indexDir);
+                    }
+                    txtalog.append("\n-----------------INDEX-AUTHOR-CITATION-----------------\n");
+                    connectionPool = new ConnectionPool(user, pass, database, port);
+                    if (connectionPool.getConnection() == null) {
+                        txtalog.append("Error: Can not connect to database!\n");
+                    } else {
+                        txtalog.append("Connect database success!\nINDEX-AUTHOR-CITATION is running \n");
+                        AuthorCitationIndexer index = new AuthorCitationIndexer(path);
+                        txtalog.append(index._run(connectionPool));
+                        txtalog.append("\nINDEX-AUTHOR-CITATION is finished!");  
+                    }
+                    txtalog.append("\n-----------------------------------------------------------------------\n");
+                    connectionPool.getConnection().close();
+                    connectionPool = null;
+                    
+                    //INDEX-AUTHOR-KEYWORD
+                    indexDir = new File(path + IndexConst.AUTHOR_KEYWORD_DIRECTORY_PATH);
+                    if (indexDir.exists()) {
+                        delete(indexDir);
+                    }
+                    txtalog.append("\n----------------INDEX-AUTHOR-KEYWORD----------------\n");
+                    connectionPool = new ConnectionPool(user, pass, database, port);
+                    if (connectionPool.getConnection() == null) {
+                        txtalog.append("Error: Can not connect to database!\n");
+                    } else {
+                        txtalog.append("Connect database success!\nINDEX-AUTHOR-KEYWORD is running \n");
+                        AuthorKeyIndexer index = new AuthorKeyIndexer(path);
+                        txtalog.append(index._run(connectionPool));
+                        txtalog.append("\nINDEX-AUTHOR-KEYWORD is finished!");  
+                    }
+                    txtalog.append("\n-----------------------------------------------------------------------\n");
+                    connectionPool.getConnection().close();
+                    connectionPool = null;
+                    
+                    //INDEX-AUTHOR-CoAUTHOR
+                    indexDir = new File(path + IndexConst.AUTHOR_COAUTHOR_DIRECTORY_PATH);
+                    if (indexDir.exists()) {
+                        delete(indexDir);
+                    }
+                    txtalog.append("\n--------------INDEX-AUTHOR-COAUTHOR----------------\n");
+                    connectionPool = new ConnectionPool(user, pass, database, port);
+                    if (connectionPool.getConnection() == null) {
+                        txtalog.append("Error: Can not connect to database!\n");
+                    } else {
+                        txtalog.append("Connect database success!\nINDEX-AUTHOR-COAUTHOR is running \n");
+                        AuthorCoAuthorIndexer index = new AuthorCoAuthorIndexer(path);
+                        txtalog.append(index._run(connectionPool));
+                        txtalog.append("\nINDEX-AUTHOR-COAUTHOR is finished!");  
+                    }
+                    txtalog.append("\n-----------------------------------------------------------------------\n");
+                    connectionPool.getConnection().close();
+                    connectionPool = null;
+                    
+                    //INDEX-AUTHOR-CONFERENCE
+                    indexDir = new File(path + IndexConst.AUTHOR_CONFERENCE_DIRECTORY_PATH);
+                    if (indexDir.exists()) {
+                        delete(indexDir);
+                    }
+                    txtalog.append("\n-------------INDEX-AUTHOR-CONFERENCE-------------\n");
+                    connectionPool = new ConnectionPool(user, pass, database, port);
+                    if (connectionPool.getConnection() == null) {
+                        txtalog.append("Error: Can not connect to database!\n");
+                    } else {
+                        txtalog.append("Connect database success!\nINDEX-AUTHOR-CONFERENCE is running \n");
+                        AuthorConfIndexer index = new AuthorConfIndexer(path);
+                        txtalog.append(index._run(connectionPool));
+                        txtalog.append("\nINDEX-AUTHOR-CONFERENCE is finished!");  
+                    }
+                    txtalog.append("\n-----------------------------------------------------------------------\n");
+                    connectionPool.getConnection().close();
+                    connectionPool = null;
+                    
+                    //INDEX-AUTHOR-JOURNAL
+                    indexDir = new File(path + IndexConst.AUTHOR_JOURNAL_DIRECTORY_PATH);
+                    if (indexDir.exists()) {
+                        delete(indexDir);
+                    }
+                    txtalog.append("\n----------------INDEX-AUTHOR-JOURNAL-----------------\n");
+                    connectionPool = new ConnectionPool(user, pass, database, port);
+                    if (connectionPool.getConnection() == null) {
+                        txtalog.append("Error: Can not connect to database!\n");
+                    } else {
+                        txtalog.append("Connect database success!\nINDEX-AUTHOR-JOURNAL is running \n");
+                        AuthorJournalIndexer index = new AuthorJournalIndexer(path);
+                        txtalog.append(index._run(connectionPool));
+                        txtalog.append("\nINDEX-AUTHOR-JOURNAL is finished!");  
+                    }
+                    txtalog.append("\n-----------------------------------------------------------------------\n");
+                    connectionPool.getConnection().close();
+                    connectionPool = null;
+                    
+                    //INDEX-CONFERENCE-KEYWORD
+                    indexDir = new File(path + IndexConst.CONFERENCE_KEYWORD_DIRECTORY_PATH);
+                    if (indexDir.exists()) {
+                        delete(indexDir);
+                    }
+                    txtalog.append("\n-----------INDEX-CONFERENCE-KEYWORD------------\n");
+                    connectionPool = new ConnectionPool(user, pass, database, port);
+                    if (connectionPool.getConnection() == null) {
+                        txtalog.append("Error: Can not connect to database!\n");
+                    } else {
+                        txtalog.append("Connect database success!\nINDEX-CONFERENCE-KEYWORD is running \n");
+                        ConferenceKeyIndexer index = new ConferenceKeyIndexer(path);
+                        txtalog.append(index._run(connectionPool));
+                        txtalog.append("\nINDEX-CONFERENCE-KEYWORD is finished!");  
+                    }
+                    txtalog.append("\n-----------------------------------------------------------------------\n");
+                    connectionPool.getConnection().close();
+                    connectionPool = null;
+                    
+                    //INDEX-JOURNAL-KEYWORD
+                    indexDir = new File(path + IndexConst.JOURNAL_KEYWORD_DIRECTORY_PATH);
+                    if (indexDir.exists()) {
+                        delete(indexDir);
+                    }
+                    txtalog.append("\n---------------INDEX-JOURNAL-KEYWORD----------------\n");
+                    connectionPool = new ConnectionPool(user, pass, database, port);
+                    if (connectionPool.getConnection() == null) {
+                        txtalog.append("Error: Can not connect to database!\n");
+                    } else {
+                        txtalog.append("Connect database success!\nINDEX-JOURNAL-KEYWORD is running \n");
+                        JournalKeyIndexer index = new JournalKeyIndexer(path);
+                        txtalog.append(index._run(connectionPool));
+                        txtalog.append("\nINDEX-JOURNAL-KEYWORD is finished!");  
+                    }
+                    txtalog.append("\n-----------------------------------------------------------------------\n");
+                    connectionPool.getConnection().close();
+                    connectionPool = null;
+                    
+                    //INDEX-ORG-KEYWORD
+                    indexDir = new File(path + IndexConst.ORG_KEYWORD_DIRECTORY_PATH);
+                    if (indexDir.exists()) {
+                        delete(indexDir);
+                    }
+                    txtalog.append("\n--------------------INDEX-ORG-KEYWORD------------------\n");
+                    connectionPool = new ConnectionPool(user, pass, database, port);
+                    if (connectionPool.getConnection() == null) {
+                        txtalog.append("Error: Can not connect to database!\n");
+                    } else {
+                        txtalog.append("Connect database success!\nINDEX-ORG-KEYWORD is running \n");
+                        OrgKeyIndexer index = new OrgKeyIndexer(path);
+                        txtalog.append(index._run(connectionPool));
+                        txtalog.append("\nINDEX-ORG-KEYWORD is finished!");  
+                    }
+                    txtalog.append("\n-----------------------------------------------------------------------\n");
+                    connectionPool.getConnection().close();
+                    connectionPool = null;
+                    
                     //INDEX-RANK-AUTHOR
                     indexDir = new File(path + IndexConst.RANK_AUTHOR_INDEX_PATH);
                     if (indexDir.exists()) {
@@ -1858,35 +2017,430 @@ public class MainIndexForm extends javax.swing.JFrame {
             worker.execute();
         } catch (Exception ex) {
             txtalog.append(ex.getMessage());
-        }  // TODO add your handling code here:
+        }
     }//GEN-LAST:event_btAuthorCitationActionPerformed
 
     private void btAuthorCoAuthorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btAuthorCoAuthorActionPerformed
-        // TODO add your handling code here:
+        try {
+            prBar.setIndeterminate(true);
+            txtalog.setText("Begin!\n");
+            this.setDisabledAll();
+            this.path = this.txtPath.getText();
+            final String user = txtUserName.getText();
+            final String pass = txtPassWord.getText();
+            final String database = txtDatabase.getText();
+            final int port = Integer.parseInt(txtPort.getText());
+            File file = new File(this.path);
+            if (!file.exists()) {
+                // It returns false if File or directory does not exist
+                txtalog.append("Directory you are searching does not exist : " + file.exists() + "\n");
+                this.setEnabledAll();
+                prBar.setIndeterminate(false);
+                return;
+            } else {
+                // It returns true if File or directory exists
+                txtalog.append("Directory you are searching does exist : " + file.exists() + "\n");
+                if (!"\\".equals(this.path.substring(this.path.length() - 1, this.path.length()))) {
+                    this.path += "\\";
+                    this.txtPath.setText(this.path);
+                }
+            }
+            // Delete folder
+            File indexDir = new File(this.path + IndexConst.AUTHOR_COAUTHOR_DIRECTORY_PATH);
+            if (indexDir.exists()) {
+                delete(indexDir);
+            }
+            // Connect Database
+            SwingWorker<String, Void> worker = new SwingWorker<String, Void>() {
+                @Override
+                protected String doInBackground() throws Exception {
+                    ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
+                    if (connectionPool.getConnection() == null) {
+                        txtalog.append("Error: Can not connect to database!\n");
+                    } else {
+                        txtalog.append("Connect database success!\nINDEX-AUTHOR-COAUTHOR is running \n");
+                        AuthorCoAuthorIndexer index = new AuthorCoAuthorIndexer(path);
+                        txtalog.append(index._run(connectionPool));
+                    }
+                    connectionPool.getConnection().close();
+                    connectionPool = null;
+                    return null;
+                }
+                
+                @Override
+                public void done() {
+                    txtalog.append("\nFinished!\n");
+                    prBar.setIndeterminate(false);
+                    setEnabledAll();
+                }
+            };
+            worker.execute();
+        } catch (Exception ex) {
+            txtalog.append(ex.getMessage());
+        }
     }//GEN-LAST:event_btAuthorCoAuthorActionPerformed
 
     private void btAuthorConferenceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btAuthorConferenceActionPerformed
-        // TODO add your handling code here:
+        try {
+            prBar.setIndeterminate(true);
+            txtalog.setText("Begin!\n");
+            this.setDisabledAll();
+            this.path = this.txtPath.getText();
+            final String user = txtUserName.getText();
+            final String pass = txtPassWord.getText();
+            final String database = txtDatabase.getText();
+            final int port = Integer.parseInt(txtPort.getText());
+            File file = new File(this.path);
+            if (!file.exists()) {
+                // It returns false if File or directory does not exist
+                txtalog.append("Directory you are searching does not exist : " + file.exists() + "\n");
+                this.setEnabledAll();
+                prBar.setIndeterminate(false);
+                return;
+            } else {
+                // It returns true if File or directory exists
+                txtalog.append("Directory you are searching does exist : " + file.exists() + "\n");
+                if (!"\\".equals(this.path.substring(this.path.length() - 1, this.path.length()))) {
+                    this.path += "\\";
+                    this.txtPath.setText(this.path);
+                }
+            }
+            // Delete folder
+            File indexDir = new File(this.path + IndexConst.AUTHOR_CONFERENCE_DIRECTORY_PATH);
+            if (indexDir.exists()) {
+                delete(indexDir);
+            }
+            // Connect Database
+            SwingWorker<String, Void> worker = new SwingWorker<String, Void>() {
+                @Override
+                protected String doInBackground() throws Exception {
+                    ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
+                    if (connectionPool.getConnection() == null) {
+                        txtalog.append("Error: Can not connect to database!\n");
+                    } else {
+                        txtalog.append("Connect database success!\nINDEX-AUTHOR-CONFERENCE is running \n");
+                        AuthorConfIndexer index = new AuthorConfIndexer(path);
+                        txtalog.append(index._run(connectionPool));
+                    }
+                    connectionPool.getConnection().close();
+                    connectionPool = null;
+                    return null;
+                }
+                
+                @Override
+                public void done() {
+                    txtalog.append("\nFinished!\n");
+                    prBar.setIndeterminate(false);
+                    setEnabledAll();
+                }
+            };
+            worker.execute();
+        } catch (Exception ex) {
+            txtalog.append(ex.getMessage());
+        }
     }//GEN-LAST:event_btAuthorConferenceActionPerformed
 
     private void btAuthorJournalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btAuthorJournalActionPerformed
-        // TODO add your handling code here:
+        try {
+            prBar.setIndeterminate(true);
+            txtalog.setText("Begin!\n");
+            this.setDisabledAll();
+            this.path = this.txtPath.getText();
+            final String user = txtUserName.getText();
+            final String pass = txtPassWord.getText();
+            final String database = txtDatabase.getText();
+            final int port = Integer.parseInt(txtPort.getText());
+            File file = new File(this.path);
+            if (!file.exists()) {
+                // It returns false if File or directory does not exist
+                txtalog.append("Directory you are searching does not exist : " + file.exists() + "\n");
+                this.setEnabledAll();
+                prBar.setIndeterminate(false);
+                return;
+            } else {
+                // It returns true if File or directory exists
+                txtalog.append("Directory you are searching does exist : " + file.exists() + "\n");
+                if (!"\\".equals(this.path.substring(this.path.length() - 1, this.path.length()))) {
+                    this.path += "\\";
+                    this.txtPath.setText(this.path);
+                }
+            }
+            // Delete folder
+            File indexDir = new File(this.path + IndexConst.AUTHOR_JOURNAL_DIRECTORY_PATH);
+            if (indexDir.exists()) {
+                delete(indexDir);
+            }
+            // Connect Database
+            SwingWorker<String, Void> worker = new SwingWorker<String, Void>() {
+                @Override
+                protected String doInBackground() throws Exception {
+                    ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
+                    if (connectionPool.getConnection() == null) {
+                        txtalog.append("Error: Can not connect to database!\n");
+                    } else {
+                        txtalog.append("Connect database success!\nINDEX-AUTHOR-JOURNAL is running \n");
+                        AuthorJournalIndexer index = new AuthorJournalIndexer(path);
+                        txtalog.append(index._run(connectionPool));
+                    }
+                    connectionPool.getConnection().close();
+                    connectionPool = null;
+                    return null;
+                }
+                
+                @Override
+                public void done() {
+                    txtalog.append("\nFinished!\n");
+                    prBar.setIndeterminate(false);
+                    setEnabledAll();
+                }
+            };
+            worker.execute();
+        } catch (Exception ex) {
+            txtalog.append(ex.getMessage());
+        }
     }//GEN-LAST:event_btAuthorJournalActionPerformed
 
     private void btAuthorKeywordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btAuthorKeywordActionPerformed
-        // TODO add your handling code here:
+        try {
+            prBar.setIndeterminate(true);
+            txtalog.setText("Begin!\n");
+            this.setDisabledAll();
+            this.path = this.txtPath.getText();
+            final String user = txtUserName.getText();
+            final String pass = txtPassWord.getText();
+            final String database = txtDatabase.getText();
+            final int port = Integer.parseInt(txtPort.getText());
+            File file = new File(this.path);
+            if (!file.exists()) {
+                // It returns false if File or directory does not exist
+                txtalog.append("Directory you are searching does not exist : " + file.exists() + "\n");
+                this.setEnabledAll();
+                prBar.setIndeterminate(false);
+                return;
+            } else {
+                // It returns true if File or directory exists
+                txtalog.append("Directory you are searching does exist : " + file.exists() + "\n");
+                if (!"\\".equals(this.path.substring(this.path.length() - 1, this.path.length()))) {
+                    this.path += "\\";
+                    this.txtPath.setText(this.path);
+                }
+            }
+            // Delete folder
+            File indexDir = new File(this.path + IndexConst.AUTHOR_KEYWORD_DIRECTORY_PATH);
+            if (indexDir.exists()) {
+                delete(indexDir);
+            }
+            // Connect Database
+            SwingWorker<String, Void> worker = new SwingWorker<String, Void>() {
+                @Override
+                protected String doInBackground() throws Exception {
+                    ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
+                    if (connectionPool.getConnection() == null) {
+                        txtalog.append("Error: Can not connect to database!\n");
+                    } else {
+                        txtalog.append("Connect database success!\nINDEX-AUTHOR-KEYWORD is running \n");
+                        AuthorKeyIndexer index = new AuthorKeyIndexer(path);
+                        txtalog.append(index._run(connectionPool));
+                    }
+                    connectionPool.getConnection().close();
+                    connectionPool = null;
+                    return null;
+                }
+                
+                @Override
+                public void done() {
+                    txtalog.append("\nFinished!\n");
+                    prBar.setIndeterminate(false);
+                    setEnabledAll();
+                }
+            };
+            worker.execute();
+        } catch (Exception ex) {
+            txtalog.append(ex.getMessage());
+        }
     }//GEN-LAST:event_btAuthorKeywordActionPerformed
 
     private void btConferenceKeywordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btConferenceKeywordActionPerformed
-        // TODO add your handling code here:
+        try {
+            prBar.setIndeterminate(true);
+            txtalog.setText("Begin!\n");
+            this.setDisabledAll();
+            this.path = this.txtPath.getText();
+            final String user = txtUserName.getText();
+            final String pass = txtPassWord.getText();
+            final String database = txtDatabase.getText();
+            final int port = Integer.parseInt(txtPort.getText());
+            File file = new File(this.path);
+            if (!file.exists()) {
+                // It returns false if File or directory does not exist
+                txtalog.append("Directory you are searching does not exist : " + file.exists() + "\n");
+                this.setEnabledAll();
+                prBar.setIndeterminate(false);
+                return;
+            } else {
+                // It returns true if File or directory exists
+                txtalog.append("Directory you are searching does exist : " + file.exists() + "\n");
+                if (!"\\".equals(this.path.substring(this.path.length() - 1, this.path.length()))) {
+                    this.path += "\\";
+                    this.txtPath.setText(this.path);
+                }
+            }
+            // Delete folder
+            File indexDir = new File(this.path + IndexConst.CONFERENCE_KEYWORD_DIRECTORY_PATH);
+            if (indexDir.exists()) {
+                delete(indexDir);
+                txtalog.append("Delete old INDEX file!\n");
+            }
+            // Connect Database
+            SwingWorker<String, Void> worker = new SwingWorker<String, Void>() {
+                @Override
+                protected String doInBackground() throws Exception {
+                    ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
+                    if (connectionPool.getConnection() == null) {
+                        txtalog.append("Error: Can not connect to database!\n");
+                    } else {
+                        txtalog.append("Connect database success!\nINDEX-CONFERENCE-KEYWORD is running \n");
+                        ConferenceKeyIndexer index = new ConferenceKeyIndexer(path);
+                        txtalog.append(index._run(connectionPool));
+                    }
+                    connectionPool.getConnection().close();
+                    connectionPool = null;
+                    return null;
+                }
+                
+                @Override
+                public void done() {
+                    txtalog.append("\nFinished!\n");
+                    prBar.setIndeterminate(false);
+                    setEnabledAll();
+                }
+            };
+            worker.execute();
+        } catch (Exception ex) {
+            txtalog.append(ex.getMessage());
+        }
     }//GEN-LAST:event_btConferenceKeywordActionPerformed
 
     private void btJournalKeywordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btJournalKeywordActionPerformed
-        // TODO add your handling code here:
+        try {
+            prBar.setIndeterminate(true);
+            txtalog.setText("Begin!\n");
+            this.setDisabledAll();
+            this.path = this.txtPath.getText();
+            final String user = txtUserName.getText();
+            final String pass = txtPassWord.getText();
+            final String database = txtDatabase.getText();
+            final int port = Integer.parseInt(txtPort.getText());
+            File file = new File(this.path);
+            if (!file.exists()) {
+                // It returns false if File or directory does not exist
+                txtalog.append("Directory you are searching does not exist : " + file.exists() + "\n");
+                this.setEnabledAll();
+                prBar.setIndeterminate(false);
+                return;
+            } else {
+                // It returns true if File or directory exists
+                txtalog.append("Directory you are searching does exist : " + file.exists() + "\n");
+                if (!"\\".equals(this.path.substring(this.path.length() - 1, this.path.length()))) {
+                    this.path += "\\";
+                    this.txtPath.setText(this.path);
+                }
+            }
+            // Delete folder
+            File indexDir = new File(this.path + IndexConst.JOURNAL_KEYWORD_DIRECTORY_PATH);
+            if (indexDir.exists()) {
+                delete(indexDir);
+                txtalog.append("Delete old INDEX file!\n");
+            }
+            // Connect Database
+            SwingWorker<String, Void> worker = new SwingWorker<String, Void>() {
+                @Override
+                protected String doInBackground() throws Exception {
+                    ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
+                    if (connectionPool.getConnection() == null) {
+                        txtalog.append("Error: Can not connect to database!\n");
+                    } else {
+                        txtalog.append("Connect database success!\nINDEX-JOURNAL-KEYWORD is running \n");
+                        JournalKeyIndexer index = new JournalKeyIndexer(path);
+                        txtalog.append(index._run(connectionPool));
+                    }
+                    connectionPool.getConnection().close();
+                    connectionPool = null;
+                    return null;
+                }
+                
+                @Override
+                public void done() {
+                    txtalog.append("\nFinished!\n");
+                    prBar.setIndeterminate(false);
+                    setEnabledAll();
+                }
+            };
+            worker.execute();
+        } catch (Exception ex) {
+            txtalog.append(ex.getMessage());
+        }
     }//GEN-LAST:event_btJournalKeywordActionPerformed
 
     private void btOrgKeywordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btOrgKeywordActionPerformed
-        // TODO add your handling code here:
+        try {
+            prBar.setIndeterminate(true);
+            txtalog.setText("Begin!\n");
+            this.setDisabledAll();
+            this.path = this.txtPath.getText();
+            final String user = txtUserName.getText();
+            final String pass = txtPassWord.getText();
+            final String database = txtDatabase.getText();
+            final int port = Integer.parseInt(txtPort.getText());
+            File file = new File(this.path);
+            if (!file.exists()) {
+                // It returns false if File or directory does not exist
+                txtalog.append("Directory you are searching does not exist : " + file.exists() + "\n");
+                this.setEnabledAll();
+                prBar.setIndeterminate(false);
+                return;
+            } else {
+                // It returns true if File or directory exists
+                txtalog.append("Directory you are searching does exist : " + file.exists() + "\n");
+                if (!"\\".equals(this.path.substring(this.path.length() - 1, this.path.length()))) {
+                    this.path += "\\";
+                    this.txtPath.setText(this.path);
+                }
+            }
+            // Delete folder
+            File indexDir = new File(this.path + IndexConst.ORG_KEYWORD_DIRECTORY_PATH);
+            if (indexDir.exists()) {
+                delete(indexDir);
+                txtalog.append("Delete old INDEX file!\n");
+            }
+            // Connect Database
+            SwingWorker<String, Void> worker = new SwingWorker<String, Void>() {
+                @Override
+                protected String doInBackground() throws Exception {
+                    ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
+                    if (connectionPool.getConnection() == null) {
+                        txtalog.append("Error: Can not connect to database!\n");
+                    } else {
+                        txtalog.append("Connect database success!\nINDEX-ORG-KEYWORD is running \n");
+                        OrgKeyIndexer index = new OrgKeyIndexer(path);
+                        txtalog.append(index._run(connectionPool));
+                    }
+                    connectionPool.getConnection().close();
+                    connectionPool = null;
+                    return null;
+                }
+                
+                @Override
+                public void done() {
+                    txtalog.append("\nFinished!\n");
+                    prBar.setIndeterminate(false);
+                    setEnabledAll();
+                }
+            };
+            worker.execute();
+        } catch (Exception ex) {
+            txtalog.append(ex.getMessage());
+        }
     }//GEN-LAST:event_btOrgKeywordActionPerformed
     
     public void setDisabledAll() {

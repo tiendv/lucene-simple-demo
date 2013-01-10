@@ -464,9 +464,9 @@ public class IndexBO {
      * querySearch
      */
     public LinkedHashMap<String, String> getListPublicationCitation(String path, String querySearch, int field) {
+        LinkedHashMap<String, String> out = null;
         try {
             IndexSearcher searcher = new IndexSearcher(getFSDirectory(path));
-            LinkedHashMap<String, String> out = null;
             BooleanQuery blQuery = new BooleanQuery();
             // querySearch
             if (field == 2) {// Conference
@@ -571,11 +571,10 @@ public class IndexBO {
                 out.put("listPublicationCitation", Common.OToS(listPublicationCitation));
             }
             searcher.close();
-            return out;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
-            return null;
         }
+        return out;
     }
 
     /**
