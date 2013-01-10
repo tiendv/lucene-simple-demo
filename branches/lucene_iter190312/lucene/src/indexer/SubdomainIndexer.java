@@ -5,7 +5,6 @@
 package indexer;
 
 import bo.IndexBO;
-import constant.Common;
 import constant.ConnectionPool;
 import constant.IndexConst;
 import database.SubdomainTB;
@@ -15,6 +14,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -23,7 +23,6 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.NumericField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
@@ -77,10 +76,9 @@ public class SubdomainIndexer {
      * @param indexDir: thư mục chứa file index
      * @return số doc thực hiện index
      */
-    private int _index(ConnectionPool connectionPool, File indexDir) throws IOException {
+    private int _index(ConnectionPool connectionPool, File indexDir) throws IOException, SQLException {
         int count = 0;
         IndexBO indexBO = new IndexBO();
-
         StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
         IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
         Directory directory = FSDirectory.open(indexDir);
@@ -147,12 +145,12 @@ public class SubdomainIndexer {
                 d = null;
                 dto = null;
             }
-            count = writer.numDocs();
             stmt.close();
-            connection.close();
+            count = writer.numDocs();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         } finally {
+            connection.close();
             writer.optimize();
             writer.close();
             directory.close();

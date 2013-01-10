@@ -41,7 +41,7 @@ import javax.swing.SwingWorker;
  * @author tiendv
  */
 public class MainIndexForm extends javax.swing.JFrame {
-    
+
     private String path = "E:\\";
     private Boolean aut = false;
     private Boolean con = false;
@@ -508,7 +508,7 @@ public class MainIndexForm extends javax.swing.JFrame {
             final String database = txtDatabase.getText();
             final int port = Integer.parseInt(txtPort.getText());
             File file = new File(this.path);
-            
+
             if (!file.exists()) {
                 // It returns false if File or directory does not exist
                 txtalog.append("Directory you are searching does not exist : " + file.exists() + "\n");
@@ -528,7 +528,7 @@ public class MainIndexForm extends javax.swing.JFrame {
             if (indexDir.exists()) {
                 delete(indexDir);
             }
-            
+
             SwingWorker<String, Void> worker = new SwingWorker<String, Void>() {
                 @Override
                 protected String doInBackground() throws Exception {
@@ -540,13 +540,13 @@ public class MainIndexForm extends javax.swing.JFrame {
                         PaperIndexer index = new PaperIndexer(path);
                         txtalog.append(index._run(connectionPool));
                         IndexPaper = true;
-                        
+
                     }
                     connectionPool.getConnection().close();
                     connectionPool = null;
                     return null;
                 }
-                
+
                 @Override
                 public void done() {
                     txtalog.append("\nFinished!\n");
@@ -559,7 +559,7 @@ public class MainIndexForm extends javax.swing.JFrame {
             txtalog.append(ex.getMessage());
         }
     }//GEN-LAST:event_btPaperIndexerActionPerformed
-    
+
     private void btRankPaperActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btRankPaperActionPerformed
         // TODO add your handling code here:
         try {
@@ -602,7 +602,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                     connectionPool = null;
                     return null;
                 }
-                
+
                 @Override
                 public void done() {
                     txtalog.append("\nFinished!\n");
@@ -615,7 +615,7 @@ public class MainIndexForm extends javax.swing.JFrame {
             txtalog.setText(ex.getMessage());
         }
     }//GEN-LAST:event_btRankPaperActionPerformed
-    
+
     private void btAuthorIndexerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btAuthorIndexerActionPerformed
         // TODO add your handling code here:
         try {
@@ -657,13 +657,13 @@ public class MainIndexForm extends javax.swing.JFrame {
                         txtalog.append("Connect database success!\nINDEX-AUTHOR is running \n");
                         AuthorIndexer index = new AuthorIndexer(path);
                         txtalog.append(index._run(connectionPool));
-                        aut=true;
+                        aut = true;
                     }
                     connectionPool.getConnection().close();
                     connectionPool = null;
                     return null;
                 }
-                
+
                 @Override
                 public void done() {
                     txtalog.append("\nFinished!\n");
@@ -676,7 +676,7 @@ public class MainIndexForm extends javax.swing.JFrame {
             txtalog.append(ex.getMessage());
         }
     }//GEN-LAST:event_btAuthorIndexerActionPerformed
-    
+
     private void btConferenceIndexerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btConferenceIndexerActionPerformed
         // TODO add your handling code here:
         try {
@@ -718,13 +718,13 @@ public class MainIndexForm extends javax.swing.JFrame {
                         txtalog.append("Connect database success!\nINDEX-CONFERENCE is running \n");
                         ConferenceIndexer index = new ConferenceIndexer(path);
                         txtalog.append(index._run(connectionPool));
-                        con=true;
+                        con = true;
                     }
                     connectionPool.getConnection().close();
                     connectionPool = null;
                     return null;
                 }
-                
+
                 @Override
                 public void done() {
                     txtalog.append("\nFinished!\n");
@@ -737,7 +737,7 @@ public class MainIndexForm extends javax.swing.JFrame {
             txtalog.append(ex.getMessage());
         }
     }//GEN-LAST:event_btConferenceIndexerActionPerformed
-    
+
     private void btJournalIndexerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btJournalIndexerActionPerformed
         // TODO add your handling code here:
         try {
@@ -785,7 +785,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                     connectionPool = null;
                     return null;
                 }
-                
+
                 @Override
                 public void done() {
                     txtalog.append("\nFinished!\n");
@@ -798,7 +798,7 @@ public class MainIndexForm extends javax.swing.JFrame {
             txtalog.setText(ex.getMessage());
         }
     }//GEN-LAST:event_btJournalIndexerActionPerformed
-    
+
     private void btKeywordIndexerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btKeywordIndexerActionPerformed
         // TODO add your handling code here:
         try {
@@ -846,7 +846,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                     connectionPool = null;
                     return null;
                 }
-                
+
                 @Override
                 public void done() {
                     txtalog.append("\nFinished!\n");
@@ -859,7 +859,7 @@ public class MainIndexForm extends javax.swing.JFrame {
             txtalog.setText(ex.getMessage());
         }
     }//GEN-LAST:event_btKeywordIndexerActionPerformed
-    
+
     private void btOrgIndexerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btOrgIndexerActionPerformed
         // TODO add your handling code here:
         try {
@@ -907,7 +907,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                     connectionPool = null;
                     return null;
                 }
-                
+
                 @Override
                 public void done() {
                     prBar.setIndeterminate(false);
@@ -920,7 +920,7 @@ public class MainIndexForm extends javax.swing.JFrame {
             txtalog.setText(ex.getMessage());
         }
     }//GEN-LAST:event_btOrgIndexerActionPerformed
-    
+
     private void btSubdomainIndexerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btSubdomainIndexerActionPerformed
         // TODO add your handling code here:
         try {
@@ -967,7 +967,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                     connectionPool = null;
                     return null;
                 }
-                
+
                 @Override
                 public void done() {
                     txtalog.append("\nFinished!\n");
@@ -980,7 +980,7 @@ public class MainIndexForm extends javax.swing.JFrame {
             txtalog.setText(ex.getMessage());
         }
     }//GEN-LAST:event_btSubdomainIndexerActionPerformed
-    
+
     private void btCcidfIndexerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btCcidfIndexerActionPerformed
         // TODO add your handling code here:
         try {
@@ -1028,7 +1028,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                     connectionPool = null;
                     return null;
                 }
-                
+
                 @Override
                 public void done() {
                     txtalog.append("\nFinished!\n");
@@ -1041,7 +1041,7 @@ public class MainIndexForm extends javax.swing.JFrame {
             txtalog.setText(ex.getMessage());
         }
     }//GEN-LAST:event_btCcidfIndexerActionPerformed
-    
+
     private void btRankAuthorIndexerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btRankAuthorIndexerActionPerformed
         // TODO add your handling code here:
         try {
@@ -1076,21 +1076,19 @@ public class MainIndexForm extends javax.swing.JFrame {
             SwingWorker<String, Void> worker = new SwingWorker<String, Void>() {
                 @Override
                 protected String doInBackground() throws Exception {
-                    _RankAuthorIndexer index = new _RankAuthorIndexer(user, pass, database, port, path);
-                    if (index.folder && index.connect) {
-                        txtalog.append("Connect database success!\nINDEX-RANK-AUTHOR is running \n");
-                        txtalog.append(index._run());
+                    ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
+                    if (connectionPool.getConnection() == null) {
+                        txtalog.append("Error: Can not connect to database!\n");
                     } else {
-                        if (!index.folder) {
-                            txtalog.append("Error: Can not connect to folder!\n");
-                        }
-                        if (!index.connect) {
-                            txtalog.append("Error: Can not connect to database!\n");
-                        }
+                        txtalog.append("Connect database success!\nINDEX-RANK-AUTHOR is running \n");
+                        _RankAuthorIndexer index = new _RankAuthorIndexer(path);
+                        txtalog.append(index._run(connectionPool));
                     }
+                    connectionPool.getConnection().close();
+                    connectionPool = null;
                     return null;
                 }
-                
+
                 @Override
                 public void done() {
                     txtalog.append("\nFinished!\n");
@@ -1103,7 +1101,7 @@ public class MainIndexForm extends javax.swing.JFrame {
             txtalog.setText(ex.getMessage());
         }
     }//GEN-LAST:event_btRankAuthorIndexerActionPerformed
-    
+
     private void btRankConfIndexerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btRankConfIndexerActionPerformed
         // TODO add your handling code here:
         try {
@@ -1138,21 +1136,19 @@ public class MainIndexForm extends javax.swing.JFrame {
             SwingWorker<String, Void> worker = new SwingWorker<String, Void>() {
                 @Override
                 protected String doInBackground() throws Exception {
-                    _RankConfIndexer index = new _RankConfIndexer(user, pass, database, port, path);
-                    if (index.folder && index.connect) {
-                        txtalog.append("Connect database success!\nINDEX-RANK-CONFERENCE is running \n");
-                        txtalog.append(index._run());
+                    ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
+                    if (connectionPool.getConnection() == null) {
+                        txtalog.append("Error: Can not connect to database!\n");
                     } else {
-                        if (!index.folder) {
-                            txtalog.append("Error: Can not connect to folder!\n");
-                        }
-                        if (!index.connect) {
-                            txtalog.append("Error: Can not connect to database!\n");
-                        }
+                        txtalog.append("Connect database success!\nINDEX-RANK-CONFERENCE is running \n");
+                        _RankConfIndexer index = new _RankConfIndexer(path);
+                        txtalog.append(index._run(connectionPool));
                     }
+                    connectionPool.getConnection().close();
+                    connectionPool = null;
                     return null;
                 }
-                
+
                 @Override
                 public void done() {
                     txtalog.append("\nFinished!\n");
@@ -1165,7 +1161,7 @@ public class MainIndexForm extends javax.swing.JFrame {
             txtalog.setText(ex.getMessage());
         }
     }//GEN-LAST:event_btRankConfIndexerActionPerformed
-    
+
     private void btRankJournalIndexerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btRankJournalIndexerActionPerformed
         // TODO add your handling code here:
         try {
@@ -1200,21 +1196,19 @@ public class MainIndexForm extends javax.swing.JFrame {
             SwingWorker<String, Void> worker = new SwingWorker<String, Void>() {
                 @Override
                 protected String doInBackground() throws Exception {
-                    _RankJournalIndexer index = new _RankJournalIndexer(user, pass, database, port, path);
-                    if (index.folder && index.connect) {
-                        txtalog.append("Connect database success!\nINDEX-RANK-JOURNAL is running \n");
-                        txtalog.append(index._run());
+                    ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
+                    if (connectionPool.getConnection() == null) {
+                        txtalog.append("Error: Can not connect to database!\n");
                     } else {
-                        if (!index.folder) {
-                            txtalog.append("Error: Can not connect to folder!\n");
-                        }
-                        if (!index.connect) {
-                            txtalog.append("Error: Can not connect to database!\n");
-                        }
+                        txtalog.append("Connect database success!\nINDEX-RANK-JOURNAL is running \n");
+                        _RankJournalIndexer index = new _RankJournalIndexer(path);
+                        txtalog.append(index._run(connectionPool));
                     }
+                    connectionPool.getConnection().close();
+                    connectionPool = null;
                     return null;
                 }
-                
+
                 @Override
                 public void done() {
                     txtalog.append("\nFinished!\n");
@@ -1227,7 +1221,7 @@ public class MainIndexForm extends javax.swing.JFrame {
             txtalog.setText(ex.getMessage());
         }
     }//GEN-LAST:event_btRankJournalIndexerActionPerformed
-    
+
     private void btRankKeyIndexerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btRankKeyIndexerActionPerformed
         // TODO add your handling code here:
         try {
@@ -1262,21 +1256,19 @@ public class MainIndexForm extends javax.swing.JFrame {
             SwingWorker<String, Void> worker = new SwingWorker<String, Void>() {
                 @Override
                 protected String doInBackground() throws Exception {
-                    _RankKeyIndexer index = new _RankKeyIndexer(user, pass, database, port, path);
-                    if (index.folder && index.connect) {
-                        txtalog.append("Connect database success!\nINDEX-RANK-KEYWORD is running \n");
-                        txtalog.append(index._run());
+                    ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
+                    if (connectionPool.getConnection() == null) {
+                        txtalog.append("Error: Can not connect to database!\n");
                     } else {
-                        if (!index.folder) {
-                            txtalog.append("Error: Can not connect to folder!\n");
-                        }
-                        if (!index.connect) {
-                            txtalog.append("Error: Can not connect to database!\n");
-                        }
+                        txtalog.append("Connect database success!\nINDEX-RANK-KEYWORD is running \n");
+                        _RankKeyIndexer index = new _RankKeyIndexer(path);
+                        txtalog.append(index._run(connectionPool));
                     }
+                    connectionPool.getConnection().close();
+                    connectionPool = null;
                     return null;
                 }
-                
+
                 @Override
                 public void done() {
                     txtalog.append("\nFinished!\n");
@@ -1289,7 +1281,7 @@ public class MainIndexForm extends javax.swing.JFrame {
             txtalog.setText(ex.getMessage());
         }
     }//GEN-LAST:event_btRankKeyIndexerActionPerformed
-    
+
     private void btRankOrgIndexerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btRankOrgIndexerActionPerformed
         // TODO add your handling code here:
         try {
@@ -1324,21 +1316,19 @@ public class MainIndexForm extends javax.swing.JFrame {
             SwingWorker<String, Void> worker = new SwingWorker<String, Void>() {
                 @Override
                 protected String doInBackground() throws Exception {
-                    _RankOrgIndexer index = new _RankOrgIndexer(user, pass, database, port, path);
-                    if (index.folder && index.connect) {
-                        txtalog.append("Connect database success!\nINDEX-RANK-ORGANIZATION is running \n");
-                        txtalog.append(index._run());
+                    ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
+                    if (connectionPool.getConnection() == null) {
+                        txtalog.append("Error: Can not connect to database!\n");
                     } else {
-                        if (!index.folder) {
-                            txtalog.append("Error: Can not connect to folder!\n");
-                        }
-                        if (!index.connect) {
-                            txtalog.append("Error: Can not connect to database!\n");
-                        }
+                        txtalog.append("Connect database success!\nINDEX-RANK-ORGANIZATION is running \n");
+                        _RankOrgIndexer index = new _RankOrgIndexer(path);
+                        txtalog.append(index._run(connectionPool));
                     }
+                    connectionPool.getConnection().close();
+                    connectionPool = null;
                     return null;
                 }
-                
+
                 @Override
                 public void done() {
                     txtalog.append("\nFinished!\n");
@@ -1351,7 +1341,7 @@ public class MainIndexForm extends javax.swing.JFrame {
             txtalog.setText(ex.getMessage());
         }
     }//GEN-LAST:event_btRankOrgIndexerActionPerformed
-    
+
     private void btAutocompleteIndexerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btAutocompleteIndexerActionPerformed
         // TODO add your handling code here:
 
@@ -1392,7 +1382,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                     txtalog.append(Index._run());
                     return null;
                 }
-                
+
                 @Override
                 public void done() {
                     txtalog.append("\nFinished!\n");
@@ -1404,9 +1394,9 @@ public class MainIndexForm extends javax.swing.JFrame {
         } catch (IOException ex) {
             Logger.getLogger(MainIndexForm.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
     }//GEN-LAST:event_btAutocompleteIndexerActionPerformed
-    
+
     private void btCheckSpellIndexerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btCheckSpellIndexerActionPerformed
         // TODO add your handling code here:
         try {
@@ -1446,7 +1436,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                     txtalog.append(Index._run());
                     return null;
                 }
-                
+
                 @Override
                 public void done() {
                     txtalog.append("\nFinished!\n");
@@ -1459,7 +1449,7 @@ public class MainIndexForm extends javax.swing.JFrame {
             Logger.getLogger(MainIndexForm.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_btCheckSpellIndexerActionPerformed
-    
+
     private void btAutoRunActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btAutoRunActionPerformed
         // TODO add your handling code here:
         try {
@@ -1490,7 +1480,7 @@ public class MainIndexForm extends javax.swing.JFrame {
             SwingWorker<String, Void> Index = new SwingWorker<String, Void>() {
                 @Override
                 protected String doInBackground() throws Exception {
-                    
+
                     //Create table RankPaper
                     ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
                     if (connectionPool.getConnection() == null) {
@@ -1501,12 +1491,12 @@ public class MainIndexForm extends javax.swing.JFrame {
                         //_Rank_Paper rank = new _Rank_Paper();
                         //txtalog.append(rank._run(connectionPool));
                         rankPaper = true;
-                     txtalog.append("\nRank Paper is finished!");
+                        txtalog.append("\nRank Paper is finished!");
                         txtalog.append("\n-----------------------------------------------------------------------\n");
                     }
                     connectionPool.getConnection().close();
                     connectionPool = null;
-                    
+
                     //Create INDEX-PAPER
                     File indexDir = new File(path + IndexConst.PAPER_INDEX_PATH);
                     if (indexDir.exists()) {
@@ -1562,7 +1552,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                         ConferenceIndexer index = new ConferenceIndexer(path);
                         txtalog.append(index._run(connectionPool));
                         con = true;
-                        txtalog.append("\nINDEX-CONFERENCE is finished!");                        
+                        txtalog.append("\nINDEX-CONFERENCE is finished!");
                     }
                     txtalog.append("\n-----------------------------------------------------------------------\n");
                     connectionPool.getConnection().close();
@@ -1582,7 +1572,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                         JournalIndexer index = new JournalIndexer(path);
                         txtalog.append(index._run(connectionPool));
                         jou = true;
-                        txtalog.append("\nINDEX-JOURNAL is finished!");                        
+                        txtalog.append("\nINDEX-JOURNAL is finished!");
                     }
                     txtalog.append("\n-----------------------------------------------------------------------\n");
                     connectionPool.getConnection().close();
@@ -1603,7 +1593,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                         OrgIndexer index = new OrgIndexer(path);
                         txtalog.append(index._run(connectionPool));
                         org = true;
-                        txtalog.append("\nINDEX-ORGANIZATION is finished!");                        
+                        txtalog.append("\nINDEX-ORGANIZATION is finished!");
                     }
                     txtalog.append("\n-----------------------------------------------------------------------\n");
                     connectionPool.getConnection().close();
@@ -1624,7 +1614,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                         KeywordIndexer index = new KeywordIndexer(path);
                         txtalog.append(index._run(connectionPool));
                         key = true;
-                        txtalog.append("\nINDEX-KEYWORD is finished!");                        
+                        txtalog.append("\nINDEX-KEYWORD is finished!");
                     }
                     txtalog.append("\n-----------------------------------------------------------------------\n");
                     connectionPool.getConnection().close();
@@ -1644,12 +1634,12 @@ public class MainIndexForm extends javax.swing.JFrame {
                         txtalog.append("Connect database success!\nINDEX-SUBDOMAIN is running \n");
                         SubdomainIndexer index = new SubdomainIndexer(path);
                         txtalog.append(index._run(connectionPool));
-                        txtalog.append("\nINDEX-SUBDOMAIN is finished!");                        
+                        txtalog.append("\nINDEX-SUBDOMAIN is finished!");
                     }
                     txtalog.append("\n-----------------------------------------------------------------------\n");
                     connectionPool.getConnection().close();
                     connectionPool = null;
-                    
+
                     //INDEX-AUTHOR-CITATION
                     indexDir = new File(path + IndexConst.AUTHOR_CITATION_DIRECTORY_PATH);
                     if (indexDir.exists()) {
@@ -1663,12 +1653,12 @@ public class MainIndexForm extends javax.swing.JFrame {
                         txtalog.append("Connect database success!\nINDEX-AUTHOR-CITATION is running \n");
                         AuthorCitationIndexer index = new AuthorCitationIndexer(path);
                         txtalog.append(index._run(connectionPool));
-                        txtalog.append("\nINDEX-AUTHOR-CITATION is finished!");  
+                        txtalog.append("\nINDEX-AUTHOR-CITATION is finished!");
                     }
                     txtalog.append("\n-----------------------------------------------------------------------\n");
                     connectionPool.getConnection().close();
                     connectionPool = null;
-                    
+
                     //INDEX-AUTHOR-KEYWORD
                     indexDir = new File(path + IndexConst.AUTHOR_KEYWORD_DIRECTORY_PATH);
                     if (indexDir.exists()) {
@@ -1682,12 +1672,12 @@ public class MainIndexForm extends javax.swing.JFrame {
                         txtalog.append("Connect database success!\nINDEX-AUTHOR-KEYWORD is running \n");
                         AuthorKeyIndexer index = new AuthorKeyIndexer(path);
                         txtalog.append(index._run(connectionPool));
-                        txtalog.append("\nINDEX-AUTHOR-KEYWORD is finished!");  
+                        txtalog.append("\nINDEX-AUTHOR-KEYWORD is finished!");
                     }
                     txtalog.append("\n-----------------------------------------------------------------------\n");
                     connectionPool.getConnection().close();
                     connectionPool = null;
-                    
+
                     //INDEX-AUTHOR-CoAUTHOR
                     indexDir = new File(path + IndexConst.AUTHOR_COAUTHOR_DIRECTORY_PATH);
                     if (indexDir.exists()) {
@@ -1701,12 +1691,12 @@ public class MainIndexForm extends javax.swing.JFrame {
                         txtalog.append("Connect database success!\nINDEX-AUTHOR-COAUTHOR is running \n");
                         AuthorCoAuthorIndexer index = new AuthorCoAuthorIndexer(path);
                         txtalog.append(index._run(connectionPool));
-                        txtalog.append("\nINDEX-AUTHOR-COAUTHOR is finished!");  
+                        txtalog.append("\nINDEX-AUTHOR-COAUTHOR is finished!");
                     }
                     txtalog.append("\n-----------------------------------------------------------------------\n");
                     connectionPool.getConnection().close();
                     connectionPool = null;
-                    
+
                     //INDEX-AUTHOR-CONFERENCE
                     indexDir = new File(path + IndexConst.AUTHOR_CONFERENCE_DIRECTORY_PATH);
                     if (indexDir.exists()) {
@@ -1720,12 +1710,12 @@ public class MainIndexForm extends javax.swing.JFrame {
                         txtalog.append("Connect database success!\nINDEX-AUTHOR-CONFERENCE is running \n");
                         AuthorConfIndexer index = new AuthorConfIndexer(path);
                         txtalog.append(index._run(connectionPool));
-                        txtalog.append("\nINDEX-AUTHOR-CONFERENCE is finished!");  
+                        txtalog.append("\nINDEX-AUTHOR-CONFERENCE is finished!");
                     }
                     txtalog.append("\n-----------------------------------------------------------------------\n");
                     connectionPool.getConnection().close();
                     connectionPool = null;
-                    
+
                     //INDEX-AUTHOR-JOURNAL
                     indexDir = new File(path + IndexConst.AUTHOR_JOURNAL_DIRECTORY_PATH);
                     if (indexDir.exists()) {
@@ -1739,12 +1729,12 @@ public class MainIndexForm extends javax.swing.JFrame {
                         txtalog.append("Connect database success!\nINDEX-AUTHOR-JOURNAL is running \n");
                         AuthorJournalIndexer index = new AuthorJournalIndexer(path);
                         txtalog.append(index._run(connectionPool));
-                        txtalog.append("\nINDEX-AUTHOR-JOURNAL is finished!");  
+                        txtalog.append("\nINDEX-AUTHOR-JOURNAL is finished!");
                     }
                     txtalog.append("\n-----------------------------------------------------------------------\n");
                     connectionPool.getConnection().close();
                     connectionPool = null;
-                    
+
                     //INDEX-CONFERENCE-KEYWORD
                     indexDir = new File(path + IndexConst.CONFERENCE_KEYWORD_DIRECTORY_PATH);
                     if (indexDir.exists()) {
@@ -1758,12 +1748,12 @@ public class MainIndexForm extends javax.swing.JFrame {
                         txtalog.append("Connect database success!\nINDEX-CONFERENCE-KEYWORD is running \n");
                         ConferenceKeyIndexer index = new ConferenceKeyIndexer(path);
                         txtalog.append(index._run(connectionPool));
-                        txtalog.append("\nINDEX-CONFERENCE-KEYWORD is finished!");  
+                        txtalog.append("\nINDEX-CONFERENCE-KEYWORD is finished!");
                     }
                     txtalog.append("\n-----------------------------------------------------------------------\n");
                     connectionPool.getConnection().close();
                     connectionPool = null;
-                    
+
                     //INDEX-JOURNAL-KEYWORD
                     indexDir = new File(path + IndexConst.JOURNAL_KEYWORD_DIRECTORY_PATH);
                     if (indexDir.exists()) {
@@ -1777,12 +1767,12 @@ public class MainIndexForm extends javax.swing.JFrame {
                         txtalog.append("Connect database success!\nINDEX-JOURNAL-KEYWORD is running \n");
                         JournalKeyIndexer index = new JournalKeyIndexer(path);
                         txtalog.append(index._run(connectionPool));
-                        txtalog.append("\nINDEX-JOURNAL-KEYWORD is finished!");  
+                        txtalog.append("\nINDEX-JOURNAL-KEYWORD is finished!");
                     }
                     txtalog.append("\n-----------------------------------------------------------------------\n");
                     connectionPool.getConnection().close();
                     connectionPool = null;
-                    
+
                     //INDEX-ORG-KEYWORD
                     indexDir = new File(path + IndexConst.ORG_KEYWORD_DIRECTORY_PATH);
                     if (indexDir.exists()) {
@@ -1796,32 +1786,31 @@ public class MainIndexForm extends javax.swing.JFrame {
                         txtalog.append("Connect database success!\nINDEX-ORG-KEYWORD is running \n");
                         OrgKeyIndexer index = new OrgKeyIndexer(path);
                         txtalog.append(index._run(connectionPool));
-                        txtalog.append("\nINDEX-ORG-KEYWORD is finished!");  
+                        txtalog.append("\nINDEX-ORG-KEYWORD is finished!");
                     }
                     txtalog.append("\n-----------------------------------------------------------------------\n");
                     connectionPool.getConnection().close();
                     connectionPool = null;
-                    
+
                     //INDEX-RANK-AUTHOR
                     indexDir = new File(path + IndexConst.RANK_AUTHOR_INDEX_PATH);
                     if (indexDir.exists()) {
                         delete(indexDir);
                     }
+                    // Connect Database
                     txtalog.append("\n------------------INDEX-RANK-AUTHOR----------------------\n");
-                    _RankAuthorIndexer indexRankAuthor = new _RankAuthorIndexer(user, pass, database, port, path);
-                    if (indexRankAuthor.folder && indexRankAuthor.connect) {
-                        txtalog.append("Connect database success!\nINDEX-RANK-AUTHOR is running \n");
-                        txtalog.append(indexRankAuthor._run());
-                        txtalog.append("\nINDEX-RANK-AUTHOR is finished!");
+                    connectionPool = new ConnectionPool(user, pass, database, port);
+                    if (connectionPool.getConnection() == null) {
+                        txtalog.append("Error: Can not connect to database!\n");
                     } else {
-                        if (!indexRankAuthor.folder) {
-                            txtalog.append("\nError: Can not connect to folder!");
-                        }
-                        if (!indexRankAuthor.connect) {
-                            txtalog.append("\nError: Can not connect to database!");
-                        }
+                        txtalog.append("Connect database success!\nINDEX-RANK-AUTHOR is running \n");
+                        _RankAuthorIndexer index = new _RankAuthorIndexer(path);
+                        txtalog.append(index._run(connectionPool));
+                        txtalog.append("\nINDEX-RANK-AUTHOR is finished!");
                     }
                     txtalog.append("\n-----------------------------------------------------------------------\n");
+                    connectionPool.getConnection().close();
+                    connectionPool = null;
 
                     //INDEX-RANK-CONFERENCE
                     // Delete folder
@@ -1831,21 +1820,18 @@ public class MainIndexForm extends javax.swing.JFrame {
                     }
                     // Index
                     txtalog.append("\n-------------INDEX-RANK-CONFERENCE------------------\n");
-                    _RankConfIndexer indexRankConf = new _RankConfIndexer(user, pass, database, port, path);
-                    if (indexRankConf.folder && indexRankConf.connect) {
-                        txtalog.append("Connect database success!\nINDEX-RANK-CONFERENCE is running \n");
-                        txtalog.append(indexRankConf._run());
-                        txtalog.append("\nINDEX-RANK-CONFERENCE is finished!");
+                    connectionPool = new ConnectionPool(user, pass, database, port);
+                    if (connectionPool.getConnection() == null) {
+                        txtalog.append("Error: Can not connect to database!\n");
                     } else {
-                        if (!indexRankConf.folder) {
-                            txtalog.append("\nError: Can not connect to folder!");
-                        }
-                        if (!indexRankConf.connect) {
-                            txtalog.append("\nError: Can not connect to database!");
-                        }
+                        txtalog.append("Connect database success!\nINDEX-RANK-CONFERENCE is running \n");
+                        _RankConfIndexer index = new _RankConfIndexer(path);
+                        txtalog.append(index._run(connectionPool));
+                        txtalog.append("\nINDEX-RANK-CONFERENCE is finished!");
                     }
+                    connectionPool.getConnection().close();
+                    connectionPool = null;
                     txtalog.append("\n-----------------------------------------------------------------------\n");
-
 
                     //INDEX-RANK-JOURNAL
                     // Delete folder
@@ -1855,19 +1841,17 @@ public class MainIndexForm extends javax.swing.JFrame {
                     }
                     // Index
                     txtalog.append("\n------------------INDEX-RANK-JOURNAL--------------------\n");
-                    _RankJournalIndexer indexRankJournal = new _RankJournalIndexer(user, pass, database, port, path);
-                    if (indexRankJournal.folder && indexRankJournal.connect) {
-                        txtalog.append("Connect database success!\nINDEX-RANK-JOURNAL is running \n");
-                        txtalog.append(indexRankJournal._run());
-                        txtalog.append("\nINDEX-RANK-JOURNAL is finished!");
+                    connectionPool = new ConnectionPool(user, pass, database, port);
+                    if (connectionPool.getConnection() == null) {
+                        txtalog.append("Error: Can not connect to database!\n");
                     } else {
-                        if (!indexRankJournal.folder) {
-                            txtalog.append("\nError: Can not connect to folder!");
-                        }
-                        if (!indexRankJournal.connect) {
-                            txtalog.append("\nError: Can not connect to database!");
-                        }
+                        txtalog.append("Connect database success!\nINDEX-RANK-JOURNAL is running \n");
+                        _RankJournalIndexer index = new _RankJournalIndexer(path);
+                        txtalog.append(index._run(connectionPool));
+                        txtalog.append("\nINDEX-RANK-JOURNAL is finished!");
                     }
+                    connectionPool.getConnection().close();
+                    connectionPool = null;
                     txtalog.append("\n-----------------------------------------------------------------------\n");
 
                     //INDEX-RANK-ORGANIZATION
@@ -1877,19 +1861,17 @@ public class MainIndexForm extends javax.swing.JFrame {
                     }
                     // Index
                     txtalog.append("\n--------------INDEX-RANK-ORGANIZATION----------------\n");
-                    _RankOrgIndexer indexRankOrg = new _RankOrgIndexer(user, pass, database, port, path);
-                    if (indexRankOrg.folder && indexRankOrg.connect) {
-                        txtalog.append("Connect database success!\nINDEX-RANK-ORGANIZATION is running \n");
-                        txtalog.append(indexRankOrg._run());
-                        txtalog.append("\nINDEX-RANK-ORGANIZATION is finished!");
+                    connectionPool = new ConnectionPool(user, pass, database, port);
+                    if (connectionPool.getConnection() == null) {
+                        txtalog.append("Error: Can not connect to database!\n");
                     } else {
-                        if (!indexRankOrg.folder) {
-                            txtalog.append("\nError: Can not connect to folder!");
-                        }
-                        if (!indexRankOrg.connect) {
-                            txtalog.append("\nError: Can not connect to database!");
-                        }
+                        txtalog.append("Connect database success!\nINDEX-RANK-ORGANIZATION is running \n");
+                        _RankOrgIndexer index = new _RankOrgIndexer(path);
+                        txtalog.append(index._run(connectionPool));
+                        txtalog.append("\nINDEX-RANK-ORGANIZATION is finished!");
                     }
+                    connectionPool.getConnection().close();
+                    connectionPool = null;
                     txtalog.append("\n-----------------------------------------------------------------------\n");
 
 
@@ -1900,19 +1882,17 @@ public class MainIndexForm extends javax.swing.JFrame {
                     }
                     // Index
                     txtalog.append("\n-----------------INDEX-RANK-KEYWORD--------------------\n");
-                    _RankKeyIndexer indexRankKeyword = new _RankKeyIndexer(user, pass, database, port, path);
-                    if (indexRankKeyword.folder && indexRankKeyword.connect) {
-                        txtalog.append("Connect database success!\nINDEX-RANK-KEYWORD is running \n");
-                        txtalog.append(indexRankKeyword._run());
-                        txtalog.append("\nINDEX-RANK-KEYWORD is finished!");
+                    connectionPool = new ConnectionPool(user, pass, database, port);
+                    if (connectionPool.getConnection() == null) {
+                        txtalog.append("Error: Can not connect to database!\n");
                     } else {
-                        if (!indexRankKeyword.folder) {
-                            txtalog.append("\nError: Can not connect to folder!");
-                        }
-                        if (!indexRankKeyword.connect) {
-                            txtalog.append("\nError: Can not connect to database!");
-                        }
+                        txtalog.append("Connect database success!\nINDEX-RANK-KEYWORD is running \n");
+                        _RankKeyIndexer index = new _RankKeyIndexer(path);
+                        txtalog.append(index._run(connectionPool));
+                        txtalog.append("\nINDEX-RANK-KEYWORD is finished!");
                     }
+                    connectionPool.getConnection().close();
+                    connectionPool = null;
                     txtalog.append("\n-----------------------------------------------------------------------\n");
 
 
@@ -1946,7 +1926,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                     //return
                     return null;
                 }
-                
+
                 @Override
                 public void done() {
                     prBar.setIndeterminate(false);
@@ -1961,7 +1941,7 @@ public class MainIndexForm extends javax.swing.JFrame {
     }//GEN-LAST:event_btAutoRunActionPerformed
 
     private void btAuthorCitationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btAuthorCitationActionPerformed
-      try {
+        try {
             prBar.setIndeterminate(true);
             txtalog.setText("Begin!\n");
             this.setDisabledAll();
@@ -2006,7 +1986,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                     connectionPool = null;
                     return null;
                 }
-                
+
                 @Override
                 public void done() {
                     txtalog.append("\nFinished!\n");
@@ -2066,7 +2046,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                     connectionPool = null;
                     return null;
                 }
-                
+
                 @Override
                 public void done() {
                     txtalog.append("\nFinished!\n");
@@ -2126,7 +2106,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                     connectionPool = null;
                     return null;
                 }
-                
+
                 @Override
                 public void done() {
                     txtalog.append("\nFinished!\n");
@@ -2186,7 +2166,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                     connectionPool = null;
                     return null;
                 }
-                
+
                 @Override
                 public void done() {
                     txtalog.append("\nFinished!\n");
@@ -2246,7 +2226,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                     connectionPool = null;
                     return null;
                 }
-                
+
                 @Override
                 public void done() {
                     txtalog.append("\nFinished!\n");
@@ -2307,7 +2287,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                     connectionPool = null;
                     return null;
                 }
-                
+
                 @Override
                 public void done() {
                     txtalog.append("\nFinished!\n");
@@ -2368,7 +2348,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                     connectionPool = null;
                     return null;
                 }
-                
+
                 @Override
                 public void done() {
                     txtalog.append("\nFinished!\n");
@@ -2429,7 +2409,7 @@ public class MainIndexForm extends javax.swing.JFrame {
                     connectionPool = null;
                     return null;
                 }
-                
+
                 @Override
                 public void done() {
                     txtalog.append("\nFinished!\n");
@@ -2442,7 +2422,7 @@ public class MainIndexForm extends javax.swing.JFrame {
             txtalog.append(ex.getMessage());
         }
     }//GEN-LAST:event_btOrgKeywordActionPerformed
-    
+
     public void setDisabledAll() {
         this.btAuthorIndexer.setEnabled(false);
         this.btConferenceIndexer.setEnabled(false);
@@ -2476,14 +2456,14 @@ public class MainIndexForm extends javax.swing.JFrame {
         this.btJournalKeyword.setEnabled(false);
         this.btOrgKeyword.setEnabled(false);
     }
-    
+
     public void setEnabledAll() {
         this.txtDatabase.setEditable(true);
         this.txtPassWord.setEditable(true);
         this.txtPath.setEditable(true);
         this.txtPort.setEditable(true);
         this.txtUserName.setEditable(true);
-        
+
         this.btAuthorCitation.setEnabled(true);
         this.btAuthorCoAuthor.setEnabled(true);
         this.btAuthorConference.setEnabled(true);
@@ -2528,7 +2508,7 @@ public class MainIndexForm extends javax.swing.JFrame {
             btAutocompleteIndexer.setEnabled(true);
         }
     }
-    
+
     public static void delete(File file) throws IOException {
         if (file.isDirectory()) {
             //directory is empty, then delete it

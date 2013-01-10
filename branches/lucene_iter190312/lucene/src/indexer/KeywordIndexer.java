@@ -78,7 +78,7 @@ public class KeywordIndexer {
      * @param indexDir: thư mục lưu trữ file index
      * @return số doc thực hiện index
      */
-    private int _index(ConnectionPool connectionPool, File indexDir) throws IOException {
+    private int _index(ConnectionPool connectionPool, File indexDir) throws IOException, SQLException {
         int count = 0;
         IndexBO indexBO = new IndexBO();
         StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
@@ -144,12 +144,13 @@ public class KeywordIndexer {
                 d = null;
                 dto = null;
             }
-            count = writer.numDocs();
+            rs.close();
             stmt.close();
-            connection.close();
+            count = writer.numDocs();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         } finally {
+            connection.close();
             writer.optimize();
             writer.close();
             directory.close();
@@ -167,8 +168,8 @@ public class KeywordIndexer {
      */
     private String getListIdSubdomain(ConnectionPool connectionPool, int idKeyword) throws SQLException, ClassNotFoundException {
         String list = "";
+        Connection connection = connectionPool.getConnection();
         try {
-            Connection connection = connectionPool.getConnection();
             String sql = "SELECT sp." + SubdomainPaperTB.COLUMN_SUBDOMAINID + " FROM " + PaperKeywordTB.TABLE_NAME + " pk JOIN " + SubdomainPaperTB.TABLE_NAME + " sp ON sp." + SubdomainPaperTB.COLUMN_PAPERID + " = pk." + PaperKeywordTB.COLUMN_PAPERID + " WHERE pk." + PaperKeywordTB.COLUMN_KEYWORDID + " = ? GROUP BY sp." + SubdomainPaperTB.COLUMN_SUBDOMAINID + "";
             PreparedStatement stmt = connection.prepareStatement(sql);
             stmt.setInt(1, idKeyword);
@@ -179,10 +180,12 @@ public class KeywordIndexer {
             if (!"".equals(list)) {
                 list = list.substring(1);
             }
+            rs.close();
             stmt.close();
-            connection.close();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
+        } finally {
+            connection.close();
         }
         return list;
     }

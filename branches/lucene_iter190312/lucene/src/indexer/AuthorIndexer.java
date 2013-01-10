@@ -92,9 +92,8 @@ public class AuthorIndexer {
      * sử dụng IdAuthor để truy vấn và tính toán các thuộc tính.
      * @return: trả về số doc được index
      */
-    private int _index(ConnectionPool connectionPool, File indexDir) throws IOException {
+    private int _index(ConnectionPool connectionPool, File indexDir) throws IOException, SQLException {
         int count = 0;
-
         StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
         IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
         Directory directory = FSDirectory.open(indexDir);
@@ -188,14 +187,14 @@ public class AuthorIndexer {
                 d = null;
                 dto = null;
             }
-            //count = writer.numDocs();
-
+            rs.close();
             stmt.close();
-            connection.close();
+            count = writer.numDocs();
             searcher = null;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         } finally {
+            connection.close();
             writer.optimize();
             writer.close();
             directory.close();
@@ -214,8 +213,8 @@ public class AuthorIndexer {
         LinkedHashMap<String, String> out = new LinkedHashMap<String, String>();
         String listIdSubdomain = "";
         //LinkedHashMap<Integer, Object> listRankSubdomain = new LinkedHashMap<Integer, Object>();
+        Connection connection = connectionPool.getConnection();
         try {
-            Connection connection = connectionPool.getConnection();
             String sql = "SELECT sp." + SubdomainPaperTB.COLUMN_SUBDOMAINID + " FROM " + AuthorPaperTB.TABLE_NAME + " ap JOIN " + SubdomainPaperTB.TABLE_NAME + " sp ON ap." + AuthorPaperTB.COLUMN_PAPERID + " = sp." + SubdomainPaperTB.COLUMN_PAPERID + " WHERE ap." + AuthorPaperTB.COLUMN_AUTHORID + " = ? GROUP BY sp." + SubdomainPaperTB.COLUMN_SUBDOMAINID + "";
             PreparedStatement stmt = connection.prepareStatement(sql);
             stmt.setInt(1, idAuthor);
@@ -227,10 +226,12 @@ public class AuthorIndexer {
             if (!"".equals(listIdSubdomain)) {
                 listIdSubdomain = listIdSubdomain.substring(1);
             }
+            rs.close();
             stmt.close();
-            connection.close();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
+        } finally {
+            connection.close();
         }
         out.put("listIdSubdomain", listIdSubdomain);
         //out.put("listRankSubdomain", Common.OToS(listRankSubdomain));
@@ -347,8 +348,8 @@ public class AuthorIndexer {
      */
     private int getCoAuthorCount(ConnectionPool connectionPool, String listIdPaper) throws SQLException, ClassNotFoundException, IOException {
         int count = 0;
+        Connection connection = connectionPool.getConnection();
         try {
-            Connection connection = connectionPool.getConnection();
             String sql = "SELECT COUNT(DISTINCT ap." + AuthorPaperTB.COLUMN_AUTHORID + ") AS CoAuthorCount FROM " + AuthorPaperTB.TABLE_NAME + " ap WHERE ap." + AuthorPaperTB.COLUMN_PAPERID + " IN (" + listIdPaper + ")";
             PreparedStatement stmt = connection.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery();
@@ -358,10 +359,12 @@ public class AuthorIndexer {
             if (count > 0) {
                 count = count - 1;
             }
+            rs.close();
             stmt.close();
-            connection.close();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
+        } finally {
+            connection.close();
         }
         return count;
     }
@@ -515,7 +518,7 @@ public class AuthorIndexer {
         // TODO add your handling code here:
         try {
             String user = "root";
-            String pass = "@huydang1920@";
+            String pass = "root";
             String database = "pubguru";
             int port = 3306;
             String path = "E:\\INDEX\\";

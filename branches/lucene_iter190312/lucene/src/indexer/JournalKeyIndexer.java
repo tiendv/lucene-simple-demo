@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -52,7 +53,15 @@ public class JournalKeyIndexer {
         return out;
     }
 
-    private int _index(ConnectionPool connectionPool) throws IOException {
+    /**
+     * Truy vấn các thông tin journal, keyword, publicationCount từ csdl thực
+     * hiện index
+     *
+     * @param connectionPool: kết nối csdl
+     * @param indexDir: thư mục lưu trữ file index
+     * @return số doc thực hiện
+     */
+    private int _index(ConnectionPool connectionPool) throws IOException, SQLException {
         int count = 0;
 
         StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
@@ -60,8 +69,8 @@ public class JournalKeyIndexer {
         Directory directory = FSDirectory.open(new File(path + IndexConst.JOURNAL_KEYWORD_DIRECTORY_PATH));
         IndexWriter writer = new IndexWriter(directory, config);
         // Connection to DB
+        Connection connection = connectionPool.getConnection();
         try {
-            Connection connection = connectionPool.getConnection();
             String jourQuery = "SELECT " + JournalTB.COLUMN_JOURNALID + ", " + JournalTB.COLUMN_JOURNALNAME + " FROM " + JournalTB.TABLE_NAME + " a";
             PreparedStatement jourStmt = connection.prepareStatement(jourQuery, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             jourStmt.setFetchSize(Integer.MIN_VALUE);
@@ -89,11 +98,10 @@ public class JournalKeyIndexer {
                 keyCon.close();
             }
             jourStmt.close();
-            connection.close();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
-        }finally
-        {
+        } finally {
+            connection.close();
             writer.optimize();
             writer.close();
             directory.close();
@@ -109,7 +117,7 @@ public class JournalKeyIndexer {
         // TODO add your handling code here:
         try {
             String user = "root";
-            String pass = "@huydang1920@";
+            String pass = "root";
             String database = "pubguru";
             int port = 3306;
             String path = "E:\\INDEX\\";

@@ -92,10 +92,9 @@ public class ConferenceIndexer {
      * @param connectionPool: kết nối tới csdl
      * @param indexDir : thư mục lưu trữ file index
      */
-    private int _index(ConnectionPool connectionPool, File indexDir) throws IOException {
+    private int _index(ConnectionPool connectionPool, File indexDir) throws IOException, SQLException {
         int count = 0;
         IndexBO indexBO = new IndexBO();
-
         StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
         IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
         Directory directory = FSDirectory.open(indexDir);
@@ -191,12 +190,13 @@ public class ConferenceIndexer {
                 d = null;
                 dto = null;
             }
-            //count = writer.numDocs();
+            rs.close();
             stmt.close();
-            connection.close();
+            count = writer.numDocs();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
-        }finally{
+        } finally {
+            connection.close();
             writer.optimize();
             writer.close();
             directory.close();
@@ -213,8 +213,8 @@ public class ConferenceIndexer {
      */
     private String getListIdSubdomain(ConnectionPool connectionPool, int idConference) throws SQLException, ClassNotFoundException {
         String list = "";
+        Connection connection = connectionPool.getConnection();
         try {
-            Connection connection = connectionPool.getConnection();
             String sql = "SELECT s." + SubdomainPaperTB.COLUMN_SUBDOMAINID + " FROM " + PaperTB.TABLE_NAME + " p JOIN " + SubdomainPaperTB.TABLE_NAME + " s ON p." + PaperTB.COLUMN_PAPERID + " = s." + SubdomainPaperTB.COLUMN_PAPERID + " WHERE p." + PaperTB.COLUMN_CONFERENCEID + " = ? GROUP BY s." + SubdomainPaperTB.COLUMN_SUBDOMAINID + "";
             PreparedStatement stmt = connection.prepareStatement(sql);
             stmt.setInt(1, idConference);
@@ -225,10 +225,12 @@ public class ConferenceIndexer {
             if (!"".equals(list)) {
                 list = list.substring(1);
             }
+            rs.close();
             stmt.close();
-            connection.close();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
+        } finally {
+            connection.close();
         }
         return list;
     }
@@ -270,7 +272,7 @@ public class ConferenceIndexer {
         try {
             String user = "root";
             String pass = "root";
-            String database = "cspublicationcrawler1";
+            String database = "pubguru";
             int port = 3306;
             String path = "E:\\INDEX\\";
             ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);

@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -52,9 +53,8 @@ public class AuthorCitationIndexer {
         return out;
     }
 
-    private int _index(ConnectionPool connectionPool) throws IOException {
+    private int _index(ConnectionPool connectionPool) throws IOException, SQLException {
         int count = 0;
-
         StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
         IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
         Directory directory = FSDirectory.open(new File(path + IndexConst.AUTHOR_CITATION_DIRECTORY_PATH));
@@ -86,10 +86,10 @@ public class AuthorCitationIndexer {
             }
             rs.close();
             stmt.close();
-            connection.close();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         } finally {
+            connection.close();
             writer.optimize();
             writer.close();
             directory.close();
@@ -97,42 +97,40 @@ public class AuthorCitationIndexer {
         return count;
     }
 
-    private ArrayList<Object> getObjects(ConnectionPool connectionPool, int idAuthor) {
+    private ArrayList<Object> getObjects(ConnectionPool connectionPool, int idAuthor) throws SQLException {
+        ArrayList<Object> out = new ArrayList<Object>();
+        Connection connection = connectionPool.getConnection();
         try {
-            Connection connection = connectionPool.getConnection();
             String list = this.getListIdPaperFromAuthor(connectionPool, idAuthor);
-            if ("".equals(list)) {
-                connection.close();
-                return null;
+            if (!"".equals(list)) {
+                String sql = "SELECT ap." + AuthorPaperTB.COLUMN_AUTHORID + ", COUNT(ap." + AuthorPaperTB.COLUMN_AUTHORID + ") AS citationCount "
+                        + "FROM " + PaperPaperTB.TABLE_NAME + " pp JOIN " + AuthorPaperTB.TABLE_NAME + " ap ON (ap." + AuthorPaperTB.COLUMN_PAPERID + " = pp." + PaperPaperTB.COLUMN_PAPERID + ") "
+                        + "WHERE pp." + PaperPaperTB.COLUMN_PAPERREFID + " IN (" + list + ") AND ap." + AuthorPaperTB.COLUMN_AUTHORID + " <> ? "
+                        + "GROUP BY ap." + AuthorPaperTB.COLUMN_AUTHORID + " ORDER BY citationCount DESC LIMIT 20";
+                PreparedStatement stmt = connection.prepareStatement(sql);
+                stmt.setInt(1, idAuthor);
+                ResultSet rs = stmt.executeQuery();
+                while ((rs != null) && (rs.next())) {
+                    LinkedHashMap<String, Object> item = new LinkedHashMap<String, Object>();
+                    item.put("idAuthor", rs.getInt(AuthorPaperTB.COLUMN_AUTHORID));
+                    item.put("citationCount", rs.getInt("citationCount"));
+                    out.add(item);
+                }
+                rs.close();
+                stmt.close();
             }
-            String sql = "SELECT ap." + AuthorPaperTB.COLUMN_AUTHORID + ", COUNT(ap." + AuthorPaperTB.COLUMN_AUTHORID + ") AS citationCount "
-                    + "FROM " + PaperPaperTB.TABLE_NAME + " pp JOIN " + AuthorPaperTB.TABLE_NAME + " ap ON (ap." + AuthorPaperTB.COLUMN_PAPERID + " = pp." + PaperPaperTB.COLUMN_PAPERID + ") "
-                    + "WHERE pp." + PaperPaperTB.COLUMN_PAPERREFID + " IN (" + list + ") AND ap." + AuthorPaperTB.COLUMN_AUTHORID + " <> ? "
-                    + "GROUP BY ap." + AuthorPaperTB.COLUMN_AUTHORID + " ORDER BY citationCount DESC LIMIT 20";
-            PreparedStatement stmt = connection.prepareStatement(sql);
-            stmt.setInt(1, idAuthor);
-            ResultSet rs = stmt.executeQuery();
-            ArrayList<Object> out = new ArrayList<Object>();
-            while ((rs != null) && (rs.next())) {
-                LinkedHashMap<String, Object> item = new LinkedHashMap<String, Object>();
-                item.put("idAuthor", rs.getInt(AuthorPaperTB.COLUMN_AUTHORID));
-                item.put("citationCount", rs.getInt("citationCount"));
-                out.add(item);
-            }
-            rs.close();
-            stmt.close();
-            connection.close();
-            return out;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
+        } finally {
+            connection.close();
         }
-        return null;
+        return out;
     }
 
-    private String getListIdPaperFromAuthor(ConnectionPool connectionPool, int idAuthor) {
+    private String getListIdPaperFromAuthor(ConnectionPool connectionPool, int idAuthor) throws SQLException {
         String list = "";
+        Connection connection = connectionPool.getConnection();
         try {
-            Connection connection = connectionPool.getConnection();
             String sql = "SELECT ap." + AuthorPaperTB.COLUMN_PAPERID + " FROM " + AuthorPaperTB.TABLE_NAME + " ap WHERE ap." + AuthorPaperTB.COLUMN_AUTHORID + " = ?";
             PreparedStatement stmt = connection.prepareStatement(sql);
             stmt.setInt(1, idAuthor);
@@ -145,9 +143,10 @@ public class AuthorCitationIndexer {
             }
             rs.close();
             stmt.close();
-            connection.close();
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
+        } finally {
+            connection.close();
         }
         return list;
     }
@@ -160,10 +159,10 @@ public class AuthorCitationIndexer {
         // TODO add your handling code here:
         try {
             String user = "root";
-            String pass = "@huydang1920@";
+            String pass = "root";
             String database = "pubguru";
             int port = 3306;
-            String path = "E:\\INDEX\\INDEX\\";
+            String path = "E:\\INDEX\\";
             ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
             AuthorCitationIndexer indexer = new AuthorCitationIndexer(path);
             System.out.println(indexer._run(connectionPool));
