@@ -6,7 +6,6 @@ package indexer;
 
 import constant.IndexConst;
 import dto.CoAuthorEdgeDTO;
-import dto.RTBVSEdgeDTO;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,7 +15,6 @@ import java.util.Date;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.document.NumericField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
@@ -102,7 +100,7 @@ public class CoAuthorGraphIndexer {
         // TODO add your handling code here:
         try {
             String path = "D:\\DaoLVData\\INDEX\\";
-            RTBVSGraphIndexer indexer = new RTBVSGraphIndexer(path);
+            CoAuthorGraphIndexer indexer = new CoAuthorGraphIndexer(path);
             String filePath = "D:\\DaoLVData\\RTBVSGraphData\\RTBVSGraph.txt";
             System.out.println(indexer._run(filePath));
         } catch (Exception ex) {
