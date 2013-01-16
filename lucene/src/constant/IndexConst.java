@@ -277,4 +277,14 @@ public class IndexConst {
     public static final String CONFERENCE_KEYWORD_DIRECTORY_PATH = "INDEX-CONFERENCE-KEYWORD";
     public static final String JOURNAL_KEYWORD_DIRECTORY_PATH = "INDEX-JOURNAL-KEYWORD";
     public static final String ORG_KEYWORD_DIRECTORY_PATH = "INDEX-ORG-KEYWORD";
+    
+    //Index RTBVS Graph
+    public static final String RTBVSGRAPH_DIRECTORY_PATH = "INDEX-RTBVSGRAPH";
+    public static final String RTBVSGRAPH_IDEDGE_FIELD = "idEdge";
+    public static final String RBTVSGRAPH_WEIGHT_FIELD = "weight";
+    
+    //Index CoAuthor Graph
+    public static final String COAUTHORGRAPH_DIRECTORY_PATH = "INDEX_COAUTHORGRAPH";
+    public static final String COAUTHORGRAPH_IDAUTHOR1_FIELD = "idAuthor1";
+    public static final String COAUTHORGRAPH_IDAUTHOR2_FIELD = "idAuthor2";
 }
