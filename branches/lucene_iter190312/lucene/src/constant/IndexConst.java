@@ -284,7 +284,7 @@ public class IndexConst {
     public static final String RBTVSGRAPH_WEIGHT_FIELD = "weight";
     
     //Index CoAuthor Graph
-    public static final String COAUTHORGRAPH_DIRECTORY_PATH = "INDEX_COAUTHORGRAPH";
+    public static final String COAUTHORGRAPH_DIRECTORY_PATH = "INDEX-COAUTHORGRAPH";
     public static final String COAUTHORGRAPH_IDAUTHOR1_FIELD = "idAuthor1";
     public static final String COAUTHORGRAPH_IDAUTHOR2_FIELD = "idAuthor2";
 }
