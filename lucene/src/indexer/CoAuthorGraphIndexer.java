@@ -65,27 +65,40 @@ public class CoAuthorGraphIndexer {
             String line = null;
             reader.readLine(); // ignore first row
             String[] tokens;
+            String preAuthorID1="";
             String authorID1 ;
-            String authorID2 ;
-            float weight;
+            String authorID2;
             CoAuthorEdgeDTO edgeDTO = null;
             while((line=reader.readLine()) != null)
             {
                 tokens = line.split("\t");
                 authorID1 = tokens[0];
                 authorID2 = tokens[1];
-                edgeDTO = new CoAuthorEdgeDTO();
-                edgeDTO.setIdAuthor1(authorID1);
-                edgeDTO.setIdAuthor2(authorID2);
-                
-                Document d = new Document();
-                d.add(new Field(IndexConst.COAUTHORGRAPH_IDAUTHOR1_FIELD, edgeDTO.idAuthor1, Field.Store.YES, Field.Index.ANALYZED));
-                d.add(new Field(IndexConst.COAUTHORGRAPH_IDAUTHOR2_FIELD, edgeDTO.idAuthor2, Field.Store.YES, Field.Index.NO));
-                writer.addDocument(d);
-                System.out.println("Indexing : " + count++ + "\t");
-                d = null;
-                edgeDTO = null;
+                if (!preAuthorID1.equals(authorID1))
+                {
+                    if (edgeDTO != null)
+                    {
+                        Document d = new Document();
+                        d.add(new Field(IndexConst.COAUTHORGRAPH_IDAUTHOR1_FIELD, edgeDTO.idAuthor1, Field.Store.YES, Field.Index.ANALYZED));
+                        d.add(new Field(IndexConst.COAUTHORGRAPH_IDAUTHOR2_FIELD, edgeDTO.listIdAuthor2, Field.Store.YES, Field.Index.NO));
+                        writer.addDocument(d);
+                        System.out.println("Indexing : " + count++ + "\t");
+                    }
+                    
+                    edgeDTO = new CoAuthorEdgeDTO();
+                    edgeDTO.setIdAuthor1(authorID1);
+                    preAuthorID1 = authorID1;
+                }
+                edgeDTO.addIdAuthor2(authorID2);
             }
+            //Index the last author
+            Document d = new Document();
+            d.add(new Field(IndexConst.COAUTHORGRAPH_IDAUTHOR1_FIELD, edgeDTO.idAuthor1, Field.Store.YES, Field.Index.ANALYZED));
+            d.add(new Field(IndexConst.COAUTHORGRAPH_IDAUTHOR2_FIELD, edgeDTO.listIdAuthor2, Field.Store.YES, Field.Index.NO));
+            writer.addDocument(d);
+            System.out.println("Indexing : " + count++ + "\t");
+            //
+            
             count = writer.numDocs();
             writer.optimize();
             writer.close();
