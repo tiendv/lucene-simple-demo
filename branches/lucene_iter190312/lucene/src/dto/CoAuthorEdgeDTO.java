@@ -11,7 +11,7 @@ package dto;
 public class CoAuthorEdgeDTO {
 
     public String idAuthor1;
-    public String idAuthor2;
+    public String listIdAuthor2="";
 
     public CoAuthorEdgeDTO() {
     }
@@ -20,7 +20,15 @@ public class CoAuthorEdgeDTO {
         this.idAuthor1 = idAuthor1;
     }
 
-    public void setIdAuthor2(String idAuthor2) {
-        this.idAuthor2 = idAuthor2;
+    public void setListIdAuthor2(String listIdAuthor2) {
+        this.listIdAuthor2 = listIdAuthor2;
+    }
+    
+    public void addIdAuthor2(String idAuthor2)
+    {
+        if (listIdAuthor2.isEmpty())
+            listIdAuthor2+=idAuthor2;
+        else
+            listIdAuthor2+= ";"+idAuthor2;
     }
 }
