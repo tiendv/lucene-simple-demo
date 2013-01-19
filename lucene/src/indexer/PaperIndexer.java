@@ -350,7 +350,7 @@ public class PaperIndexer {
         String list = "";
         Connection connection = connectionPool.getConnection();
         try {
-            String sql = "SELECT s." + SubdomainTB.COLUMN_SUBDOMAINID + " FROM " + PaperTB.TABLE_NAME + " p JOIN " + SubdomainPaperTB.TABLE_NAME + " sp ON sp." + SubdomainPaperTB.COLUMN_PAPERID + " = p." + PaperTB.COLUMN_PAPERID + " JOIN " + SubdomainTB.TABLE_NAME + " s ON s." + SubdomainTB.COLUMN_SUBDOMAINID + " = sp." + SubdomainPaperTB.COLUMN_SUBDOMAINID + " WHERE p." + PaperTB.COLUMN_PAPERID + " = ?";
+            String sql = "SELECT " + SubdomainTB.COLUMN_SUBDOMAINID + " FROM " +SubdomainPaperTB.TABLE_NAME + " WHERE " + PaperTB.COLUMN_PAPERID + " = ?";
             PreparedStatement stmt = connection.prepareStatement(sql);
             stmt.setInt(1, idPaper);
             ResultSet rs = stmt.executeQuery();
@@ -494,9 +494,9 @@ public class PaperIndexer {
         try {
             String user = "root";
             String pass = "root";
-            String database = "pubguru";
+            String database = "cspublicationcrawler";
             int port = 3306;
-            String path = "E:\\INDEX\\";
+            String path = "E:\\";
             ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
             PaperIndexer indexer = new PaperIndexer(path);
             System.out.println(indexer._run(connectionPool));
