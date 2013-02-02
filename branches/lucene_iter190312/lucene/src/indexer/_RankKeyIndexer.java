@@ -95,7 +95,7 @@ public class _RankKeyIndexer {
                 ArrayList<Integer> listIdKeyword = keywordSearcher.getListIdKeywordFromIdSubDomain(path, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID));
                 for (int i = 0; i < listIdKeyword.size(); i++) {
                     LinkedHashMap<String, Object> objectAllYear = paperSearcher.getPapersForRankSubDomain(path, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdKeyword.get(i)), 0, 5);
-                    if (objectAllYear != null) {
+                    if (!objectAllYear.isEmpty()) {
                         int pubLast5Year = 0;
                         int citLast5Year = 0;
                         int pubLast10Year = 0;
@@ -106,11 +106,11 @@ public class _RankKeyIndexer {
                         LinkedHashMap<String, Object> object10Year = paperSearcher.getPapersForRankSubDomain(path, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdKeyword.get(i)), 10, 5);
                         publicationCount = Integer.parseInt(objectAllYear.get("pubCount").toString());
                         citationCount = Integer.parseInt(objectAllYear.get("citCount").toString());
-                        if (object10Year != null) {
+                        if (!object10Year.isEmpty()) {
                             pubLast10Year = Integer.parseInt(object10Year.get("pubCount").toString());
                             citLast10Year = Integer.parseInt(object10Year.get("citCount").toString());
                             LinkedHashMap<String, Object> object5Year = paperSearcher.getPapersForRankSubDomain(path, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdKeyword.get(i)), 5, 5);
-                            if (object5Year != null) {
+                            if (!object5Year.isEmpty()) {
                                 pubLast5Year = Integer.parseInt(object5Year.get("pubCount").toString());
                                 citLast5Year = Integer.parseInt(object5Year.get("citCount").toString());
                             }

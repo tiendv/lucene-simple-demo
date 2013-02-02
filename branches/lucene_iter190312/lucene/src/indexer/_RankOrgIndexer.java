@@ -93,7 +93,7 @@ public class _RankOrgIndexer {
                 for (int i = 0; i < listIdOrg.size(); i++) {
                     LinkedHashMap<String, Object> objectAllYear = paperSearcher.getPapersForRankSubDomain(path, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdOrg.get(i)), 0, 4);
                     String listPublicationCitation = paperSearcher.getChartFromIdSubdomain(path, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdOrg.get(i)), 4);
-                    if (objectAllYear != null) {
+                    if (!objectAllYear.isEmpty()) {
                         int pubLast5Year = 0;
                         int citLast5Year = 0;
                         int g_indexLast5Year = 0;
@@ -114,7 +114,7 @@ public class _RankOrgIndexer {
                         h_index = indexAllYear.get("h_index");
                         g_index = indexAllYear.get("g_index");
                         LinkedHashMap<String, Object> object10Year = paperSearcher.getPapersForRankSubDomain(path, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdOrg.get(i)), 10, 4);
-                        if (object10Year != null) {
+                        if (!object10Year.isEmpty()) {
                             ArrayList<Integer> publicationList10Year = (ArrayList<Integer>) object10Year.get("list");
                             LinkedHashMap<String, Integer> index10Year = Common.getCalculateIndex(publicationList10Year);
                             pubLast10Year = Integer.parseInt(object10Year.get("pubCount").toString());
@@ -122,7 +122,7 @@ public class _RankOrgIndexer {
                             g_indexLast10Year = index10Year.get("g_index");
                             h_indexLast10Year = index10Year.get("h_index");
                             LinkedHashMap<String, Object> object5Year = paperSearcher.getPapersForRankSubDomain(path, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdOrg.get(i)), 5, 4);
-                            if (object5Year != null) {
+                            if (!object5Year.isEmpty()) {
                                 ArrayList<Integer> publicationList5Year = (ArrayList<Integer>) object5Year.get("list");
                                 LinkedHashMap<String, Integer> index5Year = Common.getCalculateIndex(publicationList5Year);
                                 pubLast5Year = Integer.parseInt(object5Year.get("pubCount").toString());
