@@ -48,7 +48,7 @@ import org.json.simple.JSONObject;
  */
 public class PaperIndexer {
 
-    private String path = "E:\\";
+    private String path = "E:\\INDEX\\";
 
     /**
      * hàm khởi tạo
@@ -350,7 +350,7 @@ public class PaperIndexer {
         String list = "";
         Connection connection = connectionPool.getConnection();
         try {
-            String sql = "SELECT " + SubdomainTB.COLUMN_SUBDOMAINID + " FROM " +SubdomainPaperTB.TABLE_NAME + " WHERE " + PaperTB.COLUMN_PAPERID + " = ?";
+            String sql = "SELECT " + SubdomainTB.COLUMN_SUBDOMAINID + " FROM " + SubdomainPaperTB.TABLE_NAME + " WHERE " + PaperTB.COLUMN_PAPERID + " = ?";
             PreparedStatement stmt = connection.prepareStatement(sql);
             stmt.setInt(1, idPaper);
             ResultSet rs = stmt.executeQuery();
@@ -363,7 +363,7 @@ public class PaperIndexer {
             rs.close();
             stmt.close();
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         } finally {
             connection.close();
         }
@@ -397,7 +397,7 @@ public class PaperIndexer {
             rs.close();
             stmt.close();
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         } finally {
             connection.close();
         }
@@ -424,7 +424,7 @@ public class PaperIndexer {
             rs.close();
             stmt.close();
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         } finally {
             connection.close();
         }
@@ -452,7 +452,7 @@ public class PaperIndexer {
             rs.close();
             stmt.close();
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         } finally {
             connection.close();
         }
@@ -477,7 +477,7 @@ public class PaperIndexer {
             rs.close();
             stmt.close();
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         } finally {
             connection.close();
         }
@@ -494,14 +494,14 @@ public class PaperIndexer {
         try {
             String user = "root";
             String pass = "root";
-            String database = "cspublicationcrawler";
+            String database = "pubguru";
             int port = 3306;
-            String path = "E:\\";
+            String path = "E:\\INDEX\\";
             ConnectionPool connectionPool = new ConnectionPool(user, pass, database, port);
             PaperIndexer indexer = new PaperIndexer(path);
             System.out.println(indexer._run(connectionPool));
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         }
     }
 }

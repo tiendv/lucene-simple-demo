@@ -10,6 +10,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import org.apache.lucene.store.FSDirectory;
 import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
@@ -85,6 +87,46 @@ public class Common {
         }
         //long end = System.currentTimeMillis();
         //System.out.println("Decode:" + (end - start));
+        return out;
+    }
+
+    /**
+     * calculateIndex
+     *
+     * @return h_index, g_index width publicationList
+     * @throws Exception
+     */
+    public static LinkedHashMap<String, Integer> getCalculateIndex(ArrayList<Integer> publicationList) throws Exception {
+        LinkedHashMap<String, Integer> out = new LinkedHashMap<String, Integer>();
+        int h_index;
+        int g_index;
+        int citationCount;
+        int citationCountSum;
+        // Calculate h-index for each.
+        h_index = 0;
+        while (h_index < publicationList.size()) {
+            citationCount = publicationList.get(h_index);
+            if (citationCount >= (h_index + 1)) {
+                h_index++;
+            } else {
+                break;
+            }
+        }
+        // Calculate g-index for each.
+        g_index = 0;
+        citationCountSum = 0;
+        while (true) {
+            if (g_index < publicationList.size()) {
+                citationCountSum += publicationList.get(g_index);
+            }
+            if (citationCountSum >= ((g_index + 1) * (g_index + 1))) {
+                g_index++;
+            } else {
+                break;
+            }
+        }
+        out.put("h_index", h_index);
+        out.put("g_index", g_index);
         return out;
     }
 }

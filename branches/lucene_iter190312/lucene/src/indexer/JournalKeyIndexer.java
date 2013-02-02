@@ -33,7 +33,7 @@ import org.apache.lucene.util.Version;
  */
 public class JournalKeyIndexer {
 
-    private String path = "E:\\";
+    private String path = "E:\\INDEX\\";
 
     public JournalKeyIndexer(String path) {
         this.path = path;
@@ -99,7 +99,7 @@ public class JournalKeyIndexer {
             }
             jourStmt.close();
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         } finally {
             connection.close();
             writer.optimize();
@@ -125,7 +125,7 @@ public class JournalKeyIndexer {
             JournalKeyIndexer indexer = new JournalKeyIndexer(path);
             System.out.println(indexer._run(connectionPool));
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         }
     }
 }

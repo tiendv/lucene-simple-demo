@@ -4,7 +4,6 @@
  */
 package indexer;
 
-import bo.IndexBO;
 import constant.ConnectionPool;
 import constant.IndexConst;
 import database.SubdomainTB;
@@ -26,6 +25,8 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
+import searcher.KeywordSearcher;
+import searcher.PaperSearcher;
 
 /**
  *
@@ -33,7 +34,7 @@ import org.apache.lucene.util.Version;
  */
 public class _RankKeyIndexer {
 
-    private String path = "E:\\";
+    private String path = "E:\\INDEX\\";
 
     /**
      *
@@ -76,8 +77,6 @@ public class _RankKeyIndexer {
      */
     public int _index(ConnectionPool connectionPool, File indexDir) throws IOException, SQLException {
         int count = 0;
-        IndexBO indexBO = new IndexBO();
-
         StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
         IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
         Directory directory = FSDirectory.open(indexDir);
@@ -90,10 +89,12 @@ public class _RankKeyIndexer {
             stmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet rs = stmt.executeQuery();
             // Index data from query
+            PaperSearcher paperSearcher = new PaperSearcher();
+            KeywordSearcher keywordSearcher = new KeywordSearcher();
             while ((rs != null) && (rs.next())) {
-                ArrayList<Integer> listIdKeyword = indexBO.getListIdKeywordFromIdSubDomain(path + IndexConst.KEYWORD_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID));
+                ArrayList<Integer> listIdKeyword = keywordSearcher.getListIdKeywordFromIdSubDomain(path, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID));
                 for (int i = 0; i < listIdKeyword.size(); i++) {
-                    LinkedHashMap<String, Object> objectAllYear = indexBO.getPapersForRankSubDomain(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdKeyword.get(i)), 0, 5);
+                    LinkedHashMap<String, Object> objectAllYear = paperSearcher.getPapersForRankSubDomain(path, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdKeyword.get(i)), 0, 5);
                     if (objectAllYear != null) {
                         int pubLast5Year = 0;
                         int citLast5Year = 0;
@@ -102,13 +103,13 @@ public class _RankKeyIndexer {
                         int publicationCount = 0;
                         int citationCount = 0;
 
-                        LinkedHashMap<String, Object> object10Year = indexBO.getPapersForRankSubDomain(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdKeyword.get(i)), 10, 5);
+                        LinkedHashMap<String, Object> object10Year = paperSearcher.getPapersForRankSubDomain(path, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdKeyword.get(i)), 10, 5);
                         publicationCount = Integer.parseInt(objectAllYear.get("pubCount").toString());
                         citationCount = Integer.parseInt(objectAllYear.get("citCount").toString());
                         if (object10Year != null) {
                             pubLast10Year = Integer.parseInt(object10Year.get("pubCount").toString());
                             citLast10Year = Integer.parseInt(object10Year.get("citCount").toString());
-                            LinkedHashMap<String, Object> object5Year = indexBO.getPapersForRankSubDomain(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdKeyword.get(i)), 5, 5);
+                            LinkedHashMap<String, Object> object5Year = paperSearcher.getPapersForRankSubDomain(path, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdKeyword.get(i)), 5, 5);
                             if (object5Year != null) {
                                 pubLast5Year = Integer.parseInt(object5Year.get("pubCount").toString());
                                 citLast5Year = Integer.parseInt(object5Year.get("citCount").toString());
@@ -153,7 +154,7 @@ public class _RankKeyIndexer {
         // TODO add your handling code here:
         try {
             String user = "root";
-            String pass = "@huydang1920@";
+            String pass = "root";
             String database = "pubguru";
             int port = 3306;
             String path = "E:\\INDEX\\";

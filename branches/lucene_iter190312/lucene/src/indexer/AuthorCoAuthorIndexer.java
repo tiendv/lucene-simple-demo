@@ -31,7 +31,7 @@ import org.apache.lucene.util.Version;
  */
 public class AuthorCoAuthorIndexer {
 
-    private String path = "E:\\";
+    private String path = "E:\\INDEX\\";
 
     public AuthorCoAuthorIndexer(String path) {
         this.path = path;
@@ -95,7 +95,7 @@ public class AuthorCoAuthorIndexer {
             }
             authorStmt.close();
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         } finally {
             connection.close();
             writer.optimize();
@@ -121,7 +121,7 @@ public class AuthorCoAuthorIndexer {
             AuthorCoAuthorIndexer indexer = new AuthorCoAuthorIndexer(path);
             System.out.println(indexer._run(connectionPool));
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         }
     }
 }

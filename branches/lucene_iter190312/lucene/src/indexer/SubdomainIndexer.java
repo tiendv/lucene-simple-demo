@@ -4,7 +4,6 @@
  */
 package indexer;
 
-import bo.IndexBO;
 import constant.ConnectionPool;
 import constant.IndexConst;
 import database.SubdomainTB;
@@ -26,6 +25,7 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
+import searcher.PaperSearcher;
 
 /**
  *
@@ -33,7 +33,7 @@ import org.apache.lucene.util.Version;
  */
 public class SubdomainIndexer {
 
-    private String path = "E:\\";
+    private String path = "E:\\INDEX\\";
 
     /**
      * hàm khởi tạo
@@ -41,11 +41,7 @@ public class SubdomainIndexer {
      * @param path: đường dẫn tới thư mục chứa file index
      */
     public SubdomainIndexer(String path) {
-        try {
-            this.path = path;
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
+        this.path = path;
     }
 
     /**
@@ -78,7 +74,6 @@ public class SubdomainIndexer {
      */
     private int _index(ConnectionPool connectionPool, File indexDir) throws IOException, SQLException {
         int count = 0;
-        IndexBO indexBO = new IndexBO();
         StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
         IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
         Directory directory = FSDirectory.open(indexDir);
@@ -91,16 +86,19 @@ public class SubdomainIndexer {
             stmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet rs = stmt.executeQuery();
             // Index data from query
+            PaperSearcher paperSearcher = new PaperSearcher();
             SubdomainDTO dto = null;
             while ((rs != null) && (rs.next())) {
                 dto = new SubdomainDTO();
-                LinkedHashMap<String, String> listPublicationCitation = indexBO.getListPublicationCitation(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), 6);
+                LinkedHashMap<String, String> listPublicationCitation = paperSearcher.getListPublicationCitation(path, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), 6);
                 dto.setIdSubdomain(rs.getString(SubdomainTB.COLUMN_SUBDOMAINID));
                 dto.setSubdomainName(rs.getString(SubdomainTB.COLUMN_SUBDOMAINNAME));
                 dto.setIdDomain(rs.getString(SubdomainTB.COLUMN_DOMAINID));
-                //dto.setCitationCount(Integer.parseInt(listPublicationCitation.get("citationCount")));
-                //dto.setPublicationCount(Integer.parseInt(listPublicationCitation.get("publicationCount")));
-                dto.setListPublicationCitation(listPublicationCitation.get("listPublicationCitation"));
+                if (listPublicationCitation != null) {
+                    //dto.setCitationCount(Integer.parseInt(listPublicationCitation.get("citationCount")));
+                    //dto.setPublicationCount(Integer.parseInt(listPublicationCitation.get("publicationCount")));
+                    dto.setListPublicationCitation(listPublicationCitation.get("listPublicationCitation"));
+                }
 
                 int pubLast5Year = 0;
                 int citLast5Year = 0;
@@ -109,15 +107,15 @@ public class SubdomainIndexer {
                 int publicationCount = 0;
                 int citationCount = 0;
 
-                LinkedHashMap<String, Integer> objectAllYear = indexBO.getPublicationsFromIdSubdomain(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), 0);
+                LinkedHashMap<String, Integer> objectAllYear = paperSearcher.getPublicationsFromIdSubdomain(path, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), 0);
                 if (objectAllYear != null) {
                     publicationCount = objectAllYear.get("pubCount");
                     citationCount = objectAllYear.get("citCount");
-                    LinkedHashMap<String, Integer> object10Year = indexBO.getPublicationsFromIdSubdomain(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), 10);
+                    LinkedHashMap<String, Integer> object10Year = paperSearcher.getPublicationsFromIdSubdomain(path, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), 10);
                     if (object10Year != null) {
                         pubLast10Year = object10Year.get("pubCount");
                         citLast10Year = object10Year.get("citCount");
-                        LinkedHashMap<String, Integer> object5Year = indexBO.getPublicationsFromIdSubdomain(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), 5);
+                        LinkedHashMap<String, Integer> object5Year = paperSearcher.getPublicationsFromIdSubdomain(path, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), 5);
                         if (object5Year != null) {
                             pubLast5Year = object5Year.get("pubCount");
                             citLast5Year = object5Year.get("citCount");
@@ -148,7 +146,7 @@ public class SubdomainIndexer {
             stmt.close();
             count = writer.numDocs();
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         } finally {
             connection.close();
             writer.optimize();
@@ -167,7 +165,7 @@ public class SubdomainIndexer {
         // TODO add your handling code here:
         try {
             String user = "root";
-            String pass = "@huydang1920@";
+            String pass = "root";
             String database = "pubguru";
             int port = 3306;
             String path = "E:\\INDEX\\";
@@ -175,7 +173,7 @@ public class SubdomainIndexer {
             SubdomainIndexer indexer = new SubdomainIndexer(path);
             System.out.println(indexer._run(connectionPool));
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         }
     }
 }

@@ -4,7 +4,7 @@
  */
 package indexer;
 
-import bo.IndexBO;
+import constant.Common;
 import constant.ConnectionPool;
 import constant.IndexConst;
 import database.SubdomainTB;
@@ -26,6 +26,8 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
+import searcher.OrgSearcher;
+import searcher.PaperSearcher;
 
 /**
  *
@@ -33,7 +35,7 @@ import org.apache.lucene.util.Version;
  */
 public class _RankOrgIndexer {
 
-    private String path = "E:\\";
+    private String path = "E:\\INDEX\\";
 
     /**
      *
@@ -41,11 +43,7 @@ public class _RankOrgIndexer {
      * @Summary: khởi tạo connection và searcher bằng các thông số trên
      */
     public _RankOrgIndexer(String path) {
-        try {
-            this.path = path;
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
+        this.path = path;
     }
 
     /**
@@ -76,7 +74,6 @@ public class _RankOrgIndexer {
      */
     public int _index(ConnectionPool connectionPool, File indexDir) throws IOException, SQLException {
         int count = 0;
-        IndexBO indexBO = new IndexBO();
         StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
         IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
         Directory directory = FSDirectory.open(indexDir);
@@ -89,11 +86,13 @@ public class _RankOrgIndexer {
             stmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet rs = stmt.executeQuery();
             // Index data from query
+            PaperSearcher paperSearcher = new PaperSearcher();
+            OrgSearcher orgSearcher = new OrgSearcher();
             while ((rs != null) && (rs.next())) {
-                ArrayList<Integer> listIdOrg = indexBO.getListIdOrgFromIdSubDomain(path + IndexConst.ORG_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID));
+                ArrayList<Integer> listIdOrg = orgSearcher.getListIdOrgFromIdSubDomain(path, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID));
                 for (int i = 0; i < listIdOrg.size(); i++) {
-                    LinkedHashMap<String, Object> objectAllYear = indexBO.getPapersForRankSubDomain(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdOrg.get(i)), 0, 4);
-                    String listPublicationCitation = indexBO.getChartFromIdSubdomain(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdOrg.get(i)), 4);
+                    LinkedHashMap<String, Object> objectAllYear = paperSearcher.getPapersForRankSubDomain(path, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdOrg.get(i)), 0, 4);
+                    String listPublicationCitation = paperSearcher.getChartFromIdSubdomain(path, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdOrg.get(i)), 4);
                     if (objectAllYear != null) {
                         int pubLast5Year = 0;
                         int citLast5Year = 0;
@@ -109,23 +108,23 @@ public class _RankOrgIndexer {
                         int g_index = 0;
 
                         ArrayList<Integer> publicationListAllYear = (ArrayList<Integer>) objectAllYear.get("list");
-                        LinkedHashMap<String, Integer> indexAllYear = indexBO.getCalculateIndex(publicationListAllYear);
+                        LinkedHashMap<String, Integer> indexAllYear = Common.getCalculateIndex(publicationListAllYear);
                         publicationCount = Integer.parseInt(objectAllYear.get("pubCount").toString());
                         citationCount = Integer.parseInt(objectAllYear.get("citCount").toString());
                         h_index = indexAllYear.get("h_index");
                         g_index = indexAllYear.get("g_index");
-                        LinkedHashMap<String, Object> object10Year = indexBO.getPapersForRankSubDomain(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdOrg.get(i)), 10, 4);
+                        LinkedHashMap<String, Object> object10Year = paperSearcher.getPapersForRankSubDomain(path, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdOrg.get(i)), 10, 4);
                         if (object10Year != null) {
                             ArrayList<Integer> publicationList10Year = (ArrayList<Integer>) object10Year.get("list");
-                            LinkedHashMap<String, Integer> index10Year = indexBO.getCalculateIndex(publicationList10Year);
+                            LinkedHashMap<String, Integer> index10Year = Common.getCalculateIndex(publicationList10Year);
                             pubLast10Year = Integer.parseInt(object10Year.get("pubCount").toString());
                             citLast10Year = Integer.parseInt(object10Year.get("citCount").toString());
                             g_indexLast10Year = index10Year.get("g_index");
                             h_indexLast10Year = index10Year.get("h_index");
-                            LinkedHashMap<String, Object> object5Year = indexBO.getPapersForRankSubDomain(path + IndexConst.PAPER_INDEX_PATH, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdOrg.get(i)), 5, 4);
+                            LinkedHashMap<String, Object> object5Year = paperSearcher.getPapersForRankSubDomain(path, rs.getString(SubdomainTB.COLUMN_SUBDOMAINID), Integer.toString(listIdOrg.get(i)), 5, 4);
                             if (object5Year != null) {
                                 ArrayList<Integer> publicationList5Year = (ArrayList<Integer>) object5Year.get("list");
-                                LinkedHashMap<String, Integer> index5Year = indexBO.getCalculateIndex(publicationList5Year);
+                                LinkedHashMap<String, Integer> index5Year = Common.getCalculateIndex(publicationList5Year);
                                 pubLast5Year = Integer.parseInt(object5Year.get("pubCount").toString());
                                 citLast5Year = Integer.parseInt(object5Year.get("citCount").toString());
                                 g_indexLast5Year = index5Year.get("g_index");
@@ -159,7 +158,7 @@ public class _RankOrgIndexer {
             stmt.close();
             count = writer.numDocs();
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         } finally {
             connection.close();
             writer.optimize();
@@ -186,7 +185,7 @@ public class _RankOrgIndexer {
             _RankOrgIndexer indexer = new _RankOrgIndexer(path);
             System.out.println(indexer._run(connectionPool));
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         }
     }
 }

@@ -44,7 +44,7 @@ public class IndexAutocomplete {
         String out = "";
         try {
             long start = new Date().getTime();
-            int count = this.index(Path);
+            int count = IndexAutocomplete.index(Path);
             long end = new Date().getTime();
             out = "Index : " + count + " files : Time index :" + (end - start) + " milisecond";
         } catch (Exception ex) {
@@ -248,7 +248,7 @@ public class IndexAutocomplete {
     }
 
     public static void main(String[] args) throws IOException {
-        String path = "E:\\Projects\\DataPubGuru\\INDEX\\";
+        String path = "E:\\INDEX\\";
         int count = index(path);
         System.out.println(count);
     }

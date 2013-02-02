@@ -34,7 +34,7 @@ import org.apache.lucene.util.Version;
  */
 public class OrgKeyIndexer {
 
-    private String path = "E:\\";
+    private String path = "E:\\INDEX\\";
 
     public OrgKeyIndexer(String path) {
         this.path = path;
@@ -55,8 +55,8 @@ public class OrgKeyIndexer {
     }
 
     /**
-     * Truy vấn các thông tin org, keyword, publicationCount từ csdl thực
-     * hiện index
+     * Truy vấn các thông tin org, keyword, publicationCount từ csdl thực hiện
+     * index
      *
      * @param connectionPool: kết nối csdl
      * @param indexDir: thư mục lưu trữ file index
@@ -69,7 +69,7 @@ public class OrgKeyIndexer {
         Directory directory = FSDirectory.open(new File(path + IndexConst.ORG_KEYWORD_DIRECTORY_PATH));
         IndexWriter writer = new IndexWriter(directory, config);
         // Connection to DB        
-            Connection connection = connectionPool.getConnection();
+        Connection connection = connectionPool.getConnection();
         try {
             String orgQuery = "SELECT " + OrgTB.COLUMN_ORGID + ", " + OrgTB.COLUMN_ORGNAME + " FROM " + OrgTB.TABLE_NAME + " a";
             PreparedStatement orgStmt = connection.prepareStatement(orgQuery, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -100,8 +100,8 @@ public class OrgKeyIndexer {
             orgRs.close();
             orgStmt.close();
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        } finally {            
+            ex.printStackTrace();
+        } finally {
             connection.close();
             writer.optimize();
             writer.close();
@@ -118,7 +118,7 @@ public class OrgKeyIndexer {
         // TODO add your handling code here:
         try {
             String user = "root";
-            String pass = "@huydang1920@";
+            String pass = "root";
             String database = "pubguru";
             int port = 3306;
             String path = "E:\\INDEX\\";
@@ -126,7 +126,7 @@ public class OrgKeyIndexer {
             OrgKeyIndexer indexer = new OrgKeyIndexer(path);
             System.out.println(indexer._run(connectionPool));
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         }
     }
 }

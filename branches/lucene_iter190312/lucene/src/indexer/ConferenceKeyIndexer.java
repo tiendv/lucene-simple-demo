@@ -35,7 +35,7 @@ import org.apache.lucene.util.Version;
  */
 public class ConferenceKeyIndexer {
 
-    private String path = "E:\\";
+    private String path = "E:\\INDEX\\";
 
     public ConferenceKeyIndexer(String path) {
         this.path = path;
@@ -101,7 +101,7 @@ public class ConferenceKeyIndexer {
             }
             confStmt.close();
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         } finally {
             connection.close();
             writer.optimize();
@@ -127,7 +127,7 @@ public class ConferenceKeyIndexer {
             ConferenceKeyIndexer indexer = new ConferenceKeyIndexer(path);
             System.out.println(indexer._run(connectionPool));
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         }
     }
 }

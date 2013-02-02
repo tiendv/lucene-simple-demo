@@ -4,7 +4,6 @@
  */
 package indexer;
 
-import bo.IndexBO;
 import constant.Common;
 import constant.ConnectionPool;
 import constant.IndexConst;
@@ -27,19 +26,10 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.NumericField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.queryParser.ParseException;
-import org.apache.lucene.queryParser.QueryParser;
-import org.apache.lucene.search.BooleanClause;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.Sort;
-import org.apache.lucene.search.SortField;
-import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
+import searcher.PaperSearcher;
 
 /**
  *
@@ -47,8 +37,7 @@ import org.apache.lucene.util.Version;
  */
 public class JournalIndexer {
 
-    private IndexSearcher searcher = null;
-    private String path = "E:\\";
+    private String path = "E:\\INDEX\\";
 
     /**
      * hàm khởi tạo searcher
@@ -56,13 +45,7 @@ public class JournalIndexer {
      * @param path: đường dẫn tới thư mục lưu trữ file index
      */
     public JournalIndexer(String path) {
-        try {
-            FSDirectory directory = Common.getFSDirectory(path, IndexConst.PAPER_INDEX_PATH);
-            searcher = new IndexSearcher(directory);
-            this.path = path;
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
+        this.path = path;
     }
 
     /**
@@ -96,7 +79,6 @@ public class JournalIndexer {
      */
     private int _index(ConnectionPool connectionPool, File indexDir) throws IOException, SQLException {
         int count = 0;
-        IndexBO indexBO = new IndexBO();
         StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
         IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
         Directory directory = FSDirectory.open(indexDir);
@@ -109,12 +91,13 @@ public class JournalIndexer {
             stmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet rs = stmt.executeQuery();
             // Index data from query
+            PaperSearcher paperSearcher = new PaperSearcher();
             JournalDTO dto = null;
             while ((rs != null) && (rs.next())) {
                 dto = new JournalDTO();
-                LinkedHashMap<String, String> listPublicationCitation = indexBO.getListPublicationCitation(path + IndexConst.PAPER_INDEX_PATH, rs.getString(JournalTB.COLUMN_JOURNALID), 3);
-                ArrayList<Integer> publicationList = this.getPublicationList(rs.getString(JournalTB.COLUMN_JOURNALID));
-                LinkedHashMap<String, Integer> indexJournal = indexBO.getCalculateIndex(publicationList);
+                LinkedHashMap<String, String> listPublicationCitation = paperSearcher.getListPublicationCitation(path, rs.getString(JournalTB.COLUMN_JOURNALID), 3);
+                ArrayList<Integer> publicationList = paperSearcher.getPublicationList(path, rs.getString(JournalTB.COLUMN_JOURNALID), 3);
+                LinkedHashMap<String, Integer> indexJournal = Common.getCalculateIndex(publicationList);
                 dto.setIdJournal(rs.getString(JournalTB.COLUMN_JOURNALID));
                 dto.setJournalName(rs.getString(JournalTB.COLUMN_JOURNALNAME));
                 dto.setOrganization(rs.getString(JournalTB.COLUMN_ORGANIZATION));
@@ -139,19 +122,19 @@ public class JournalIndexer {
                 int g_indexLast10Year = 0;
                 int h_indexLast10Year = 0;
 
-                LinkedHashMap<String, Object> object10Year = indexBO.getPapersForAll(path + IndexConst.PAPER_INDEX_PATH, rs.getString(JournalTB.COLUMN_JOURNALID), 10, 3);
+                LinkedHashMap<String, Object> object10Year = paperSearcher.getPapersForAll(path, rs.getString(JournalTB.COLUMN_JOURNALID), 10, 3);
                 if (object10Year != null) {
                     ArrayList<Integer> publicationList10Year = (ArrayList<Integer>) object10Year.get("list");
-                    LinkedHashMap<String, Integer> index10Year = indexBO.getCalculateIndex(publicationList10Year);
+                    LinkedHashMap<String, Integer> index10Year = Common.getCalculateIndex(publicationList10Year);
                     pubLast10Year = Integer.parseInt(object10Year.get("pubCount").toString());
                     citLast10Year = Integer.parseInt(object10Year.get("citCount").toString());
                     g_indexLast10Year = index10Year.get("g_index");
                     h_indexLast10Year = index10Year.get("h_index");
 
-                    LinkedHashMap<String, Object> object5Year = indexBO.getPapersForAll(path + IndexConst.PAPER_INDEX_PATH, rs.getString(JournalTB.COLUMN_JOURNALID), 5, 3);
+                    LinkedHashMap<String, Object> object5Year = paperSearcher.getPapersForAll(path, rs.getString(JournalTB.COLUMN_JOURNALID), 5, 3);
                     if (object5Year != null) {
                         ArrayList<Integer> publicationList5Year = (ArrayList<Integer>) object5Year.get("list");
-                        LinkedHashMap<String, Integer> index5Year = indexBO.getCalculateIndex(publicationList5Year);
+                        LinkedHashMap<String, Integer> index5Year = Common.getCalculateIndex(publicationList5Year);
                         pubLast5Year = Integer.parseInt(object5Year.get("pubCount").toString());
                         citLast5Year = Integer.parseInt(object5Year.get("citCount").toString());
                         g_indexLast5Year = index5Year.get("g_index");
@@ -192,7 +175,7 @@ public class JournalIndexer {
             stmt.close();
             count = writer.numDocs();
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         } finally {
             connection.close();
             writer.optimize();
@@ -228,38 +211,11 @@ public class JournalIndexer {
             rs.close();
             stmt.close();
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         } finally {
             connection.close();
         }
         return list;
-    }
-
-    /**
-     * Truy vấn số lượng citation của các bài viết trong journal và sắp xếp từ
-     * nhiều đến ít
-     *
-     * @param idJournal
-     * @return array số lượng citation
-     */
-    private ArrayList<Integer> getPublicationList(String idJournal) throws IOException, ParseException {
-        ArrayList<Integer> publicationList = new ArrayList<Integer>();
-        BooleanQuery booleanQuery = new BooleanQuery();
-        QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_IDJOURNAL_FIELD, new StandardAnalyzer(Version.LUCENE_36));
-        Query query = parser.parse(idJournal);
-        booleanQuery.add(query, BooleanClause.Occur.MUST);
-        Sort sort = new Sort(new SortField[]{
-                    new SortField(IndexConst.PAPER_CITATIONCOUNT_FIELD, SortField.INT, true)});
-        TopDocs result = searcher.search(booleanQuery, Integer.MAX_VALUE, sort);
-        if (result != null) {
-            ScoreDoc[] hits = result.scoreDocs;
-            for (int i = 0; i < result.totalHits; i++) {
-                ScoreDoc hit = hits[i];
-                Document doc = searcher.doc(hit.doc);
-                publicationList.add(Integer.parseInt(doc.get(IndexConst.PAPER_CITATIONCOUNT_FIELD)));
-            }
-        }
-        return publicationList;
     }
 
     /**
@@ -279,7 +235,7 @@ public class JournalIndexer {
             JournalIndexer indexer = new JournalIndexer(path);
             System.out.println(indexer._run(connectionPool));
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         }
     }
 }

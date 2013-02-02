@@ -33,7 +33,7 @@ import org.apache.lucene.util.Version;
  */
 public class AuthorKeyIndexer {
 
-    private String path = "E:\\";
+    private String path = "E:\\INDEX\\";
 
     public AuthorKeyIndexer(String path) {
         this.path = path;
@@ -97,7 +97,7 @@ public class AuthorKeyIndexer {
             }
             authorStmt.close();
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         } finally {
             connection.close();
             writer.optimize();
@@ -123,7 +123,7 @@ public class AuthorKeyIndexer {
             AuthorKeyIndexer indexer = new AuthorKeyIndexer(path);
             System.out.println(indexer._run(connectionPool));
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         }
     }
 }
