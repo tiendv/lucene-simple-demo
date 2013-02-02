@@ -4,7 +4,6 @@
  */
 package indexer;
 
-import bo.IndexBO;
 import constant.ConnectionPool;
 import constant.IndexConst;
 import database.KeywordTB;
@@ -28,6 +27,7 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
+import searcher.PaperSearcher;
 
 /**
  *
@@ -35,7 +35,7 @@ import org.apache.lucene.util.Version;
  */
 public class KeywordIndexer {
 
-    private String path = "E:\\";
+    private String path = "E:\\INDEX\\";
 
     /**
      * khởi tạo searcher
@@ -43,11 +43,7 @@ public class KeywordIndexer {
      * @param path: đường dẫn thư mục lưu trữ file index
      */
     public KeywordIndexer(String path) {
-        try {
-            this.path = path;
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
+        this.path = path;
     }
 
     /**
@@ -80,7 +76,6 @@ public class KeywordIndexer {
      */
     private int _index(ConnectionPool connectionPool, File indexDir) throws IOException, SQLException {
         int count = 0;
-        IndexBO indexBO = new IndexBO();
         StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
         IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
         Directory directory = FSDirectory.open(indexDir);
@@ -92,11 +87,12 @@ public class KeywordIndexer {
             PreparedStatement stmt = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet rs = stmt.executeQuery();
-            // Index data from query            
+            // Index data from query
+            PaperSearcher paperSearcher = new PaperSearcher();
             KeywordDTO dto = null;
             while ((rs != null) && (rs.next())) {
                 dto = new KeywordDTO();
-                LinkedHashMap<String, String> listPublicationCitation = indexBO.getListPublicationCitation(path + IndexConst.PAPER_INDEX_PATH, rs.getString(KeywordTB.COLUMN_KEYWORDID), 5);
+                LinkedHashMap<String, String> listPublicationCitation = paperSearcher.getListPublicationCitation(path, rs.getString(KeywordTB.COLUMN_KEYWORDID), 5);
                 dto.setIdKeyword(rs.getString(KeywordTB.COLUMN_KEYWORDID));
                 dto.setKeyword(rs.getString(KeywordTB.COLUMN_KEYWORD));
                 dto.setStemmingVariations(rs.getString(KeywordTB.COLUMN_STEMMINGVARIATIONS));
@@ -112,12 +108,12 @@ public class KeywordIndexer {
                 int pubLast10Year = 0;
                 int citLast10Year = 0;
 
-                LinkedHashMap<String, Object> object10Year = indexBO.getPapersForAll(path + IndexConst.PAPER_INDEX_PATH, rs.getString(KeywordTB.COLUMN_KEYWORDID), 10, 5);
+                LinkedHashMap<String, Object> object10Year = paperSearcher.getPapersForAll(path, rs.getString(KeywordTB.COLUMN_KEYWORDID), 10, 5);
                 if (object10Year != null) {
                     pubLast10Year = Integer.parseInt(object10Year.get("pubCount").toString());
                     citLast10Year = Integer.parseInt(object10Year.get("citCount").toString());
 
-                    LinkedHashMap<String, Object> object5Year = indexBO.getPapersForAll(path + IndexConst.PAPER_INDEX_PATH, rs.getString(KeywordTB.COLUMN_KEYWORDID), 5, 5);
+                    LinkedHashMap<String, Object> object5Year = paperSearcher.getPapersForAll(path, rs.getString(KeywordTB.COLUMN_KEYWORDID), 5, 5);
                     if (object5Year != null) {
                         pubLast5Year = Integer.parseInt(object5Year.get("pubCount").toString());
                         citLast5Year = Integer.parseInt(object5Year.get("citCount").toString());
@@ -148,7 +144,7 @@ public class KeywordIndexer {
             stmt.close();
             count = writer.numDocs();
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         } finally {
             connection.close();
             writer.optimize();
@@ -183,7 +179,7 @@ public class KeywordIndexer {
             rs.close();
             stmt.close();
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         } finally {
             connection.close();
         }
@@ -199,7 +195,7 @@ public class KeywordIndexer {
         // TODO add your handling code here:
         try {
             String user = "root";
-            String pass = "@huydang1920@";
+            String pass = "root";
             String database = "pubguru";
             int port = 3306;
             String path = "E:\\INDEX\\";
@@ -207,7 +203,7 @@ public class KeywordIndexer {
             KeywordIndexer indexer = new KeywordIndexer(path);
             System.out.println(indexer._run(connectionPool));
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         }
     }
 }

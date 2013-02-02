@@ -13,18 +13,17 @@ import org.apache.commons.dbcp.PoolingDataSource;
 import org.apache.commons.pool.impl.GenericObjectPool;
 
 /**
- * 
- * @author Dung Doan
- * Summary: Create connection pool
+ *
+ * @author Dung Doan Summary: Create connection pool
  */
 public class ConnectionPool {
-
+    
     public static final String DRIVER = "com.mysql.jdbc.Driver";
     public static final String USERNAME = "root";
     public static final String PASSWORD = "root";
     public static DataSource dataSource;
     private GenericObjectPool connectionPool = null;
-
+    
     public ConnectionPool(String username, String password, String database, int port) {
         try {
             database = "jdbc:mysql://localhost:" + port + "/" + database;
@@ -33,7 +32,7 @@ public class ConnectionPool {
             Class.forName(ConnectionPool.DRIVER).newInstance();
             // Create a object to hold my pool.
             connectionPool = new GenericObjectPool();
-            connectionPool.setMaxActive(10);
+            connectionPool.setMaxActive(50);
             //
             // Creates a connection factory object which will be use by
             // the pool to create the connection object. We passes the
@@ -51,18 +50,18 @@ public class ConnectionPool {
                     false,
                     true);
             dataSource = new PoolingDataSource(connectionPool);
-
-        } catch (Exception e) {
-            System.out.println(e.toString());
+            
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
-
+    
     public Connection getConnection() {
         try {
             Connection con = dataSource.getConnection();
             return con;
-        } catch (Exception e) {
-            System.out.println(e.toString());
+        } catch (Exception ex) {
+            ex.printStackTrace();
             return null;
         }
     }

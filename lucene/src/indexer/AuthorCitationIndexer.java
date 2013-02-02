@@ -36,7 +36,7 @@ import org.json.simple.JSONObject;
  */
 public class AuthorCitationIndexer {
 
-    private String path = "E:\\";
+    private String path = "E:\\INDEX\\";
 
     public AuthorCitationIndexer(String path) {
         this.path = path;
@@ -82,7 +82,7 @@ public class AuthorCitationIndexer {
                 System.out.println("Indexing: " + count++ + "\t" + " idAuthor: " + Integer.toString(i));
             }
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         } finally {
             writer.optimize();
             writer.close();
@@ -113,7 +113,7 @@ public class AuthorCitationIndexer {
             rs.close();
             stmt.close();
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         } finally {
             connection.close();
         }
@@ -153,7 +153,7 @@ public class AuthorCitationIndexer {
                 stmt.close();
             }
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         } finally {
             connection.close();
         }
@@ -191,7 +191,7 @@ public class AuthorCitationIndexer {
             rs.close();
             stmt.close();
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         } finally {
             connection.close();
         }
@@ -214,7 +214,7 @@ public class AuthorCitationIndexer {
             AuthorCitationIndexer indexer = new AuthorCitationIndexer(path);
             System.out.println(indexer._run(connectionPool));
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         }
     }
 }

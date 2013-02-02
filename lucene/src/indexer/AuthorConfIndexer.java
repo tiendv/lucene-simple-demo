@@ -33,7 +33,7 @@ import org.apache.lucene.util.Version;
  */
 public class AuthorConfIndexer {
 
-    private String path = "E:\\";
+    private String path = "E:\\INDEX\\";
 
     public AuthorConfIndexer(String path) {
         this.path = path;
@@ -97,7 +97,7 @@ public class AuthorConfIndexer {
             }
             authorStmt.close();
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         } finally {
             connection.close();
             writer.optimize();
@@ -123,7 +123,7 @@ public class AuthorConfIndexer {
             AuthorConfIndexer indexer = new AuthorConfIndexer(path);
             System.out.println(indexer._run(connectionPool));
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         }
     }
 }

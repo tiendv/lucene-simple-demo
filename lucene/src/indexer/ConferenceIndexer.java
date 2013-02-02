@@ -4,7 +4,6 @@
  */
 package indexer;
 
-import bo.IndexBO;
 import constant.Common;
 import constant.ConnectionPool;
 import constant.IndexConst;
@@ -27,19 +26,10 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.document.NumericField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.queryParser.ParseException;
-import org.apache.lucene.queryParser.QueryParser;
-import org.apache.lucene.search.BooleanClause;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.Sort;
-import org.apache.lucene.search.SortField;
-import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
+import searcher.PaperSearcher;
 
 /**
  *
@@ -47,7 +37,6 @@ import org.apache.lucene.util.Version;
  */
 public class ConferenceIndexer {
 
-    private IndexSearcher searcher = null;
     private String path = "E:\\INDEX\\";
 
     /**
@@ -56,13 +45,7 @@ public class ConferenceIndexer {
      * @param path : đường dẫn tới thư mục lưu trữ Index
      */
     public ConferenceIndexer(String path) {
-        try {
-            FSDirectory directory = Common.getFSDirectory(path, IndexConst.PAPER_INDEX_PATH);
-            searcher = new IndexSearcher(directory);
-            this.path = path;
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
+        this.path = path;
     }
 
     /**
@@ -74,7 +57,7 @@ public class ConferenceIndexer {
     public String _run(ConnectionPool connectionPool) {
         String out = "";
         try {
-            File indexDir = new File(path + IndexConst.CONFERENCE_INDEX_PATH);
+            File indexDir = new File(this.path + IndexConst.CONFERENCE_INDEX_PATH);
             long start = new Date().getTime();
             int count = this._index(connectionPool, indexDir);
             long end = new Date().getTime();
@@ -94,7 +77,6 @@ public class ConferenceIndexer {
      */
     private int _index(ConnectionPool connectionPool, File indexDir) throws IOException, SQLException {
         int count = 0;
-        IndexBO indexBO = new IndexBO();
         StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_36);
         IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_36, analyzer);
         Directory directory = FSDirectory.open(indexDir);
@@ -107,12 +89,13 @@ public class ConferenceIndexer {
             stmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet rs = stmt.executeQuery();
             // Index data from query
+            PaperSearcher paperSearcher = new PaperSearcher();
             ConferenceDTO dto = null;
             while ((rs != null) && (rs.next())) {
                 dto = new ConferenceDTO();
-                LinkedHashMap<String, String> listPublicationCitation = indexBO.getListPublicationCitation(path + IndexConst.PAPER_INDEX_PATH, rs.getString(ConferenceTB.COLUMN_CONFERENCEID), 2);
-                ArrayList<Integer> publicationList = this.getPublicationList(rs.getString(ConferenceTB.COLUMN_CONFERENCEID));
-                LinkedHashMap<String, Integer> indexConference = indexBO.getCalculateIndex(publicationList);
+                LinkedHashMap<String, String> listPublicationCitation = paperSearcher.getListPublicationCitation(this.path, rs.getString(ConferenceTB.COLUMN_CONFERENCEID), 2);
+                ArrayList<Integer> publicationList = paperSearcher.getPublicationList(this.path, rs.getString(ConferenceTB.COLUMN_CONFERENCEID), 2);
+                LinkedHashMap<String, Integer> indexConference = Common.getCalculateIndex(publicationList);
                 dto.setIdConference(rs.getString(ConferenceTB.COLUMN_CONFERENCEID));
                 dto.setConferenceName(rs.getString(ConferenceTB.COLUMN_CONFERENCENAME));
                 dto.setDuration(rs.getString(ConferenceTB.COLUMN_DURATION));
@@ -139,19 +122,19 @@ public class ConferenceIndexer {
                 int g_indexLast10Year = 0;
                 int h_indexLast10Year = 0;
 
-                LinkedHashMap<String, Object> object10Year = indexBO.getPapersForAll(path + IndexConst.PAPER_INDEX_PATH, rs.getString(ConferenceTB.COLUMN_CONFERENCEID), 10, 2);
+                LinkedHashMap<String, Object> object10Year = paperSearcher.getPapersForAll(this.path, rs.getString(ConferenceTB.COLUMN_CONFERENCEID), 10, 2);
                 if (object10Year != null) {
                     ArrayList<Integer> publicationList10Year = (ArrayList<Integer>) object10Year.get("list");
-                    LinkedHashMap<String, Integer> index10Year = indexBO.getCalculateIndex(publicationList10Year);
+                    LinkedHashMap<String, Integer> index10Year = Common.getCalculateIndex(publicationList10Year);
                     pubLast10Year = Integer.parseInt(object10Year.get("pubCount").toString());
                     citLast10Year = Integer.parseInt(object10Year.get("citCount").toString());
                     g_indexLast10Year = index10Year.get("g_index");
                     h_indexLast10Year = index10Year.get("h_index");
 
-                    LinkedHashMap<String, Object> object5Year = indexBO.getPapersForAll(path + IndexConst.PAPER_INDEX_PATH, rs.getString(ConferenceTB.COLUMN_CONFERENCEID), 5, 2);
+                    LinkedHashMap<String, Object> object5Year = paperSearcher.getPapersForAll(this.path, rs.getString(ConferenceTB.COLUMN_CONFERENCEID), 5, 2);
                     if (object5Year != null) {
                         ArrayList<Integer> publicationList5Year = (ArrayList<Integer>) object5Year.get("list");
-                        LinkedHashMap<String, Integer> index5Year = indexBO.getCalculateIndex(publicationList5Year);
+                        LinkedHashMap<String, Integer> index5Year = Common.getCalculateIndex(publicationList5Year);
                         pubLast5Year = Integer.parseInt(object5Year.get("pubCount").toString());
                         citLast5Year = Integer.parseInt(object5Year.get("citCount").toString());
                         g_indexLast5Year = index5Year.get("g_index");
@@ -194,7 +177,7 @@ public class ConferenceIndexer {
             stmt.close();
             count = writer.numDocs();
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         } finally {
             connection.close();
             writer.optimize();
@@ -228,38 +211,11 @@ public class ConferenceIndexer {
             rs.close();
             stmt.close();
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         } finally {
             connection.close();
         }
         return list;
-    }
-
-    /**
-     * lấy chuỗi các bài viết với citation của bài viết đó được sắp xếp từ cao
-     * xuống thấp
-     *
-     * @param idConference
-     * @return ArrayList lưu citation từ cao xuống thấp
-     */
-    private ArrayList<Integer> getPublicationList(String idConference) throws IOException, ParseException {
-        ArrayList<Integer> publicationList = new ArrayList<Integer>();
-        BooleanQuery booleanQuery = new BooleanQuery();
-        QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_IDCONFERENCE_FIELD, new StandardAnalyzer(Version.LUCENE_36));
-        Query query = parser.parse(idConference);
-        booleanQuery.add(query, BooleanClause.Occur.MUST);
-        Sort sort = new Sort(new SortField[]{
-                    new SortField(IndexConst.PAPER_CITATIONCOUNT_FIELD, SortField.INT, true)});
-        TopDocs result = searcher.search(booleanQuery, Integer.MAX_VALUE, sort);
-        if (result != null) {
-            ScoreDoc[] hits = result.scoreDocs;
-            for (int i = 0; i < result.totalHits; i++) {
-                ScoreDoc hit = hits[i];
-                Document doc = searcher.doc(hit.doc);
-                publicationList.add(Integer.parseInt(doc.get(IndexConst.PAPER_CITATIONCOUNT_FIELD)));
-            }
-        }
-        return publicationList;
     }
 
     /**
@@ -279,7 +235,7 @@ public class ConferenceIndexer {
             ConferenceIndexer indexer = new ConferenceIndexer(path);
             System.out.println(indexer._run(connectionPool));
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         }
     }
 }

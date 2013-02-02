@@ -4,7 +4,6 @@
  */
 package indexer;
 
-import bo.IndexBO;
 import constant.Common;
 import constant.ConnectionPool;
 import constant.IndexConst;
@@ -35,15 +34,13 @@ import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.Sort;
-import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
+import searcher.PaperSearcher;
 
 /**
  *
@@ -51,17 +48,10 @@ import org.apache.lucene.util.Version;
  */
 public class AuthorIndexer {
 
-    private IndexSearcher searcher = null;
-    private String path = "E:\\";
+    private String path = "E:\\INDEX\\";
 
     public AuthorIndexer(String path) {
-        try {
-            FSDirectory directory = Common.getFSDirectory(path, IndexConst.PAPER_INDEX_PATH);
-            searcher = new IndexSearcher(directory);
-            this.path = path;
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
+        this.path = path;
     }
 
     /**
@@ -101,18 +91,18 @@ public class AuthorIndexer {
         // Connection to DB
         Connection connection = connectionPool.getConnection();
         try {
-            String sql = "SELECT * FROM " + AuthorTB.TABLE_NAME + " a";
+            String sql = "SELECT * FROM " + AuthorTB.TABLE_NAME + " a LIMIT 10";
             PreparedStatement stmt = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet rs = stmt.executeQuery();
             // Index data from query
-            IndexBO indexBO = new IndexBO();
+            PaperSearcher paperSearcher = new PaperSearcher();
             AuthorDTO dto = null;
             while ((rs != null) && (rs.next())) {
                 dto = new AuthorDTO();
                 LinkedHashMap<String, String> listPublicationCitation = this.getListPublicationCitation(connectionPool, rs.getString(AuthorTB.COLUMN_AUTHORID));
-                LinkedHashMap<String, Integer> indexAuthor = this.getCalculateIndexAuthor(rs.getString(AuthorTB.COLUMN_AUTHORID));
-                LinkedHashMap<String, String> listIdSubdomain = this.getListIdSubdomain(connectionPool, rs.getInt(AuthorTB.COLUMN_AUTHORID));
+                ArrayList<Integer> publicationList = paperSearcher.getPublicationList(this.path, rs.getString(AuthorTB.COLUMN_AUTHORID), 1);
+                LinkedHashMap<String, Integer> indexAuthor = Common.getCalculateIndex(publicationList);
                 dto.setIdAuthor(rs.getString(AuthorTB.COLUMN_AUTHORID));
                 dto.setAuthorName(rs.getString(AuthorTB.COLUMN_AUTHORNAME));
                 dto.setIdOrg(rs.getString(AuthorTB.COLUMN_ORGID));
@@ -122,8 +112,7 @@ public class AuthorIndexer {
                 dto.setCitationCount(Integer.parseInt(listPublicationCitation.get("citationCount")));
                 dto.setCoAuthorCount(Integer.parseInt(listPublicationCitation.get("coAuthorCount")));
                 dto.setListPublicationCitation(listPublicationCitation.get("listPublicationCitation"));
-                dto.setListIdSubdomain(listIdSubdomain.get("listIdSubdomain"));
-                //dto.setListRankSubdomain(listIdSubdomain.get("listRankSubdomain"));
+                dto.setListIdSubdomain(this.getListIdSubdomain(connectionPool, rs.getInt(AuthorTB.COLUMN_AUTHORID)));
                 dto.setH_Index(indexAuthor.get("h_index"));
                 dto.setG_Index(indexAuthor.get("g_index"));
                 dto.setRank(0);
@@ -137,19 +126,19 @@ public class AuthorIndexer {
                 int g_indexLast10Year = 0;
                 int h_indexLast10Year = 0;
 
-                LinkedHashMap<String, Object> object10Year = indexBO.getPapersForAll(path + IndexConst.PAPER_INDEX_PATH, rs.getString(AuthorTB.COLUMN_AUTHORID), 10, 1);
+                LinkedHashMap<String, Object> object10Year = paperSearcher.getPapersForAll(path, rs.getString(AuthorTB.COLUMN_AUTHORID), 10, 1);
                 if (object10Year != null) {
                     ArrayList<Integer> publicationList10Year = (ArrayList<Integer>) object10Year.get("list");
-                    LinkedHashMap<String, Integer> index10Year = indexBO.getCalculateIndex(publicationList10Year);
+                    LinkedHashMap<String, Integer> index10Year = Common.getCalculateIndex(publicationList10Year);
                     pubLast10Year = Integer.parseInt(object10Year.get("pubCount").toString());
                     citLast10Year = Integer.parseInt(object10Year.get("citCount").toString());
                     g_indexLast10Year = index10Year.get("g_index");
                     h_indexLast10Year = index10Year.get("h_index");
 
-                    LinkedHashMap<String, Object> object5Year = indexBO.getPapersForAll(path + IndexConst.PAPER_INDEX_PATH, rs.getString(AuthorTB.COLUMN_AUTHORID), 5, 1);
+                    LinkedHashMap<String, Object> object5Year = paperSearcher.getPapersForAll(path, rs.getString(AuthorTB.COLUMN_AUTHORID), 5, 1);
                     if (object5Year != null) {
                         ArrayList<Integer> publicationList5Year = (ArrayList<Integer>) object5Year.get("list");
-                        LinkedHashMap<String, Integer> index5Year = indexBO.getCalculateIndex(publicationList5Year);
+                        LinkedHashMap<String, Integer> index5Year = Common.getCalculateIndex(publicationList5Year);
                         pubLast5Year = Integer.parseInt(object5Year.get("pubCount").toString());
                         citLast5Year = Integer.parseInt(object5Year.get("citCount").toString());
                         g_indexLast5Year = index5Year.get("g_index");
@@ -165,7 +154,6 @@ public class AuthorIndexer {
                 d.add(new Field(IndexConst.AUTHOR_WEBSITE_FIELD, dto.website, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.AUTHOR_LISTIDSUBDOMAIN_FIELD, dto.listIdSubdomain, Field.Store.YES, Field.Index.ANALYZED));
                 d.add(new Field(IndexConst.AUTHOR_LISTPUBLICATIONCITATION_FIELD, dto.listPublicationCitation, Field.Store.YES, Field.Index.ANALYZED));
-                //d.add(new Field(IndexConst.AUTHOR_LISTRANKSUBDOMAIN_FIELD, dto.listRankSubdomain, Field.Store.YES, Field.Index.NO));
                 d.add(new NumericField(IndexConst.AUTHOR_PUBLICATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(dto.publicationCount));
                 d.add(new NumericField(IndexConst.AUTHOR_CITATIONCOUNT_FIELD, Field.Store.YES, true).setIntValue(dto.citationCount));
                 d.add(new NumericField(IndexConst.AUTHOR_COAUTHORCOUNT_FIELD, Field.Store.YES, true).setIntValue(dto.coAuthorCount));
@@ -190,9 +178,8 @@ public class AuthorIndexer {
             rs.close();
             stmt.close();
             count = writer.numDocs();
-            searcher = null;
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         } finally {
             connection.close();
             writer.optimize();
@@ -209,10 +196,8 @@ public class AuthorIndexer {
      * @return List IdSubdomain của tác giả
      * @Summary: truy vấn lấy ra chuỗi Id các subdomain mà tác giả có bài viết
      */
-    private LinkedHashMap<String, String> getListIdSubdomain(ConnectionPool connectionPool, int idAuthor) throws SQLException, ClassNotFoundException, IOException, ParseException {
-        LinkedHashMap<String, String> out = new LinkedHashMap<String, String>();
-        String listIdSubdomain = "";
-        //LinkedHashMap<Integer, Object> listRankSubdomain = new LinkedHashMap<Integer, Object>();
+    private String getListIdSubdomain(ConnectionPool connectionPool, int idAuthor) throws SQLException, ClassNotFoundException, IOException, ParseException {
+        String list = "";
         Connection connection = connectionPool.getConnection();
         try {
             String sql = "SELECT sp." + SubdomainPaperTB.COLUMN_SUBDOMAINID + " FROM " + AuthorPaperTB.TABLE_NAME + " ap JOIN " + SubdomainPaperTB.TABLE_NAME + " sp ON ap." + AuthorPaperTB.COLUMN_PAPERID + " = sp." + SubdomainPaperTB.COLUMN_PAPERID + " WHERE ap." + AuthorPaperTB.COLUMN_AUTHORID + " = ? GROUP BY sp." + SubdomainPaperTB.COLUMN_SUBDOMAINID + "";
@@ -220,22 +205,19 @@ public class AuthorIndexer {
             stmt.setInt(1, idAuthor);
             ResultSet rs = stmt.executeQuery();
             while ((rs != null) && (rs.next())) {
-                listIdSubdomain += " " + rs.getString(SubdomainPaperTB.COLUMN_SUBDOMAINID);
-                //listRankSubdomain.put(rs.getInt(SubdomainPaperTB.COLUMN_SUBDOMAINID), this.getPublicationByIdAuthorAndIdSubdomain(connectionPool, Integer.toString(idAuthor), rs.getString(SubdomainPaperTB.COLUMN_SUBDOMAINID)));
+                list += " " + rs.getString(SubdomainPaperTB.COLUMN_SUBDOMAINID);
             }
-            if (!"".equals(listIdSubdomain)) {
-                listIdSubdomain = listIdSubdomain.substring(1);
+            if (!"".equals(list)) {
+                list = list.substring(1);
             }
             rs.close();
             stmt.close();
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         } finally {
             connection.close();
         }
-        out.put("listIdSubdomain", listIdSubdomain);
-        //out.put("listRankSubdomain", Common.OToS(listRankSubdomain));
-        return out;
+        return list;
     }
 
     /**
@@ -252,7 +234,7 @@ public class AuthorIndexer {
         QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDAUTHOR_FIELD, new StandardAnalyzer(Version.LUCENE_36));
         Query query = parser.parse(idAuthor);
         booleanQuery.add(query, BooleanClause.Occur.MUST);
-        TopDocs result = searcher.search(booleanQuery, Integer.MAX_VALUE);
+        TopDocs result = PaperSearcher.getSearcher(path).search(booleanQuery, Integer.MAX_VALUE);
         if (result != null) {
             ScoreDoc[] hits = result.scoreDocs;
             ArrayList<PubCiDTO> pubCiDTOList = new ArrayList<PubCiDTO>();
@@ -261,7 +243,7 @@ public class AuthorIndexer {
             String listIdPaper = "";
             for (int i = 0; i < result.totalHits; i++) {
                 ScoreDoc hit = hits[i];
-                Document doc = searcher.doc(hit.doc);
+                Document doc = PaperSearcher.getSearcher(path).doc(hit.doc);
                 citationCount += Integer.parseInt(doc.get(IndexConst.PAPER_CITATIONCOUNT_FIELD));
                 listIdPaper += "," + doc.get(IndexConst.PAPER_IDPAPER_FIELD);
                 ArrayList<Object> listCitations = (ArrayList<Object>) Common.SToO(doc.get(IndexConst.PAPER_LISTCITATION_FIELD));
@@ -362,152 +344,11 @@ public class AuthorIndexer {
             rs.close();
             stmt.close();
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         } finally {
             connection.close();
         }
         return count;
-    }
-
-    /**
-     * @Summary: Thực hiện tính H-index và G-index cho tác giả
-     */
-    private LinkedHashMap<String, Integer> getCalculateIndexAuthor(String idAuthor) throws Exception {
-        LinkedHashMap<String, Integer> out = new LinkedHashMap<String, Integer>();
-        ArrayList<Integer> publicationList = this.getPublicationList(idAuthor);
-        int h_index;
-        int g_index;
-        int citationCount;
-        int citationCountSum;
-        // Calculate h-index for each author.
-        h_index = 0;
-        while (h_index < publicationList.size()) {
-            citationCount = publicationList.get(h_index);
-            if (citationCount >= (h_index + 1)) {
-                h_index++;
-            } else {
-                break;
-            }
-        }
-        // Calculate g-index for each author.
-        g_index = 0;
-        citationCountSum = 0;
-        while (true) {
-            if (g_index < publicationList.size()) {
-                citationCountSum += publicationList.get(g_index);
-            }
-            if (citationCountSum >= ((g_index + 1) * (g_index + 1))) {
-                g_index++;
-            } else {
-                break;
-            }
-        }
-        out.put("h_index", h_index);
-        out.put("g_index", g_index);
-        return out;
-    }
-
-    /**
-     * @Summary: Sắp xếp các bài viết theo thứ tự giảm dần số trích dẫn.
-     *
-     */
-    private ArrayList<Integer> getPublicationList(String idAuthor) throws IOException, ParseException {
-        ArrayList<Integer> publicationList = new ArrayList<Integer>();
-        BooleanQuery booleanQuery = new BooleanQuery();
-        QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDAUTHOR_FIELD, new StandardAnalyzer(Version.LUCENE_36));
-        Query query = parser.parse(idAuthor);
-        booleanQuery.add(query, BooleanClause.Occur.MUST);
-        Sort sort = new Sort(new SortField[]{
-                    new SortField(IndexConst.PAPER_CITATIONCOUNT_FIELD, SortField.INT, true)});
-        TopDocs result = searcher.search(booleanQuery, Integer.MAX_VALUE, sort);
-        if (result != null) {
-            ScoreDoc[] hits = result.scoreDocs;
-            for (int i = 0; i < result.totalHits; i++) {
-                ScoreDoc hit = hits[i];
-                Document doc = searcher.doc(hit.doc);
-                publicationList.add(Integer.parseInt(doc.get(IndexConst.PAPER_CITATIONCOUNT_FIELD)));
-            }
-        }
-        return publicationList;
-    }
-
-    /**
-     *
-     * @param connectionPool: kết nối csdl
-     * @param idAuthor : Id tác giả
-     * @param idSubdomain :Id subdomain
-     * @return Map chứa thông tin H-index và H-index của tác giả theo từng tác
-     * giả
-     */
-    private LinkedHashMap<String, Integer> getPublicationByIdAuthorAndIdSubdomain(ConnectionPool connectionPool, String idAuthor, String idSubdomain) throws IOException, ParseException, SQLException, ClassNotFoundException {
-        LinkedHashMap<String, Integer> out = new LinkedHashMap<String, Integer>();
-        ArrayList<Integer> publicationList = new ArrayList<Integer>();
-        int publicationCount = 0;
-        int citationCount = 0;
-        int coAuthorCount = 0;
-        int h_index;
-        int g_index;
-        int tempCitationCount;
-        int tempCitationCountSum;
-        String listIdPaper = "";
-        // Query
-        BooleanQuery booleanQuery = new BooleanQuery();
-        QueryParser parserAuthor = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDAUTHOR_FIELD, new StandardAnalyzer(Version.LUCENE_36));
-        Query queryAuthor = parserAuthor.parse(idAuthor);
-        booleanQuery.add(queryAuthor, BooleanClause.Occur.MUST);
-        // 
-        QueryParser parserSubdomain = new QueryParser(Version.LUCENE_36, IndexConst.PAPER_LISTIDSUBDOMAIN_FIELD, new StandardAnalyzer(Version.LUCENE_36));
-        Query querySubdomain = parserSubdomain.parse(idSubdomain);
-        booleanQuery.add(querySubdomain, BooleanClause.Occur.MUST);
-        Sort sort = new Sort(new SortField[]{
-                    new SortField(IndexConst.PAPER_CITATIONCOUNT_FIELD, SortField.INT, true)});
-        TopDocs result = searcher.search(booleanQuery, Integer.MAX_VALUE, sort);
-        if (result != null) {
-            ScoreDoc[] hits = result.scoreDocs;
-            for (int i = 0; i < result.totalHits; i++) {
-                ScoreDoc hit = hits[i];
-                Document doc = searcher.doc(hit.doc);
-                citationCount += Integer.parseInt(doc.get(IndexConst.PAPER_CITATIONCOUNT_FIELD));
-                listIdPaper += "," + doc.get(IndexConst.PAPER_IDPAPER_FIELD);
-                publicationList.add(Integer.parseInt(doc.get(IndexConst.PAPER_CITATIONCOUNT_FIELD)));
-            }
-            publicationCount = result.totalHits;
-        }
-        // Calculate h-index for each author.
-        h_index = 0;
-        while (h_index < publicationList.size()) {
-            tempCitationCount = publicationList.get(h_index);
-            if (tempCitationCount >= (h_index + 1)) {
-                h_index++;
-            } else {
-                break;
-            }
-        }
-        // Calculate g-index for each author.
-        g_index = 0;
-        tempCitationCountSum = 0;
-        while (true) {
-            if (g_index < publicationList.size()) {
-                tempCitationCountSum += publicationList.get(g_index);
-            }
-            if (tempCitationCountSum >= ((g_index + 1) * (g_index + 1))) {
-                g_index++;
-            } else {
-                break;
-            }
-        }
-        // Calculate coAuthorCount for each author.
-        if (!"".equals(listIdPaper)) {
-            listIdPaper = listIdPaper.substring(1);
-            coAuthorCount = this.getCoAuthorCount(connectionPool, listIdPaper);
-        }
-        // out
-        out.put("publicationCount", publicationCount);
-        out.put("citationCount", citationCount);
-        out.put("coAuthorCount", coAuthorCount);
-        out.put("h_index", h_index);
-        out.put("g_index", g_index);
-        return out;
     }
 
     /**
@@ -526,7 +367,7 @@ public class AuthorIndexer {
             AuthorIndexer indexer = new AuthorIndexer(path);
             System.out.println(indexer._run(connectionPool));
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         }
     }
 }
