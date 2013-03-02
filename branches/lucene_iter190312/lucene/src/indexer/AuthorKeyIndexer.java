@@ -71,7 +71,6 @@ public class AuthorKeyIndexer {
         try {
             String authQuery = "SELECT " + AuthorTB.COLUMN_AUTHORID + ", " + AuthorTB.COLUMN_AUTHORNAME + " FROM " + AuthorTB.TABLE_NAME + " a";
             PreparedStatement authorStmt = connection.prepareStatement(authQuery, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-            authorStmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet authRs = authorStmt.executeQuery();
             // Index data from query
             while ((authRs != null) && (authRs.next())) {

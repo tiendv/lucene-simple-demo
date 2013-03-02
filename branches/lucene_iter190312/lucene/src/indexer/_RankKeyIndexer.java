@@ -131,6 +131,8 @@ public class _RankKeyIndexer {
                     }
                 }
             }
+            keywordSearcher.destroy();
+            paperSearcher.destroy();
             rs.close();
             stmt.close();
             count = writer.numDocs();

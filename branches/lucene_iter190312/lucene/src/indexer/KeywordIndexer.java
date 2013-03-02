@@ -140,6 +140,7 @@ public class KeywordIndexer {
                 d = null;
                 dto = null;
             }
+            paperSearcher.destroy();
             rs.close();
             stmt.close();
             count = writer.numDocs();

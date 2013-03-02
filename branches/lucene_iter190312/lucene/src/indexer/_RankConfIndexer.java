@@ -152,6 +152,8 @@ public class _RankConfIndexer {
                     }
                 }
             }
+            conferenceSearcher.destroy();
+            paperSearcher.destroy();
             rs.close();
             stmt.close();
             count = writer.numDocs();

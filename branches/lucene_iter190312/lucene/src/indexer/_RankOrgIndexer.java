@@ -154,6 +154,8 @@ public class _RankOrgIndexer {
                     }
                 }
             }
+            orgSearcher.destroy();
+            paperSearcher.destroy();
             rs.close();
             stmt.close();
             count = writer.numDocs();
