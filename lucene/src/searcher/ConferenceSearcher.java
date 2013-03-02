@@ -6,6 +6,7 @@ package searcher;
 
 import constant.Common;
 import constant.IndexConst;
+import java.io.IOException;
 import java.util.ArrayList;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -37,6 +38,10 @@ public class ConferenceSearcher {
         return searcher;
     }
 
+    public void destroy() throws IOException {
+        searcher.close();
+    }
+
     /**
      * @param path (path lucene index)
      * @param idSubdomain
@@ -44,7 +49,7 @@ public class ConferenceSearcher {
      * @throws Exception
      */
     public ArrayList<Integer> getListIdConferenceFromIdSubDomain(String path, String idSubdomain) throws Exception {
-       ArrayList<Integer> list = new ArrayList<Integer>();
+        ArrayList<Integer> list = new ArrayList<Integer>();
         try {
             BooleanQuery blQuery = new BooleanQuery();
             QueryParser parser = new QueryParser(Version.LUCENE_36, IndexConst.CONFERENCE_LISTIDSUBDOMAIN_FIELD, new StandardAnalyzer(Version.LUCENE_36));

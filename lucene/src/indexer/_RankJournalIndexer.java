@@ -152,6 +152,8 @@ public class _RankJournalIndexer {
                     }
                 }
             }
+            journalSearcher.destroy();
+            paperSearcher.destroy();
             rs.close();
             stmt.close();
             count = writer.numDocs();

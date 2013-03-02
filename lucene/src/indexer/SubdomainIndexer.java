@@ -143,6 +143,8 @@ public class SubdomainIndexer {
                 d = null;
                 dto = null;
             }
+            paperSearcher.destroy();
+            rs.close();
             stmt.close();
             count = writer.numDocs();
         } catch (Exception ex) {

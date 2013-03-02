@@ -83,7 +83,6 @@ public class _RankAuthorIndexer {
         try {
             String sql = "SELECT * FROM " + SubdomainTB.TABLE_NAME + " s";
             PreparedStatement stmt = connection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-            stmt.setFetchSize(Integer.MIN_VALUE);
             ResultSet rs = stmt.executeQuery();
             // Index data from query
             PaperSearcher paperSearcher = new PaperSearcher();
@@ -155,6 +154,8 @@ public class _RankAuthorIndexer {
                     }
                 }
             }
+            authorSearcher.destroy();
+            paperSearcher.destroy();
             rs.close();
             stmt.close();
             count = writer.numDocs();

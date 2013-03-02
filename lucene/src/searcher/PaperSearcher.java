@@ -54,6 +54,10 @@ public class PaperSearcher {
         return searcher;
     }
 
+    public void destroy() throws IOException {
+        searcher.close();
+    }
+
     /**
      * Tính toán các thông tin publication, ciatation theo từng năm của một
      *

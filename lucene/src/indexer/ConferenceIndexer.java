@@ -173,6 +173,7 @@ public class ConferenceIndexer {
                 d = null;
                 dto = null;
             }
+            paperSearcher.destroy();
             rs.close();
             stmt.close();
             count = writer.numDocs();

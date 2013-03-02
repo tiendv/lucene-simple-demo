@@ -6,6 +6,7 @@ package searcher;
 
 import constant.Common;
 import constant.IndexConst;
+import java.io.IOException;
 import java.util.ArrayList;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -35,6 +36,10 @@ public class JournalSearcher {
             ex.printStackTrace();
         }
         return searcher;
+    }
+
+    public void destroy() throws IOException {
+        searcher.close();
     }
 
     /**

@@ -167,9 +167,10 @@ public class OrgIndexer {
                 d = null;
                 dto = null;
             }
-            count = writer.numDocs();
+            paperSearcher.destroy();
             rs.close();
             stmt.close();
+            count = writer.numDocs();
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {

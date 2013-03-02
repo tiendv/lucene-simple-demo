@@ -175,6 +175,7 @@ public class AuthorIndexer {
                 d = null;
                 dto = null;
             }
+            paperSearcher.destroy();
             rs.close();
             stmt.close();
             count = writer.numDocs();
